@@ -6,7 +6,18 @@
  <script type="module" src="https://pyscript.net/releases/2025.2.3/core.js"></script>
 </head>
 <body>
-    <h1>Test</h1>
+
+  
+<div>
+  <form class='user-forms'>
+      <label for='Username'>Username</label><br>
+      <input type='text' id='Username' username=username><br>
+      <label for='Password'>Password</label><br>
+      <input type='text' id='Password' password=password><br>
+      <button  class='btn-submit' py-click="handle_submit">Submit</button>
+    
+  </form>
+</div>
 
  <script type='py' src='loginsystem.py' config='pyscript.json'>
   

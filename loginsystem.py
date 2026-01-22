@@ -8,5 +8,5 @@ def handle_click(event):
   # Assign the form value to the username variable
   username =  document.querySelector(Username)
   password = document.querySelector(Password)
-  print('username')
+  console.log(username)
 

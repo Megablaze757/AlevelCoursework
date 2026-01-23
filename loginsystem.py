@@ -1,7 +1,7 @@
-from pyscript import document, when
+from pyscript import document
 
 
-@when("click", "#btn-submit")
+
 def handle_click(event): 
   
     #Access the HTML element for the username

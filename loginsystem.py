@@ -1,13 +1,15 @@
-from pyscript import document
-
-def handle_click(event):  
-  #Access the HTML element for the username
+from pyscript import document, when
 
 
-
-  # Assign the form value to the username variable
-  username =  document.querySelector(Username)
-  password = document.querySelector(Password)
-submit.onclick(handle_click())
-print(username)
-
+@when("click", "#submit-btn")
+def handle_click(event): 
+  
+    #Access the HTML element for the username
+    username_element = document.querySelector("#Username")
+    password_element = document.querySelector("#Password")
+    
+   # Assign the form value to the username variable 
+    username = username_el.value
+    
+    
+    print(username)

@@ -15,7 +15,7 @@
       <label for='Password'>Password</label><br>
       <input type='text' id='Password' password=password><br>
       
-      <button type="button" id='btn-submit' onclick="handle_submit()">Submit</button>
+      <button type="button" id='btnsubmit' onclick="handle_submit()">Submit</button>
 
     
   </form>
@@ -23,13 +23,14 @@
 
  <script>
    let username; 
-   function handle_submit()
-     username=Username.value()
+   function handle_submit() {
+     username=Username.value
      console.log(username)
      return username;
-   function btn-submit.onclick()
+   }
+   function btnsubmit.onclick() {
     handle_submit()
-
+   }
    
 </script> 
 </body>

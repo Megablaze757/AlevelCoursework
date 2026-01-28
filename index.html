@@ -22,15 +22,20 @@
 </div>
 
  <script>
-   function handle_submit() {
-     //This gets the element data
-     const username_Element = document.getElementbyId('Username')
-    //Gets the value of the element 
-     let username = username_Element.value;
-      //Logs the username to the console
-     console.log(username);
+   document.addEventListner(, function {
+     //Get the element of the submit button   
+     let submitBtn = document.getElementbyId('btnSubmit');
+     // Add event listener to the button
+     button.addEventListner('click', function() {
+       //fetch the data from the username field
+       let usernameElement = document.getElementbyId('Username');
+       //log the value of the username form to the console
+       console.log(usernameElement.value);
+     }
+         
      
-   }
+      }
+   });
    
 </script> 
 </body>

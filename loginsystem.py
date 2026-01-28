@@ -2,7 +2,7 @@ from pyscript import document
 
 
 
-def handle_submit(event): 
+def handle_submit(event=None): 
   
     #Access the HTML element for the username
     username_element = document.querySelector("#Username")

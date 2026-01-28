@@ -22,14 +22,14 @@
 </div>
 
  <script>
-   let username; 
-   function handle_submit() {
-     username=Username.value
-     console.log(username)
-     return username;
-   }
-   function btnsubmit.onclick() {
-    handle_submit()
+   function handlesubmit() {
+     //This gets the element data
+     const username_Element = document.getElementbyId('Username')
+    //Gets the value of the element 
+     let username = username_Element.value;
+      //Logs the username to the console
+     console.log(username);
+     
    }
    
 </script> 

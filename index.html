@@ -24,11 +24,11 @@
  <script>
    document.addEventListener('DOMContentLoaded', function () {
      //Get the element of the submit button   
-     let button = document.getElementbyId('btnSubmit');
+     let button = document.getElementById('btnSubmit');
      // Add event listener to the button
      button.addEventListner('click', function() {
        //fetch the data from the username field
-       let usernameElement = document.getElementbyId('Username');
+       let usernameElement = document.getElementById('Username');
        //log the value of the username form to the console
        console.log(usernameElement.value);
      });

@@ -48,7 +48,7 @@
       const { data, error } = await supabaseClient
         //Sql query to fetch username
         .from('userinfo')
-        .select('username','password')
+        .select('username, password_hash')
         .eq('username', usernameElement.value)
       //If not found then log to the console
       if(error) {

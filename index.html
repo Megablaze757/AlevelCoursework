@@ -30,11 +30,14 @@
     const supabase_url = 'https://pxjndwrkafegopsolnde.supabase.co'
     //Supabase key
     const supabase_key = 'sb_publishable_eOUJ3K3GNczOncszRwYhyA_A1QAw72F'
+    //Initialize supabase client
+    supabase.createClient(
+    'https://pxjndwrkafegopsolnde.supabase.co',
+    'sb_publishable_eOUJ3K3GNczOncszRwYhyA_A1QAw72F'
+    );
+    
+    
     //Username element 
-    const supabase = window.supabase.createClient(supabaseUrl, supabaseKey);
-
-
-
     let usernameElement = document.getElementById('Username');
 
     //function to check if username is in database

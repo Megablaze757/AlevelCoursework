@@ -24,11 +24,16 @@
  <script>
 
    //The supabase url
-   const supabase_url = https://pxjndwrkafegopsolnde.supabase.co
+   const supabase_url = 'https://pxjndwrkafegopsolnde.supabase.co'
    //Supabase key
-   const supabase_key = sb_publishable_eOUJ3K3GNczOncszRwYhyA_A1QAw72F
+   const supabase_key = 'sb_publishable_eOUJ3K3GNczOncszRwYhyA_A1QAw72F'
    //Username element 
+   const supabase = window.supabase.createClient(supabaseUrl, supabaseKey);
+
+
+
    let usernameElement = document.getElementById('Username');
+   
    
    
    //Fetches from the table username

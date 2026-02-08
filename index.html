@@ -46,7 +46,7 @@
       //if not found returns not found to the console
       const { data, error } = await supabaseClient
         //Sql query to fetch username
-        .from('UserInfo')
+        .from('userinfo')
         .select('Username')
         .eq('Username', usernameElement.value)
       //If not found then log to the console

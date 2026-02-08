@@ -48,12 +48,16 @@
         //Sql query to fetch username
         .from('UserInfo')
         .select('Username')
-        .eq(usernameElement.value)
+        .eq('Username', usernameElement.value)
       //If not found then log to the console
       if (error) {
         console.log('username not found')
 
 
+      }
+      //Temporary debugging tool to see if username found this is temporary
+      else {
+        Console.log('Username found')
       }
 
     };

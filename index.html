@@ -32,45 +32,48 @@
     const supabase_key = 'sb_publishable_eOUJ3K3GNczOncszRwYhyA_A1QAw72F'
     //Initialize supabase client
     const supabaseClient = supabase.createClient(
-    'https://pxjndwrkafegopsolnde.supabase.co',
-    'sb_publishable_eOUJ3K3GNczOncszRwYhyA_A1QAw72F'
+      'https://pxjndwrkafegopsolnde.supabase.co',
+      'sb_publishable_eOUJ3K3GNczOncszRwYhyA_A1QAw72F'
     );
-    
+
 
     //fetch the data from the username field
     let usernameElement = document.getElementById('Username');
     let passwordElement = document.getElementById('Password');
 
-async function checkCredentials() {
-  console.log("Checking credentials for:", usernameElement.value);
-  
-  const { data, error } = await supabaseClient
-    .from('userinfo')
-    .select('username, password_hash')  // Changed to single string
-    .eq('username', usernameElement.value);
-  
-  console.log("Query response:", { data, error });
-  
-  if(error) {
-    console.log('Database error:', error.message);
-  }
-  else if (!data || data.length === 0) {  // Check if array is empty
-    console.log('Username not found - no data returned');
-  }
-  else {
-    console.log('User found:', data[0]);  // Debug what we got
-    
-    // Check the correct property name
-    if (data[0].password_hash === passwordElement.value) {
-      console.log('Log In successful');
-    }
-    else {
-      console.log('Password Incorrect');
-      console.log('Entered:', passwordElement.value);
-      console.log('Stored:', data[0].password_hash);
-    }
-  }
-};
+    //function to check if username is in database
+    async function checkCredentials() {
+      //Fetches from the table username
+      //if not found returns not found to the console
+      const { data, error } = await supabaseClient
+        //Sql query to fetch username
+        .from('userinfo')
+        .select('username, password_hash')
+        .eq('username', usernameElement.value)
+
+
+
+      //Log the query to the console
+      console.log('Query:', { data, error })
+      //Checks if data array if empty
+      if (error || !data || data.length === 0) {
+        console.log('Username not found')
+      }
+
+      //If theres no errors and the array is not 0 then it goes to the else statement  
+      else {
+        console.log('Username found')
+        //Checks if the Row with the username passwords matches to the password entered
+        if (data[0].password_hash === passwordElement.value) {
+          console.log('Login Succesful')
+        }
+        else {
+          console.log('Password Incorrect')
+        }
+      }
+
+    };
+
 
     document.addEventListener('DOMContentLoaded', function () {
       //Get the element of the submit button   

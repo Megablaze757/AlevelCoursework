@@ -36,30 +36,35 @@
     'sb_publishable_eOUJ3K3GNczOncszRwYhyA_A1QAw72F'
     );
     
-    
-    //Username element 
+
+    //fetch the data from the username field
     let usernameElement = document.getElementById('Username');
+    let passwordElement = document.getElementById('Password');
 
     //function to check if username is in database
-    async function checkusername() {
+    async function checkCredentials() {
       //Fetches from the table username
       //if not found returns not found to the console
       const { data, error } = await supabaseClient
         //Sql query to fetch username
         .from('userinfo')
-        .select('username')
+        .select('username','password')
         .eq('username', usernameElement.value)
       //If not found then log to the console
-      if (error) {
-        console.log('username not found')
-
-
+      if(error) {
+        console.log('Username not found')
       }
-      //Temporary debugging tool to see if username found this is temporary
-      else {
-        console.log('Username found')
-      }
+      else{
+        
+        // Check if the passwod is equal to the correct password 
+        if (data.password == passwordElement.value) {
+        console.log('Log In succesful')
 
+        }
+        else {
+          console.log('Password Incorrect')
+        }
+      }
     };
 
 
@@ -68,11 +73,10 @@
       let button = document.getElementById('btnSubmit');
       // Add event listener to the button
       button.addEventListener('click', function () {
-        //fetch the data from the username field
-        let usernameElement = document.getElementById('Username');
+
         //log the value of the username form to the console
         console.log(usernameElement.value);
-        checkusername()
+        checkCredentials()
       });
 
 

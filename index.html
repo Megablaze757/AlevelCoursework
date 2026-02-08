@@ -31,7 +31,7 @@
     //Supabase key
     const supabase_key = 'sb_publishable_eOUJ3K3GNczOncszRwYhyA_A1QAw72F'
     //Initialize supabase client
-    const supabase = supabase.createClient(
+    const supabaseClient = supabase.createClient(
     'https://pxjndwrkafegopsolnde.supabase.co',
     'sb_publishable_eOUJ3K3GNczOncszRwYhyA_A1QAw72F'
     );
@@ -44,7 +44,7 @@
     async function checkusername() {
       //Fetches from the table username
       //if not found returns not found to the console
-      const { data, error } = await supabase
+      const { data, error } = await supabaseClient
         //Sql query to fetch username
         .from('UserInfo')
         .select('Username')

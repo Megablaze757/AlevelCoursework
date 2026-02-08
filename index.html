@@ -41,32 +41,36 @@
     let usernameElement = document.getElementById('Username');
     let passwordElement = document.getElementById('Password');
 
-    //function to check if username is in database
-    async function checkCredentials() {
-      //Fetches from the table username
-      //if not found returns not found to the console
-      const { data, error } = await supabaseClient
-        //Sql query to fetch username
-        .from('userinfo')
-        .select('username, password_hash')
-        .eq('username', usernameElement.value)
-      //If not found then log to the console
-      if(error) {
-        console.log('Username not found')
-      }
-      else{
-        
-        // Check if the password is equal to the correct password 
-        if (data.password_hash == passwordElement.value) {
-        console.log('Log In succesful')
-
-        }
-        else {
-          console.log('Password Incorrect')
-        }
-      }
-    };
-
+async function checkCredentials() {
+  console.log("Checking credentials for:", usernameElement.value);
+  
+  const { data, error } = await supabaseClient
+    .from('userinfo')
+    .select('username, password_hash')  // Changed to single string
+    .eq('username', usernameElement.value);
+  
+  console.log("Query response:", { data, error });
+  
+  if(error) {
+    console.log('Database error:', error.message);
+  }
+  else if (!data || data.length === 0) {  // Check if array is empty
+    console.log('Username not found - no data returned');
+  }
+  else {
+    console.log('User found:', data[0]);  // Debug what we got
+    
+    // Check the correct property name
+    if (data[0].password_hash === passwordElement.value) {
+      console.log('Log In successful');
+    }
+    else {
+      console.log('Password Incorrect');
+      console.log('Entered:', passwordElement.value);
+      console.log('Stored:', data[0].password_hash);
+    }
+  }
+};
 
     document.addEventListener('DOMContentLoaded', function () {
       //Get the element of the submit button   

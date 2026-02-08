@@ -29,11 +29,21 @@
    const supabase_key = sb_publishable_eOUJ3K3GNczOncszRwYhyA_A1QAw72F
    //Username element 
    let usernameElement = document.getElementById('Username');
-  
-   const {data, error} = await.supabase,
-     .from('USerInfo')
+   
+   
+   //Fetches from the table username
+   //if not found returns not found to the console
+   const {data, error} = await supabase
+   //Sql query to fetch username
+     .from('UserInfo')
      .select('Username')
-     .
+     .eq(usernameElement.value)
+    //If not found then log to the console
+    if (error) {
+      console.log('username not found')
+
+
+    }
     
 
 

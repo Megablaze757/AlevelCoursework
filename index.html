@@ -72,12 +72,20 @@
       }
 
 
-      //If theres no errors and the array is not 0 then it goes to the else statement  
+      //If there are no errors and the array is not 0, then it goes to the else statement  
       else {
 
-        //Checks if the Row with the username passwords matches to the password entered
+        //Checks if the Row with the username passwords matches the password entered
         if (data[0].password_hash === passwordElement.value) {
           updateStatus('Login Succesful')
+          //Store users information in sessions storage
+          sessionStorage.setItem('currentUser',data[0].username);
+          
+          //Make page redirect to the main page after login is successful
+          setRedirect(() => {
+            window.location.href = 'main.html'
+        //added a delay to allow the user to have time to see the message before redirecting.    
+        },1500)
         }
         else {
           updateStatus('Password Incorrect')
@@ -87,6 +95,11 @@
     };
 
 
+
+
+
+
+    
     document.addEventListener('DOMContentLoaded', function () {
       //Get the element of the submit button   
       let button = document.getElementById('btnSubmit');

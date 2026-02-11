@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    
+  </head>
+  <body>
+
+    <p>You are logged in as</p>
+    //Display the username thats been logged in 
+    <div class='displayUsername' id='displayUsername'></div>
+
+    <script>
+      //Set the username as the one in session storage
+      const username = sessionStorage.getItem('currentUser');
+      //Change div content to the username in session storage
+      document.getElementById('diplayUsername').textContent = username;
+      
+    </script>
+  </body>
+</html>

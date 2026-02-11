@@ -19,6 +19,7 @@
       <input type='text' id='Password' password=password><br>
 
       <button type="button" id='btnSubmit'>Submit</button>
+      <div id='statusMessage' class='status-message'></div>
 
 
     </form>
@@ -41,6 +42,16 @@
     let usernameElement = document.getElementById('Username');
     let passwordElement = document.getElementById('Password');
 
+    //get the status element
+    let statusElement = document.getElementById('statusMessage')
+
+    //Update the status message
+    function updateStatus(message) {
+    statusElement.textContent = message;
+    
+    }
+    
+
     //function to check if username is in database
     async function checkCredentials() {
       //Fetches from the table username
@@ -57,18 +68,19 @@
       console.log('Query:', { data, error })
       //Checks if data array if empty
       if (error || !data || data.length === 0) {
-        console.log('Username not found')
+        updateStatus('Username not found')
       }
+
 
       //If theres no errors and the array is not 0 then it goes to the else statement  
       else {
-        console.log('Username found')
+
         //Checks if the Row with the username passwords matches to the password entered
         if (data[0].password_hash === passwordElement.value) {
-          console.log('Login Succesful')
+          updateStatus('Login Succesful')
         }
         else {
-          console.log('Password Incorrect')
+          updateStatus('Password Incorrect')
         }
       }
 

@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    
+  </head>
+  <body>
+    <div class='signupForm'>
+    <label for='Username'>Username</label><br>
+    <input type='text' id='Username' username=username><br>
+    
+    <label for='Password'>Password</label><br>
+    <input type='text' id='Password' password=password><br>
+
+    <label for='Name'>Name</label><br>
+    <input type='text' id='Name' name=name><br>
+      
+    <button type="button" id='btnSubmit'>Submit</button>
+    
+    <div class='statusMessage' id='statusMessage'></div>
+    </div>
+  <script>
+        //The supabase url
+    const supabase_url = 'https://pxjndwrkafegopsolnde.supabase.co'
+    //Supabase key
+    const supabase_key = 'sb_publishable_eOUJ3K3GNczOncszRwYhyA_A1QAw72F'
+    //Initialize supabase client
+    const supabaseClient = supabase.createClient(
+      'https://pxjndwrkafegopsolnde.supabase.co',
+      'sb_publishable_eOUJ3K3GNczOncszRwYhyA_A1QAw72F'
+    );
+    //fetch the data from the form
+    let usernameElement = document.getElementById('Username');
+    let passwordElement = document.getElementById('Password');
+    let nameElement = document.getElementById('Name')
+
+    //get the status element
+    let statusElement = document.getElementById('statusMessage')
+
+    //Update the status message
+    function updateStatus(message) {
+    statusElement.textContent = message;
+    
+    }
+    document.addEventListener('DOMContentLoaded', function () {
+      //Get the element of the submit button   
+      let button = document.getElementById('btnSubmit');
+      // Add event listener to the button
+      button.addEventListener('click', function () {
+
+
+        uploadCredentials()
+      });
+
+
+    });
+async function checkValidation() {
+  // check if all credentials meet validation requirements
+  const { data, error } = await supabaseClient
+    .from('userinfo')
+    .select('username')
+    .eq('username', usernameElement.value);
+  
+  // Checks to make sure that no username exists in the database and that username length > 0
+  if ((error || !data || data.length === 0) && (usernameElement.value.length > 0)) {
+    // Checks if spaces to prevent malicious sql injection
+    if (passwordElement.value.length > 8 && !passwordElement.value.includes(' ')) {
+      // Makes sure they send a valid name
+      if (nameElement.value.length > 2 && nameElement.value.length < 50 && /^[a-zA-Z]+$/.test(nameElement.value)) {
+        // If meets all validation criteria check validation is true
+        checkValidation = true;
+      } else {
+        updateStatus('Name Invalid');
+      }
+    } else {
+      updateStatus('Password Invalid');
+    }
+  } else {
+    updateStatus('Username invalid');
+  }
+}
+  function uploadCredentials{
+    //If the validation is true then upload the credential to the database
+    if checkValidation() = true {
+      const { data, error } = await supabaseClient
+  .from('userinfo')
+  .insert([
+    { username: usernameElement.value, name: nameElement.value, password_hash: passwordElement.value }
+  ])
+      inster
+  }
+    
+  </script>
+  </body>
+</html>

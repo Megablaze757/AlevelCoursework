@@ -82,7 +82,7 @@
           sessionStorage.setItem('currentUser',data[0].username);
           
           //Make page redirect to the main page after login is successful
-          setRedirect(() => {
+          setTimeout(() => {
             window.location.href = 'main.html'
         //added a delay to allow the user to have time to see the message before redirecting.    
         },1500)

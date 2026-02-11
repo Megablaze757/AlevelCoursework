@@ -67,27 +67,41 @@ async function checkValidation() {
       // Makes sure they send a valid name
       if (nameElement.value.length > 2 && nameElement.value.length < 50 && /^[a-zA-Z]+$/.test(nameElement.value)) {
         // If meets all validation criteria check validation is true
-        checkValidation = true;
-      } else {
+        return true;  // RETURN true instead of assigning to function name
+      } 
+      else {
         updateStatus('Name Invalid');
+        return false;
       }
-    } else {
+    } 
+    else {
       updateStatus('Password Invalid');
+      return false;
     }
-  } else {
+  } 
+  else {
     updateStatus('Username invalid');
+    return false;
   }
 }
-  function uploadCredentials{
-    //If the validation is true then upload the credential to the database
-    if checkValidation() = true {
-      const { data, error } = await supabaseClient
-  .from('userinfo')
-  .insert([
-    { username: usernameElement.value, name: nameElement.value, password_hash: passwordElement.value }
-  ])
-      inster
+async function uploadCredentials() {
+  // If the validation is true then upload the credential to the database
+  if (await checkValidation() === true) {
+    const { data, error } = await supabaseClient
+      .from('userinfo')
+      .insert([
+        { username: usernameElement.value, name: nameElement.value, password_hash: passwordElement.value }
+      ]);
+    
+    if (error) {
+      console.error('Upload error:', error);
+      updateStatus('Registration failed: ' + error.message, false);
+    } else {
+      console.log('Upload successful:', data);
+      updateStatus('Registration successful!', true);
+    }
   }
+}
     
   </script>
   </body>

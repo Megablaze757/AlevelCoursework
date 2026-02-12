@@ -19,15 +19,16 @@
     <div class='statusMessage' id='statusMessage'></div>
     </div>
   <script>
-        //The supabase url
+    //The supabase url
     const supabase_url = 'https://pxjndwrkafegopsolnde.supabase.co'
     //Supabase key
     const supabase_key = 'sb_publishable_eOUJ3K3GNczOncszRwYhyA_A1QAw72F'
     //Initialize supabase client
-const supabaseClient = supabase.createClient(
-  'https://pxjndwrkafegopsolnde.supabase.co',
-  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InB4am5kd3JrYWZlZ29wc29sbmRlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MDk4NzY1NDMsImV4cCI6MjAyNTQ1MjU0M30.sb_publishable_eOUJ3K3GNczOncszRwYhyA_A1QAw72'
-);
+    const supabaseClient = supabase.createClient(
+      'https://pxjndwrkafegopsolnde.supabase.co',
+      'sb_publishable_eOUJ3K3GNczOncszRwYhyA_A1QAw72F'
+    );
+
     
     //fetch the data from the form
     let usernameElement = document.getElementById('Username');

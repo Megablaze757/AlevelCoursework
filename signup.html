@@ -101,6 +101,10 @@ async function uploadCredentials() {
     } else {
       console.log('Upload successful:', data);
       updateStatus('Registration successful!', true);
+      setTimeout(() => {
+            window.location.href = 'index.html'
+        //added a delay to allow the user to have time to see the message before redirecting.    
+        },1500)
     }
   }
 }

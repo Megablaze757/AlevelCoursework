@@ -81,9 +81,8 @@
 
         //Checks if the Row with the username passwords matches the password entered
         //Made it so it checks the hash function of the password
-        console.log(hash(passwordElement.value))
-        console.log(data[0].password_hash)
-        if (data[0].password_hash === toString(hash(passwordElement.value))) {
+        hashedPassword = hash(passwordElement.value)
+        if (data[0].password_hash === hashedPassword) {
           updateStatus('Login Succesful')
           //Store users information in sessions storage
           sessionStorage.setItem('currentUser',data[0].username);

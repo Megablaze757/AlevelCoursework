@@ -40,6 +40,7 @@
       'https://pxjndwrkafegopsolnde.supabase.co',
       'sb_publishable_eOUJ3K3GNczOncszRwYhyA_A1QAw72F'
     );
+      hashedPassword = hash(passwordElement.value)
 
 
     //fetch the data from the username field
@@ -81,7 +82,7 @@
 
         //Checks if the Row with the username passwords matches the password entered
         //Made it so it checks the hash function of the password
-        hashedPassword = hash(passwordElement.value)
+
         hashedPassword = hashPassword.toString()
         
         console.log(hashedPassword)

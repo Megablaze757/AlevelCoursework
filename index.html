@@ -82,7 +82,7 @@
         //Checks if the Row with the username passwords matches the password entered
         //Made it so it checks the hash function of the password
         hashedPassword = hash(passwordElement.value)#
-        hashedPassword = toString(hashedPassword)
+        hashedPassword = hashPassword.toString()
         
         console.log(hashedPassword)
         if (data[0].password_hash === hashedPassword) {

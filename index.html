@@ -80,7 +80,8 @@
       else {
 
         //Checks if the Row with the username passwords matches the password entered
-        if (data[0].password_hash === passwordElement.value) {
+        //Made it so it checks the hash function of the password
+        if (data[0].password_hash === hash(passwordElement.value)) {
           updateStatus('Login Succesful')
           //Store users information in sessions storage
           sessionStorage.setItem('currentUser',data[0].username);
@@ -102,9 +103,9 @@
  function hash(password) {
    let product = 1;
    //iterates through string
-   for(let i = 0; < str.length i++) {
+   for(let i = 0; < password.length i++) {
      // mutiplies product by the code
-     product *= str.charCodeAt(i);
+     product *= password.charCodeAt(i);
    }
    return product
  }

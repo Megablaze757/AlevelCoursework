@@ -1,13 +1,102 @@
 <!DOCTYPE html>
 <html>
   <head>
-    
+    <style>
+      
+      /* reset all styles to default */
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+      
+      /* Nav Bar Styles*/
+      
+      /* set Nav bar colour to blue and add some padding */
+      .navbar {
+        background-color: #023e8A;
+        padding: 1rem 2rem;
+        
+      }
+      
+      /* Make sure content won't stretch to wide and aligns all items to the center */ 
+      .navContainer {
+        max-width: 1200px;
+        margin: 0 auto;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+
+      /* Switch menu styles */
+
+      /* Creates the pill shaped container on transparent background */
+      .switchMenu {
+        position: relative;
+        display: flex;
+        background-color: rgba(255,255,255,0.2);
+        border-radius: 40px;
+        padding: 5px;
+        width: 240px;
+        cursor: pointer;
+      
+      }
+
+      /* Styling of each option */
+      
+
+      .switchOption {
+        flex: 1;
+        text-align: center;
+        padding: 10px 20px;
+        color: white;
+        font-size: 15px;
+        font-weight: 500;
+        transition: color 0.3 ease;
+        z-index: 1;
+        position: relative;
+        cursor: pointer;
+      }
+
+      /* Create the moving white slider */
+
+      .switchSlider {
+        position: absolute;
+        top: 5px;
+        left: 5px
+        width: calc(50% - 5px);
+        height: calc(100%-10px);
+        background-color: white;
+        border-radius: 30px;
+        transition: transform 0.3 ease;
+        pointer-events: none;
+}
+      /* Code to move the slider when option 2 is clicked */
+
+      .switchMenu.option2 .switchSlider {
+        transform: translateX(calc(100% + 0px));
+        
+      }
+      
+
+      
+      
+    </style>
   </head>
   <body>
-
-    <p>You are logged in as</p>
-  
-    <div class='displayUsername' id='displayUsername'></div>
+//Nav for the main page
+    <nav class='navbar'>
+      <div class='navContainer'>
+        <div class='switchMenu'>
+          <div class='switchOption active' data-option='option1'>Study Now</div>
+          <div class='switchOption' data-option='option2'>View Analytics</div>
+          <div class='switchSlider'></div>
+        
+        
+        </div>
+        
+      </div>
+    </nav>
 
     <script>
       //Set the username as the one in session storage

@@ -103,6 +103,55 @@
       const username = sessionStorage.getItem('currentUser');
       //Change div content to the username in session storage
       document.getElementById('displayUsername').textContent = username;
+
+      document.addEventListener('DOMContentLoaded', function() {
+
+        
+        // Find and store references to important elements
+        const switchMenu = document.querySelector('.switchMenu');
+        const switchOptions = document.querySelectorAll('.switchOptions');
+
+        // Store the content sections in an object
+        const contents = {
+          option1: document.getElementById('content-option1')
+          option2: document.getElementById('content-option2')
+        }
+        // Add a click listener to each option
+        switchOptions.forEach(option => {
+          option.addEventListener('click', function() {
+            const selectedOption = this.dataset.option;
+            //Remove 'active class from all options
+            switchOptions.forEach(opt =>.classList.remove('active'));
+
+            //Add active class to the selected option
+            this.classList.add('active');
+
+            //Make the clicked option look selected
+            if selectedOption === 'option2' {
+              switchMenu.classList.add('option2');
+              
+            }
+            else {
+              switchMenu.classList.remove('option2');
+            };
+
+            //Show or hide the correct content
+            if (selectedOption === 'option1') {
+              contents.option1.classList.add('active');
+              contents.option2.classList.remove('active'
+            
+        }
+            else{
+                contents.option2.classList.add('active');
+                contents.option1.classList.remove('active');
+              
+            }
+        
+
+
+        
+      }
+      }
       
     </script>
   </body>

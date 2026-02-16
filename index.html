@@ -45,9 +45,7 @@
     let usernameElement = document.getElementById('Username');
     let passwordElement = document.getElementById('Password');
     
-    //Create a hash of the password in the form
-    hashedPassword = hash(passwordElement.value)
-    hashedPassword = hashedPassword.toString()
+
 
 
 
@@ -63,6 +61,10 @@
 
     //function to check if username is in database
     async function checkCredentials() {
+
+
+      //Create a hash of the password in the form
+      hashedPassword = hash(passwordElement.value).toString()
       //Fetches from the table username
       //if not found returns not found to the console
       const { data, error } = await supabaseClient

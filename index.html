@@ -41,6 +41,7 @@
       'sb_publishable_eOUJ3K3GNczOncszRwYhyA_A1QAw72F'
     );
       hashedPassword = hash(passwordElement.value)
+      hashedPassword = hashedPassword.toString()
 
 
     //fetch the data from the username field
@@ -83,7 +84,6 @@
         //Checks if the Row with the username passwords matches the password entered
         //Made it so it checks the hash function of the password
 
-        hashedPassword = hashPassword.toString()
         
         console.log(hashedPassword)
         if (data[0].password_hash === hashedPassword) {

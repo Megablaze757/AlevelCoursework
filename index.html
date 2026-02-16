@@ -40,13 +40,16 @@
       'https://pxjndwrkafegopsolnde.supabase.co',
       'sb_publishable_eOUJ3K3GNczOncszRwYhyA_A1QAw72F'
     );
-      hashedPassword = hash(passwordElement.value)
-      hashedPassword = hashedPassword.toString()
-
 
     //fetch the data from the username field
     let usernameElement = document.getElementById('Username');
     let passwordElement = document.getElementById('Password');
+    
+    //Create a hash of the password in the form
+    hashedPassword = hash(passwordElement.value)
+    hashedPassword = hashedPassword.toString()
+
+
 
     //get the status element
     let statusElement = document.getElementById('statusMessage')

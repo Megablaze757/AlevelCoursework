@@ -77,6 +77,34 @@
         transform: translateX(calc(100% + 0px));
         
       }
+      /* Topic Header CSS */
+        /* Create Header Container white and Correct size */
+      .topicsHeader {
+        background-color: white;
+        padding: 1rem 2rem;
+        margin: 1rem auto;
+        max-width: 1200px;
+        border-radius: 8px;
+      }
+
+      /* Text for topic header Styles */
+
+      .topicsHeader h2 {
+        color: #1e293b;
+        font-size 1.5rem;
+        font-weight: 600;
+        margin-bottom: 0.5rem;
+        
+      }
+
+      /* Underline */
+
+      .headerUnderline {
+        height: 3px;
+        width: 60px;
+        background=colour: #2563eb;
+        border-radius: 2px;
+      }
       
 
       
@@ -102,8 +130,21 @@
     <div id="content-option1" class="content active">Study Now Content</div>
     <div id="content-option2" class="content">View Analytics Content</div>
     
-    <!-- Add username display element that was referenced -->
-    <div id="displayUsername"></div>
+    
+    <!-- Topic Header Container -->
+    <div class='topicsHeader'>
+      <h2>
+        Topics
+      </h2>
+      <div class='headerUnderline'>
+        
+      </div>
+    </div>
+    <!-- Topics Container -->
+    <div>
+      
+    </div>
+
 
     <script>
       //Set the username as the one in session storage

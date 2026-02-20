@@ -100,16 +100,48 @@
       /* Underline */
 
       .headerUnderline {
-        height: 20px;
+        height: 5px;
         width: 100%;
         background-color: #2563eb;
         border-radius: 2px;
       }
+
+      /* Topics Container */
+      .topicsContainer {
+        max-width: 1200px
+        margin: 2rem auto;
+        padding: 0 1rem;
+      }
+      /* Container for the list of topics */
+      .topicsList {
+        display: flex;
+        flex-direction: column;
+        padding: 1rem;
+        gap: 0.75rem;
+      }
+    /* Create The rows for each topic */
+      .topicsRow {
+        display: flex;
+        align-items: center;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        width: 100%;
+        padding: 1rem 1.5rem;
+        background-color: #f8fafc;
+        border: 1px solid #e2e8f0;
+        border-radius: 8px;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        text-align: left;
+      }
+        
       
 
       
       
     </style>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   </head>
   <body>
 
@@ -138,20 +170,71 @@
       </div>
     </div>
     <!-- Topics Container -->
-    <div>
+    <div class='topicsContainer>
+      <div class='topicsList' id='topicsList'>
       
+      </div>
     </div>
 
 
     <script>
+          //The supabase url
+    const supabase_url = 'https://pxjndwrkafegopsolnde.supabase.co'
+    //Supabase key
+    const supabase_key = 'sb_publishable_eOUJ3K3GNczOncszRwYhyA_A1QAw72F'
+    //Initialize supabase client
+    const supabaseClient = supabase.createClient(
+      'https://pxjndwrkafegopsolnde.supabase.co',
+      'sb_publishable_eOUJ3K3GNczOncszRwYhyA_A1QAw72F'
+    );
       //Set the username as the one in session storage
       const username = sessionStorage.getItem('currentUser');
       //Change div content to the username in session storage
       if (username) {
         document.getElementById('displayUsername').textContent = username;
       }
+      // Fetch topics from the database
+      async function fetchTopics {
+        const topicsGrid = document.getElementbyId('topicsList');
 
+        const {data: topics,error} = await supabase
+          .from('topics')
+          .select('topic_name')
+        displayTopics(topics);
+        
+      }
+
+      //Function to display topics
+      function displayTopics(topics)
+        const topicsGrid = document.getElementById('topicsList');
+        topics.forEach(topic => {
+          const row = createTopicRow(topic_;
+          topicsList.appendChild(row);
+        });
+
+      //Function to create the Row
+      function createTopicRow(topic) {
+        //Create the Button
+        const row = document.createElement('button');
+        row.className = 'topicRow';
+        row.setAttribute('data-topic-id', topic.topic_id);
+        
+        
+        //Build the HTML inside the row
+        row.innerHtml = '
+          <div style='flex: 1;'>
+            <div class="topicName">${topic.topic_name || 'Topic'}</div>
+          ';
+      }
+
+
+
+
+
+
+      
       document.addEventListener('DOMContentLoaded', function() {
+        fetchTopics();
         
         // Find and store references to important elements
         const switchMenu = document.querySelector('.switchMenu');

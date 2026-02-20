@@ -108,7 +108,7 @@
 
       /* Topics Container */
       .topicsContainer {
-        max-width: 1200px
+        max-width: 1200px;
         margin: 2rem auto;
         padding: 0 1rem;
       }
@@ -123,8 +123,6 @@
       .topicsRow {
         display: flex;
         align-items: center;
-        display: flex;
-        align-items: center;
         justify-content: space-between;
         width: 100%;
         padding: 1rem 1.5rem;
@@ -135,10 +133,24 @@
         transition: all 0.2s ease;
         text-align: left;
       }
-        
-      
 
-      
+      .topicsRow:hover {
+        background-color: #f1f5f9;
+        border-color: #94a3b8;
+      }
+
+      .topicName {
+        font-weight: 500;
+        color: #1e293b;
+      }
+
+      .content-section {
+        display: none;
+      }
+
+      .content-section.active {
+        display: block;
+      }
       
     </style>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -151,133 +163,157 @@
           <div class='switchOption active' data-option='option1'>Study Now</div>
           <div class='switchOption' data-option='option2'>View Analytics</div>
           <div class='switchSlider'></div>
-        
-        
         </div>
-        
       </div>
     </nav>
 
-
-    
     <!-- Topic Header Container -->
     <div class='topicsHeader'>
       <h2>
         Topics
       </h2>
       <div class='headerUnderline'>
-        
       </div>
     </div>
+    
     <!-- Topics Container -->
-    <div class='topicsContainer>
+    <div class='topicsContainer'>
       <div class='topicsList' id='topicsList'>
-      
+        <!-- Topics will be loaded here -->
       </div>
     </div>
 
+    <!-- Content Sections for Switch Menu -->
+    <div id="content-option1" class="content-section active">
+      <!-- Topics are already visible above -->
+    </div>
+    <div id="content-option2" class="content-section">
+      <div style="color: white; text-align: center; padding: 2rem; background-color: #023e8A; border-radius: 8px; max-width: 1200px; margin: 2rem auto;">
+        Analytics View - Coming Soon
+      </div>
+    </div>
 
     <script>
-          //The supabase url
-    const supabase_url = 'https://pxjndwrkafegopsolnde.supabase.co'
-    //Supabase key
-    const supabase_key = 'sb_publishable_eOUJ3K3GNczOncszRwYhyA_A1QAw72F'
-    //Initialize supabase client
-    const supabaseClient = supabase.createClient(
-      'https://pxjndwrkafegopsolnde.supabase.co',
-      'sb_publishable_eOUJ3K3GNczOncszRwYhyA_A1QAw72F'
-    );
-      //Set the username as the one in session storage
+      // The supabase url
+      const supabase_url = 'https://pxjndwrkafegopsolnde.supabase.co';
+      // Supabase key
+      const supabase_key = 'sb_publishable_eOUJ3K3GNczOncszRwYhyA_A1QAw72F';
+      // Initialize supabase client
+      const supabaseClient = supabase.createClient(supabase_url, supabase_key);
+      
+      // Set the username as the one in session storage
       const username = sessionStorage.getItem('currentUser');
-      //Change div content to the username in session storage
-      if (username) {
-        document.getElementById('displayUsername').textContent = username;
-      }
+      
       // Fetch topics from the database
       async function fetchTopics() {
-        const topicsGrid = document.getElementbyId('topicsList');
-
-        const {data: topics,error} = await supabaseClient
-          .from('topics')
-          .select('topic_name')
-        displayTopics(topics);
-        
+        try {
+          console.log('Fetching topics...');
+          
+          const { data: topics, error } = await supabaseClient
+            .from('topics')
+            .select('*');
+          
+          if (error) {
+            console.error('Error fetching topics:', error);
+            return;
+          }
+          
+          console.log('Topics fetched:', topics);
+          displayTopics(topics);
+        } catch (err) {
+          console.error('Failed to fetch topics:', err);
+        }
       }
 
-      //Function to display topics
-      function displayTopics(topics){
-        const topicsGrid = document.getElementById('topicsList');
-        // ✅ Correct:
+      // Function to display topics
+      function displayTopics(topics) {
+        const topicsList = document.getElementById('topicsList');
+        
+        // Clear any existing content
+        topicsList.innerHTML = '';
+        
+        if (!topics || topics.length === 0) {
+          topicsList.innerHTML = '<div style="text-align: center; padding: 2rem; background-color: #f8fafc; border-radius: 8px;">No topics found</div>';
+          return;
+        }
+        
         topics.forEach(topic => {
           const row = createTopicRow(topic);
           topicsList.appendChild(row);
         });
+      }
 
-      //Function to create the Row
+      // Function to create the Row
       function createTopicRow(topic) {
-        //Create the Button
+        // Create the Button
         const row = document.createElement('button');
         row.className = 'topicsRow';
-        row.setAttribute('data-topic-id', topic.topic_id);
+        row.setAttribute('data-topic-id', topic.id || topic.topic_id);
         
+        // Build the HTML inside the row
+        row.innerHTML = `
+          <div style="flex: 1; text-align: left;">
+            <div class="topicName">${topic.topic_name || 'Unnamed Topic'}</div>
+          </div>
+          <div style="color: #64748b; font-size: 0.9rem;">→</div>
+        `;
         
-        //Build the HTML inside the row
-row.innerHTML = `
-  <div style="flex: 1; text-align: left;">
-    <div class="topicName">${topic.topic_name || 'Unnamed Topic'}</div>
-  </div>
-  <div style="color: #64748b; font-size: 0.9rem;">▶</div>
-`;
+        // Add click handler for the topic
+        row.addEventListener('click', () => {
+          console.log('Topic clicked:', topic.topic_name);
+          // Add your navigation or action here
+          alert(`Selected topic: ${topic.topic_name}`);
+        });
+        
+        return row;
+      }
 
-
-
-
-
-
-      
+      // Document ready handler
       document.addEventListener('DOMContentLoaded', function() {
+        // Fetch topics when page loads
         fetchTopics();
         
         // Find and store references to important elements
         const switchMenu = document.querySelector('.switchMenu');
-        const switchOptions = document.querySelectorAll('.switchOption'); // Fixed: was 'switchOptions'
-
-        // Store the content sections in an object
+        const switchOptions = document.querySelectorAll('.switchOption');
         const contents = {
           option1: document.getElementById('content-option1'),
-          option2: document.getElementById('content-option2') // Fixed: added comma
+          option2: document.getElementById('content-option2')
         };
-        
+
         // Add a click listener to each option
         switchOptions.forEach(option => {
           option.addEventListener('click', function() {
             const selectedOption = this.dataset.option;
             
-            //Remove 'active' class from all options
-            switchOptions.forEach(opt => opt.classList.remove('active')); // Fixed: added 'opt =>'
+            // Remove 'active' class from all options
+            switchOptions.forEach(opt => opt.classList.remove('active'));
 
-            //Add active class to the selected option
+            // Add active class to the selected option
             this.classList.add('active');
 
-            //Make the clicked option look selected
-            if (selectedOption === 'option2') { // Fixed: added parentheses around condition
+            // Make the clicked option look selected
+            if (selectedOption === 'option2') {
               switchMenu.classList.add('option2');
-            }
-            else {
+            } else {
               switchMenu.classList.remove('option2');
             }
 
-            //Show or hide the correct content
+            // Show or hide the correct content
             if (selectedOption === 'option1') {
               contents.option1.classList.add('active');
-              contents.option2.classList.remove('active'); // Fixed: added closing parenthesis
-            }
-            else {
+              contents.option2.classList.remove('active');
+            } else {
               contents.option2.classList.add('active');
               contents.option1.classList.remove('active');
             }
           });
         });
+
+        // Display username if exists
+        if (username) {
+          console.log('Current user:', username);
+        }
       });
     </script>
   </body>

@@ -194,10 +194,10 @@
         document.getElementById('displayUsername').textContent = username;
       }
       // Fetch topics from the database
-      async function fetchTopics {
+      async function fetchTopics() {
         const topicsGrid = document.getElementbyId('topicsList');
 
-        const {data: topics,error} = await supabase
+        const {data: topics,error} = await supabaseClient
           .from('topics')
           .select('topic_name')
         displayTopics(topics);
@@ -205,10 +205,11 @@
       }
 
       //Function to display topics
-      function displayTopics(topics)
+      function displayTopics(topics){
         const topicsGrid = document.getElementById('topicsList');
+        // ✅ Correct:
         topics.forEach(topic => {
-          const row = createTopicRow(topic_;
+          const row = createTopicRow(topic);
           topicsList.appendChild(row);
         });
 
@@ -216,16 +217,17 @@
       function createTopicRow(topic) {
         //Create the Button
         const row = document.createElement('button');
-        row.className = 'topicRow';
+        row.className = 'topicsRow';
         row.setAttribute('data-topic-id', topic.topic_id);
         
         
         //Build the HTML inside the row
-        row.innerHtml = '
-          <div style='flex: 1;'>
-            <div class="topicName">${topic.topic_name || 'Topic'}</div>
-          ';
-      }
+row.innerHTML = `
+  <div style="flex: 1; text-align: left;">
+    <div class="topicName">${topic.topic_name || 'Unnamed Topic'}</div>
+  </div>
+  <div style="color: #64748b; font-size: 0.9rem;">▶</div>
+`;
 
 
 

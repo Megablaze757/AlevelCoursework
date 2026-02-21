@@ -213,22 +213,31 @@
           topicsGrid.appendChild(row);
         });
 
-      //Function to create the Row
-      function createTopicRow(topic) {
-        //Create the Button
-        const row = document.createElement('button');
-        row.className = 'topicsRow';
-        row.setAttribute('data-topic-id', topic.topic_id);
-        
-        
-        //Build the HTML inside the row
-row.innerHTML = `
-  <div style="flex: 1; text-align: left;">
-    <div class="topicName">${topic.topic_name || 'Unnamed Topic'}</div>
-  </div>
-  < div style="color: #64748b; font-size: 0.9rem;">▶</div>
-`;
-      }
+  // Function to create the Row
+  function createTopicRow(topic) {
+    // Create the Button
+    const row = document.createElement('button');
+    row.className = 'topicsRow';
+    row.setAttribute('data-topic-id', topic.topic_id);
+    
+    // Add click handler to the button
+    row.addEventListener('click', function() {
+      console.log('Topic clicked:', topic.topic_name);
+      // Add your topic click logic here
+      // For example: window.location.href = `/topic/${topic.topic_id}`;
+      alert(`Topic "${topic.topic_name}" clicked!`);
+    });
+    
+    // Build the HTML inside the row
+    row.innerHTML = `
+      <div style="flex: 1; text-align: left;">
+        <div class="topicName">${topic.topic_name || 'Unnamed Topic'}</div>
+      </div>
+      <div style="color: #64748b; font-size: 0.9rem;">▶</div>
+    `;
+    
+    return row;
+  }
 
 
 

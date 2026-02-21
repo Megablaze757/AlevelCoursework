@@ -1,11 +1,151 @@
 <DOCTYPE html>
   <html>
     <head>
+      <style>
+        /* Remove browser Defaults */
+        * {
+          margin: 0;
+          padding: 0;
+          box-sizing: border-box;
+        }
+
+        /* Create a nice backgroud*/
+        body{
+          background: linear-gradient(145deg, #f6f9fc 0%, #edf2f9 100%);
+          min-height: 100vh;
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          padding: 1.5rem;
+        }
+        .numCorrectContainer {
+          display: flex;
+          gap: 15px
+          background: white;
+          padding: 15px 25px;
+          border-radius: 50px;
+          box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+          width: fit-content;
+          margin-bottom: 15px;
+        }
+        /* Number correct box */
+        .numCorrect {
+          background: #e8f5e9;
+          color: #2e7d32;
+          padding: 8px 20px;
+          border-radius: 30px;
+          font-weight: bold;
+          font-size: 18px;
+          border-left: 4px solid #4caf50;
+      }
+
+/* Number incorrect box */
+        .numIncorrect {
+            background: #ffebee;
+            color: #c62828;
+            padding: 8px 20px;
+            border-radius: 30px;
+            font-weight: bold;
+            font-size: 18px;
+            border-left: 4px solid #ef5350;
+        }
+        /* End Session button */
+        .endSession {
+          background: transparent;
+          border: 2px dashed #90a4ae;
+          color: #546e7a;
+          padding: 10px 25px;
+          border-radius: 30px;
+          display: inline-block;
+          font-weight: 600;
+          margin-bottom: 25px;
+          cursor: pointer;
+    }
+
+      .endSession:hover {
+        background: #eceff1;
+        border-style: solid;
+  }
+        .questionContainer {
+          background: white;
+          border-radius: 20px;
+           padding: 25px;
+          box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+          max-width: 600px;
+    }
+        /* Question box */
+        .question {
+            background: #f5f9ff;
+            border: 2px solid #bbdefb;
+            border-radius: 15px;
+            padding: 30px 25px;
+            margin-bottom: 20px;
+            font-size: 22px;
+            font-weight: 600;
+            color: #0d47a1;
+      }
+
+        /* Add some content using pseudo-element since div is empty */
+      .question::before {
+          content: "What is RAM";
+          display: block;
+    }
+        /*Answer input area */
+      .answerBox {
+          background: white;
+          border: 2px solid #b0bec5;
+          border-radius: 50px;
+          padding: 15px 25px;
+          margin-bottom: 15px;
+          font-size: 18px;
+          color: #263238;
+}
+
+      .answerBox:focus {
+          border-color: #2196f3;
+          outline: none;
+          box-shadow: 0 0 0 3px rgba(33,150,243,0.2);
+}
+
+    /* Add placeholder since div is empty */
+      .answerBox:empty::before {
+          content: "Enter Answer";
+          color: #90a4ae;
+}
+        /* Check answer button */
+    .checkAnswer {
+    background: #1976d2;
+    color: white;
+    padding: 15px 30px;
+    border-radius: 50px;
+    font-weight: bold;
+    font-size: 18px;
+    text-align: center;
+    cursor: pointer;
+    transition: background 0.2s;
+    display: inline-block;
+    min-width: 150px;
+}
+
+.checkAnswer:hover {
+    background: #1565c0;
+}
+
+/* Add button text since div is empty */
+.checkAnswer:empty::before {
+    content: "Check Answer";
+}
+
+.checkAnswer:active {
+    transform: scale(0.98);
+}
+        
+      </style>
       
     </head>
     <body>
       <div class='numCorrectContainer'>
-        <div class'numCorrect' id='numCorrect'>
+        <div class='numCorrect' id='numCorrect'>
           
         </div>
         <div class='numIncorrect' id='numIncorrect'>
@@ -15,11 +155,11 @@
       <div class='endSession' id='endSession'>
         
       </div>
-      <div class='QuestionContainer'>
-        <div class='Question' id='QuestionHolder'>
+      <div class='questionContainer'>
+        <div class='question' id='questionHolder'>
           
         </div>
-        <div class='AnswerBox' id='AnswerBox'>
+        <div class='answerBox' id='answerBox'>
           
         </div>
         <div class='checkAnswer' id='checkAnswer'>

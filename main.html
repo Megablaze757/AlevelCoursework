@@ -170,7 +170,7 @@
       </div>
     </div>
     <!-- Topics Container -->
-    <div class='topicsContainer>
+    <div class='topicsContainer'>
       <div class='topicsList' id='topicsList'>
       
       </div>
@@ -195,7 +195,7 @@
       }
       // Fetch topics from the database
       async function fetchTopics() {
-        const topicsGrid = document.getElementbyId('topicsList');
+        const topicsGrid = document.getElementById('topicsList');
 
         const {data: topics,error} = await supabaseClient
           .from('topics')
@@ -210,7 +210,7 @@
         // ✅ Correct:
         topics.forEach(topic => {
           const row = createTopicRow(topic);
-          topicsList.appendChild(row);
+          topicsGrid.appendChild(row);
         });
 
       //Function to create the Row
@@ -226,12 +226,14 @@ row.innerHTML = `
   <div style="flex: 1; text-align: left;">
     <div class="topicName">${topic.topic_name || 'Unnamed Topic'}</div>
   </div>
-  <div style="color: #64748b; font-size: 0.9rem;">▶</div>
+  < div style="color: #64748b; font-size: 0.9rem;">▶</div>
 `;
+      }
 
 
 
 
+        
 
 
       

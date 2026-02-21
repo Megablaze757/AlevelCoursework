@@ -1,171 +1,304 @@
-<DOCTYPE html>
-  <html>
-    <head>
-      <style>
-        /* Remove browser Defaults */
-        * {
-          margin: 0;
-          padding: 0;
-          box-sizing: border-box;
-        }
-
-        /* Create a nice backgroud*/
-        body{
-          background: linear-gradient(145deg, #f6f9fc 0%, #edf2f9 100%);
-          min-height: 100vh;
-          display: flex;
-          justify-content: center;
-          align-items: center;
-          padding: 1.5rem;
-        }
-        .numCorrectContainer {
-          display: flex;
-          gap: 15px
-          background: white;
-          padding: 15px 25px;
-          border-radius: 50px;
-          box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-          width: fit-content;
-          margin-bottom: 15px;
-        }
-        /* Number correct box */
-        .numCorrect {
-          background: #e8f5e9;
-          color: #2e7d32;
-          padding: 8px 20px;
-          border-radius: 30px;
-          font-weight: bold;
-          font-size: 18px;
-          border-left: 4px solid #4caf50;
-      }
-
-/* Number incorrect box */
-        .numIncorrect {
-            background: #ffebee;
-            color: #c62828;
-            padding: 8px 20px;
-            border-radius: 30px;
-            font-weight: bold;
-            font-size: 18px;
-            border-left: 4px solid #ef5350;
-        }
-        /* End Session button */
-        .endSession {
-          background: transparent;
-          border: 2px dashed #90a4ae;
-          color: #546e7a;
-          padding: 10px 25px;
-          border-radius: 30px;
-          display: inline-block;
-          font-weight: 600;
-          margin-bottom: 25px;
-          cursor: pointer;
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>flashcard · starter (counters left, end right, labels visible)</title>
+  <style>
+    /* Remove browser defaults */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
     }
 
-      .endSession:hover {
-        background: #eceff1;
-        border-style: solid;
-  }
-        .questionContainer {
-          background: white;
-          border-radius: 20px;
-           padding: 25px;
-          box-shadow: 0 5px 20px rgba(0,0,0,0.1);
-          max-width: 600px;
+    body {
+      background: linear-gradient(145deg, #f6f9fc 0%, #edf2f9 100%);
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 1.5rem;
     }
-        /* Question box */
-        .question {
-            background: #f5f9ff;
-            border: 2px solid #bbdefb;
-            border-radius: 15px;
-            padding: 30px 25px;
-            margin-bottom: 20px;
-            font-size: 22px;
-            font-weight: 600;
-            color: #0d47a1;
-      }
 
-        /* Add some content using pseudo-element since div is empty */
-      .question::before {
-          content: "What is RAM";
-          display: block;
+    /* two-column layout: left (counters) + right (card + end button) */
+    .layout {
+      display: flex;
+      align-items: flex-start;
+      gap: 2rem;
+      width: 100%;
+      max-width: 1000px;
+      flex-wrap: wrap;
+      justify-content: center;
     }
-        /*Answer input area */
-      .answerBox {
-          background: white;
-          border: 2px solid #b0bec5;
-          border-radius: 50px;
-          padding: 15px 25px;
-          margin-bottom: 15px;
-          font-size: 18px;
-          color: #263238;
-}
 
-      .answerBox:focus {
-          border-color: #2196f3;
-          outline: none;
-          box-shadow: 0 0 0 3px rgba(33,150,243,0.2);
-}
+    /* left column – only the two score cards */
+    .score-panel {
+      display: flex;
+      flex-direction: column;
+      gap: 1.2rem;
+      min-width: 170px;
+      flex-shrink: 0;
+    }
 
-    /* Add placeholder since div is empty */
-      .answerBox:empty::before {
-          content: "Enter Answer";
-          color: #90a4ae;
-}
-        /* Check answer button */
+    /* shared container for both counters (kept original class) */
+    .numCorrectContainer {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+      background: white;
+      padding: 1.5rem 1.2rem;
+      border-radius: 40px;
+      box-shadow: 0 12px 24px rgba(0,0,0,0.06);
+      width: 100%;
+    }
+
+    /* correct box */
+    .numCorrect {
+      background: #e8f5e9;
+      color: #1b5e20;
+      padding: 0.9rem 1.2rem;
+      border-radius: 100px;
+      font-weight: 700;
+      font-size: 1.4rem;
+      border-left: 6px solid #2e7d32;
+      display: flex;
+      align-items: center;
+      gap: 0.8rem;
+      box-shadow: inset 0 1px 4px rgba(0,0,0,0.02);
+    }
+
+    /* incorrect box */
+    .numIncorrect {
+      background: #ffebee;
+      color: #b71c1c;
+      padding: 0.9rem 1.2rem;
+      border-radius: 100px;
+      font-weight: 700;
+      font-size: 1.4rem;
+      border-left: 6px solid #c62828;
+      display: flex;
+      align-items: center;
+      gap: 0.8rem;
+      box-shadow: inset 0 1px 4px rgba(0,0,0,0.02);
+    }
+
+    /* icons via pseudo (keeps numbers readable) */
+    .numCorrect::before {
+      content: "✓";
+      background: #2e7d32;
+      color: white;
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.3rem;
+      font-weight: bold;
+      flex-shrink: 0;
+    }
+
+    .numIncorrect::before {
+      content: "✗";
+      background: #c62828;
+      color: white;
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.3rem;
+      font-weight: bold;
+      flex-shrink: 0;
+    }
+
+    /* right column – contains card and below it the end button (aligned right) */
+    .card-area {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;  /* pushes button to the right */
+      gap: 1rem;
+      flex: 1;
+      min-width: 340px;
+    }
+
+    /* main question card (exact same style, bigger radius) */
+    .questionContainer {
+      background: white;
+      border-radius: 32px;
+      padding: 2rem;
+      box-shadow: 0 20px 32px -8px rgba(0,20,40,0.14);
+      width: 100%;
+    }
+
+    /* question box */
+    .question {
+      background: #f2f8ff;
+      border: 2px solid #bbdefb;
+      border-radius: 24px;
+      padding: 2rem 1.8rem;
+      margin-bottom: 1.8rem;
+      font-size: 1.8rem;
+      font-weight: 600;
+      color: #0a2f6c;
+      line-height: 1.3;
+      word-break: break-word;
+    }
+
+    /* actual question text (replaces empty div) */
+    .question::before {
+      content: "What does RAM stand for?";
+      display: block;
+    }
+
+    /* answer box (simulated input) */
+    .answerBox {
+      background: white;
+      border: 2px solid #b0c5d4;
+      border-radius: 60px;
+      padding: 1.2rem 2rem;
+      margin-bottom: 1.8rem;
+      font-size: 1.3rem;
+      color: #1c2a36;
+      transition: 0.15s;
+      min-height: 4rem;
+    }
+
+    .answerBox:focus {
+      border-color: #1976d2;
+      outline: none;
+      box-shadow: 0 0 0 4px rgba(33,150,243,0.15);
+    }
+
+    /* placeholder styling for empty div */
+    .answerBox:empty::before {
+      content: "Your answer...";
+      color: #8a9fb0;
+      font-style: italic;
+      font-weight: 400;
+      opacity: 0.9;
+    }
+
+    /* ----- CHECK ANSWER BUTTON (with real text, not pseudo) ----- */
     .checkAnswer {
-    background: #1976d2;
-    color: white;
-    padding: 15px 30px;
-    border-radius: 50px;
-    font-weight: bold;
-    font-size: 18px;
-    text-align: center;
-    cursor: pointer;
-    transition: background 0.2s;
-    display: inline-block;
-    min-width: 150px;
-}
+      background: #1976d2;
+      color: white;
+      padding: 1rem 2.5rem;
+      border-radius: 60px;
+      font-weight: 700;
+      font-size: 1.4rem;
+      text-align: center;
+      cursor: default;    /* no js — just visual */
+      display: inline-block;
+      min-width: 220px;
+      border: none;
+      box-shadow: 0 8px 18px rgba(25,118,210,0.25);
+      letter-spacing: 0.3px;
+      transition: 0.15s;
+      /* the text is directly inside div: "Check answer" */
+    }
 
-.checkAnswer:hover {
-    background: #1565c0;
-}
+    /* subtle interactive illusion */
+    .checkAnswer:hover {
+      background: #1565c0;
+      box-shadow: 0 10px 22px rgba(21,101,192,0.3);
+    }
 
-/* Add button text since div is empty */
-.checkAnswer:empty::before {
-    content: "Check Answer";
-}
+    /* ----- END SESSION BUTTON (bottom right, with text) ----- */
+    .endSession {
+      background: transparent;
+      border: 2px dashed #819ca9;
+      color: #2c3e50;
+      padding: 0.9rem 2.2rem;
+      border-radius: 40px;
+      font-weight: 650;
+      font-size: 1.3rem;
+      cursor: default;
+      transition: 0.15s;
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.02);
+      margin-top: 0.25rem;
+      width: fit-content;
+    }
 
-.checkAnswer:active {
-    transform: scale(0.98);
-}
-        
-      </style>
-      
-    </head>
-    <body>
-      <div class='numCorrectContainer'>
-        <div class='numCorrect' id='numCorrect'>
-          
-        </div>
-        <div class='numIncorrect' id='numIncorrect'>
-          
-        </div>
+    .endSession:hover {
+      background: #e3eaf0;
+      border-style: solid;
+      border-color: #607d8b;
+    }
+
+    /* visible icon + text */
+    .endSession::before {
+      content: "⏻";
+      font-size: 1.4rem;
+      line-height: 1;
+      opacity: 0.8;
+    }
+
+    /* static numbers: show default correct/incorrect counts (non-zero to look realistic) */
+    #numCorrect, #numIncorrect {
+      /* numbers are directly inside divs, no js needed */
+      display: inline-block;
+    }
+
+    /* ensure numbers are clearly visible */
+    .numCorrect, .numIncorrect {
+      font-size: 1.6rem;
+    }
+
+    /* tiny extra: style for the placeholder inside answerBox */
+    .answerBox:empty::before {
+      pointer-events: none;
+    }
+
+    /* make entire layout responsive */
+    @media (max-width: 700px) {
+      .layout { gap: 1.5rem; }
+      .score-panel { min-width: 140px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="layout">
+
+    <!-- LEFT: both counters exactly as requested -->
+    <div class="score-panel">
+      <div class="numCorrectContainer">
+        <!-- correct box with number 7 (static demo) -->
+        <div class="numCorrect" id="numCorrect">7</div>
+        <!-- incorrect box with number 3 (static demo) -->
+        <div class="numIncorrect" id="numIncorrect">3</div>
       </div>
-      <div class='endSession' id='endSession'>
-        
+      /* no extra button here, only counters */
+    </div>
+
+    <!-- RIGHT: question card + end button (bottom right) -->
+    <div class="card-area">
+      <!-- main card (question, answer, check button) -->
+      <div class="questionContainer">
+        <div class="question" id="questionHolder"></div>
+        <!-- answer box (editable div for demo but without js, just static) -->
+        <div class="answerBox" id="answerBox" contenteditable="false"><!-- non-editable for pure static, but keep placeholder --></div>
+        <!-- check answer button with visible text (no pseudo, explicit) -->
+        <div class="checkAnswer" id="checkAnswer">Check answer</div>
       </div>
-      <div class='questionContainer'>
-        <div class='question' id='questionHolder'>
-          
-        </div>
-        <div class='answerBox' id='answerBox'>
-          
-        </div>
-        <div class='checkAnswer' id='checkAnswer'>
-          
-        </div>
-        </div>
-      
-    </body>
-  </html>
+
+      <!-- end session button at bottom right, with added text and icon -->
+      <div class="endSession" id="endSession">
+        <span style="display: inline-block;">End session</span>  <!-- explicit text -->
+      </div>
+    </div>
+  </div>
+
+  <!-- static notes: all numbers and labels visible, no js used.
+       counters are placed left, end button bottom right, 
+       correct/incorrect boxes have numbers (7 and 3) and left icons.
+       "Check answer" and "End session" are plain text inside divs. 
+  -->
+</body>
+</html>

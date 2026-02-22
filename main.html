@@ -208,7 +208,33 @@
       console.error('Error:', err);
     }
   }
+// Create a function to make the button on click go to study.html
+//Also store topicName in session storage to access questions on that topic
 
+async function topicButtons() {
+    // Get all topic rows
+    const topicRows = document.querySelectorAll('.topicList');
+    
+    topicRows.forEach(row => {
+        row.addEventListener('click', function() {
+            // Get topic name from the span with class 'topicsList'
+            const topicName = this.querySelector('.topicList').textContent;
+            
+            // Store topic name in session storage
+            sessionStorage.setItem('selectedTopic', topicName);
+            
+
+          
+            
+
+            
+            // Redirect to study.html after 1.5 seconds
+            setTimeout(() => {
+                window.location.href = 'study.html';
+            }, 1500);
+        });
+    });
+}
   // Function to display topics
   function displayTopics(topics) {
     const topicsGrid = document.getElementById('topicsList');
@@ -256,33 +282,8 @@
     console.log('DOM loaded, fetching topics...');
     fetchTopics();
 
-          // Create a function to make the button on click go to study.html
-      //Also store topicName in session storage to access questions on that topic
-
-async function topicButtons() {
-    // Get all topic rows
-    const topicRows = document.querySelectorAll('.topicList');
     
-    topicRows.forEach(row => {
-        row.addEventListener('click', function() {
-            // Get topic name from the span with class 'topicsList'
-            const topicName = this.querySelector('.topicList').textContent;
-            
-            // Store topic name in session storage
-            sessionStorage.setItem('selectedTopic', topicName);
-            
 
-          
-            
-
-            
-            // Redirect to study.html after 1.5 seconds
-            setTimeout(() => {
-                window.location.href = 'study.html';
-            }, 1500);
-        });
-    });
-}
     
     // Switch menu functionality
     const switchMenu = document.querySelector('.switchMenu');

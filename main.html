@@ -247,7 +247,7 @@
     // Build the HTML inside the row
     row.innerHTML = `
       <div style="flex: 1; text-align: left;">
-        <div class="topicName">${topic.topic_name || 'Unnamed Topic'}</div>
+        <div class="topicName" id='topicName'>${topic.topic_name || 'Unnamed Topic'}</div>
       </div>
       <div style="color: #64748b; font-size: 0.9rem;">▶</div>
     `;
@@ -255,10 +255,39 @@
     return row;
   }
 
+
   // Wait for the DOM to be fully loaded
   document.addEventListener('DOMContentLoaded', function() {
     console.log('DOM loaded, fetching topics...');
     fetchTopics();
+
+          // Create a function to make the button on click go to study.html
+      //Also store topicName in session storage to access questions on that topic
+
+async function topicButtons() {
+    // Get all topic rows
+    const topicRows = document.querySelectorAll('.topicList');
+    
+    topicRows.forEach(row => {
+        row.addEventListener('click', function() {
+            // Get topic name from the span with class 'topicsList'
+            const topicName = this.querySelector('.topicList').textContent;
+            
+            // Store topic name in session storage
+            sessionStorage.setItem('selectedTopic', topicName);
+            
+
+          
+            
+
+            
+            // Redirect to study.html after 1.5 seconds
+            setTimeout(() => {
+                window.location.href = 'study.html';
+            }, 1500);
+        });
+    });
+}
     
     // Switch menu functionality
     const switchMenu = document.querySelector('.switchMenu');

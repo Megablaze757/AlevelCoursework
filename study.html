@@ -206,7 +206,8 @@ let questions = [];
     'sb_publishable_eOUJ3K3GNczOncszRwYhyA_A1QAw72F'
   );
                 //Fetch the topic needed for the session
-        async function fetchTopic {
+        async function fetchTopic() {
+          
           //If the topic name is not general then fetch the questions for that topic
           const { data, error } = await supabaseClient
                    //Sql query to fetch questions based on selected topic name

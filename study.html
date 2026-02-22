@@ -193,6 +193,9 @@
     
   </div>
       <script>
+
+let questions = [];
+        
           // The supabase url
   const supabase_url = 'https://pxjndwrkafegopsolnde.supabase.co'
   // Supabase key
@@ -202,6 +205,18 @@
     'https://pxjndwrkafegopsolnde.supabase.co',
     'sb_publishable_eOUJ3K3GNczOncszRwYhyA_A1QAw72F'
   );
+                //Fetch the topic needed for the session
+        async function fetchTopic {
+          //If the topic name is not general then fetch the questions for that topic
+          const { data, error } = await supabaseClient
+                   //Sql query to fetch questions based on selected topic name
+                   .from('questions')
+                   .select(*)
+          questions = data;      
+          
+            
+            
+          }
         
           let question_id = 1;
           //Function to display the question takes the question ID as a parameter

@@ -113,11 +113,6 @@
             color: #0d47a1;
       }
 
-        /* Add some content using pseudo-element since div is empty */
-      .question::before {
-          content: "What is RAM";
-          display: block;
-    }
         /*Answer input area */
       .answerBox {
           background: white;
@@ -135,11 +130,6 @@
           box-shadow: 0 0 0 3px rgba(33,150,243,0.2);
 }
 
-    /* Add placeholder since div is empty */
-      .answerBox:empty::before {
-          content: "Enter Answer";
-          color: #90a4ae;
-}
         /* Check answer button */
     .checkAnswer {
     background: #1976d2;
@@ -201,6 +191,41 @@
     
   </div>
       <script>
+          // The supabase url
+  const supabase_url = 'https://pxjndwrkafegopsolnde.supabase.co'
+  // Supabase key
+  const supabase_key = 'sb_publishable_eOUJ3K3GNczOncszRwYhyA_A1QAw72F'
+  // Initialize supabase client
+  const supabaseClient = supabase.createClient(
+    'https://pxjndwrkafegopsolnde.supabase.co',
+    'sb_publishable_eOUJ3K3GNczOncszRwYhyA_A1QAw72F'
+  );
+        //Fetch the topic needed for the session
+        async function fetchTopic {
+          //If the topic name is not general then fetch the questions for that topic
+          const { data, error } = await supabaseClient
+                   //Sql query to fetch questions based on selected topic name
+                   .from('questions')
+                   .select(*)
+                            
+            
+            
+          }
+          let question_id = 1;
+          //Function to display the question takes the question ID as a parameter
+          function displayQuestion(question_id) {
+                const questionHolder = document.getElementById('questionHolder');
+                const currentQuestion = questions[question_id];
+                const questionText = currentQuestion.question_text
+                questionHolder.innerHTML = questionText;
+            
+          }
+          document.addEventListener('DOMContentLoaded', function () {
+            displayQuestion(1);
+            
+          )};
+          
+
     console.log('Selected Topic:', sessionStorage.getItem('selectedTopic'));
   </script>
     </body>

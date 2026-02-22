@@ -212,7 +212,9 @@ let questions = [];
           const { data, error } = await supabaseClient
                    //Sql query to fetch questions based on selected topic name
                    .from('questions')
-                   .select(*)
+                   .select('*')
+
+          
           questions = data;      
           
             

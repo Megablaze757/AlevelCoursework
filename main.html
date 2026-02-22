@@ -237,12 +237,7 @@
     row.setAttribute('data-topic-id', topic.topic_id || '');
     
     // Add click handler to the button
-    row.addEventListener('click', function() {
-      console.log('Topic clicked:', topic);
-      alert(`Topic "${topic.topic_name || 'Unnamed'}" clicked!`);
-      // You can add navigation here later
-      // window.location.href = `/topic.html?id=${topic.topic_id}`;
-    });
+    row.addEventListener('click', topicButtons() )
     
     // Build the HTML inside the row
     row.innerHTML = `

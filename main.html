@@ -213,12 +213,12 @@
 
 async function topicButtons() {
     // Get all topic rows
-    const topicRows = document.querySelectorAll('.topicList');
+    const topicRows = document.querySelectorAll('.topicsRow');
     
     topicRows.forEach(row => {
         row.addEventListener('click', function() {
-            // Get topic name from the span with class 'topicsList'
-            const topicName = this.querySelector('.topicList').textContent;
+            // Get topic name from the span with class 'topicName'
+            const topicName = this.querySelector('.topicName').textContent;
             
             // Store topic name in session storage
             sessionStorage.setItem('selectedTopic', topicName);

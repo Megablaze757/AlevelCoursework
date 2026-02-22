@@ -180,7 +180,7 @@
       <!-- Question container -->
       <div class='questionContainer'>
         <div class='question' id='questionHolder'></div>
-        <div class='answerBox' id='answerBox'></div>
+        <input type='text' class='answerBox' id='answerBox'>
         <div class='checkAnswer' id='checkAnswer'>Check answer</div>  <!-- Added text -->
       </div>
       
@@ -193,8 +193,10 @@
     
   </div>
       <script>
+        //Get the element of the answer box
 
 let questions = [];
+      
         
           // The supabase url
   const supabase_url = 'https://pxjndwrkafegopsolnde.supabase.co'

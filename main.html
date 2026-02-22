@@ -263,7 +263,10 @@ async function topicButtons() {
     row.setAttribute('data-topic-id', topic.topic_id || '');
     
     // Add click handler to the button
-    row.addEventListener('click', topicButtons() )
+    
+    row.addEventListener('click', function() {
+        topicButtons();
+    });
     
     // Build the HTML inside the row
     row.innerHTML = `

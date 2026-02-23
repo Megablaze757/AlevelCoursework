@@ -207,7 +207,8 @@
         <div class='question' id='questionHolder'></div>
         <input type='text' class='answerBox' id='answerBox'>        
         <div class='checkAnswer' id='checkAnswer'>Check answer</div>  <!-- Added text -->
-      <div class='feeback' id='feedback'></div>
+      <div class='feedback' id='feedback'></div>
+        
       </div>
       
       
@@ -241,12 +242,12 @@
             console.log('correct');
             //show Correct feedback text and colour
             feedback.textContent = 'Correct';
-            feedback.classname = 'feedback correct';
+            feedback.className = 'feedback correct';
           }
           else {
             //Show incorrect feedback message
             feedback.textContent = 'Incorrect';
-            feedback.classname = 'feedback incorrect';
+            feedback.className = 'feedback incorrect';
             
             console.log('Incorrect')
             

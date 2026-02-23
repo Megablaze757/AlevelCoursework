@@ -205,7 +205,7 @@
         checkAnswer.addEventListener('click', function () {
           //Get users answer and remove capitalisation
           const userAnswer = answerBox.value.trim().toLowerCase();
-          const correctAnswer = question_id.correct_answer.toLowerCase();
+          const correctAnswer = questions[question_id].correct_answer.toLowerCase();
 
           if (userAnswer === correctAnswer) {
             console.log('correct');

@@ -193,7 +193,29 @@
     
   </div>
       <script>
-        //Get the element of the answer box
+        
+        
+        let question_id = 1;
+        //Get the Answer elements
+        const checkAnswer = document.getElementById('checkAnswer');
+        const answerBox = document.getElementById('answerBox')
+
+        //Add a click handler
+        //Function to check answer on click
+        checkAnswer.addEventListener('click', function () {
+          //Get users answer and remove capitalisation
+          const userAnswer = answerBox.value.trim().toLowerCase();
+          const correctAnswer = question_id.correct_answer.toLowerCase();
+
+          if (userAnswer === correctAnswer) {
+            console.log('correct');
+          }
+          else {
+            console.log('Incorrect')
+          };
+        
+        }  
+        );
 
 let questions = [];
       
@@ -224,7 +246,7 @@ let questions = [];
             
           }
         
-          let question_id = 1;
+
           //Function to display the question takes the question ID as a parameter
           function displayQuestion(question_id) {
                 const questionHolder = document.getElementById('questionHolder');

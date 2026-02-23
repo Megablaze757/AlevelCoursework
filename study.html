@@ -206,6 +206,8 @@
           //Get users answer and remove capitalisation
           const userAnswer = answerBox.value.trim().toLowerCase();
           const correctAnswer = questions[question_id].correct_answer.toLowerCase();
+          console.log(correctAnswer);
+          
 
           if (userAnswer === correctAnswer) {
             console.log('correct');

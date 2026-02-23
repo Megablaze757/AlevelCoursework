@@ -159,6 +159,31 @@
 .checkAnswer:active {
     transform: scale(0.98);
 }
+        /* Feedback message Styling */
+.feedback {
+  margin-top: 20px;
+  padding: 15px 20px;
+  border-radius: 50px;
+  font-weight: bold;
+  font-size: 18px;
+  text-align: center;
+  transition: all 0.3s ease;
+  display: none; 
+}
+/* Correct message styling*/
+.feedback.correct {
+  background: #e8f5e9;
+  color: #2e7d32;
+  border: 2px solid #4caf50;
+  display: block;
+}
+/* Incorrect message styling */
+.feedback.incorrect {
+  background: #ffebee;
+  color: #c62828;
+  border: 2px solid #ef5350;
+  display: block;
+}
         
       </style>
       
@@ -180,9 +205,12 @@
       <!-- Question container -->
       <div class='questionContainer'>
         <div class='question' id='questionHolder'></div>
-        <input type='text' class='answerBox' id='answerBox'>
+        <input type='text' class='answerBox' id='answerBox'>        
         <div class='checkAnswer' id='checkAnswer'>Check answer</div>  <!-- Added text -->
+      <div class='feeback' id='feedback'></div>
       </div>
+      
+      
       
       <!-- End Session button Below the card on the bottom right -->
       <div class='endSession' id='endSession'>End session</div>       <!-- Added text -->
@@ -211,9 +239,17 @@
 
           if (userAnswer === correctAnswer) {
             console.log('correct');
+            //show Correct feedback text and colour
+            feedback.textContent = 'Correct';
+            feedback.classname = 'feedback correct';
           }
           else {
+            //Show incorrect feedback message
+            feedback.textContent = 'Incorrect';
+            feedback.classname = 'feedback incorrect';
+            
             console.log('Incorrect')
+            
           };
         
         }  

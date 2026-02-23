@@ -248,6 +248,8 @@
             feedback.className = 'feedback correct';
             //Add one to the correct count
             correctCount += 1
+            //Update Num correct
+            numCorrect.textContent = correctCount;
           }
           else {
             //Show incorrect feedback message
@@ -255,6 +257,9 @@
             feedback.className = 'feedback incorrect';
             //Add one to the incorrect count
             incorrectCount += 1 
+            //Update Num incorrect
+            
+            numIncorrect.textContent = incorrectCount;
   
 
             
@@ -306,9 +311,8 @@ let questions = [];
             await fetchQuestion()
             displayQuestion(1);
 
-            //Update Num correct and incorrect with the correct values
-            numCorrect.textContent = correctCount;
-            numIncorrect.textContent = incorrectCount;
+
+
             
             
           });

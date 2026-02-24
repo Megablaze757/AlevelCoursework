@@ -13,6 +13,9 @@
 
     <label for='Name'>Name</label><br>
     <input type='text' id='Name' name=name><br>
+    <label for='isTeacher'>Are you a Teacher</label> 
+    //CheckBox to see if the person signing up is a teacher
+    <input type="checkbox" class='isTeacher' id='isTeacher'> 
       
     <button type="button" id='btnSubmit'>Submit</button>
     
@@ -104,7 +107,7 @@ async function uploadCredentials() {
     const { data, error } = await supabaseClient
       .from('userinfo')
       .insert([
-        { username: usernameElement.value, name: nameElement.value, password_hash: hash(passwordElement.value) }
+        { username: usernameElement.value, name: nameElement.value, password_hash: hash(passwordElement.value), usertype }
       ]);
     
     if (error) {
@@ -120,6 +123,15 @@ async function uploadCredentials() {
     }
   }
 }
+    let usertype = ''
+    //Function to set the User type based on is the checkbox true
+    function getUserType(){
+     if document.getElementById('isTeacher').checked = true {
+       usertype = 'Teacher'
+    }
+      else{
+        userType = 'Student'
+      };
     
   </script>
   </body>

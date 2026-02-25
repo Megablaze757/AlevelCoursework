@@ -110,7 +110,7 @@ async function uploadCredentials() {
     const { data, error } = await supabaseClient
       .from('userinfo')
       .insert([
-        { username: usernameElement.value, name: nameElement.value, password_hash: hash(passwordElement.value), userType }
+        { username: usernameElement.value, name: nameElement.value, password_hash: hash(passwordElement.value), usertype: userType }
       ]);
     
     if (error) {

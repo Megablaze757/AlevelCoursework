@@ -129,8 +129,10 @@ async function uploadCredentials() {
     let usertype = ''
     //Function to set the User type based on is the checkbox true
     function getUserType(){
+      
       //variable storing the checked value of the checkbox
-      var isChecked = teacherCheckbox.checked();
+      var isChecked = teacherCheckbox.value();
+      console.log(isChecked)
      if ( isChecked = true) {
        usertype = 'Teacher'
     }

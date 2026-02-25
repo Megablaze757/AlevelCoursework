@@ -110,7 +110,7 @@ async function uploadCredentials() {
     const { data, error } = await supabaseClient
       .from('userinfo')
       .insert([
-        { username: usernameElement.value, name: nameElement.value, password_hash: hash(passwordElement.value), usertype }
+        { username: usernameElement.value, name: nameElement.value, password_hash: hash(passwordElement.value), userType }
       ]);
     
     if (error) {
@@ -131,9 +131,9 @@ async function uploadCredentials() {
     function getUserType(){
       
       //variable storing the checked value of the checkbox
-      var isChecked = teacherCheckbox.value();
+      var isChecked = teacherCheckbox.checked;
       console.log(isChecked)
-     if ( isChecked = true) {
+     if ( isChecked ==== true) {
        usertype = 'Teacher'
     }
       else{

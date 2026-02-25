@@ -102,6 +102,7 @@ async function checkValidation() {
   }
 }
 async function uploadCredentials() {
+  getUserType()
   // If the validation is true then upload the credential to the database
   if (await checkValidation() === true) {
     const { data, error } = await supabaseClient

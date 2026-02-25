@@ -13,9 +13,6 @@
 
     <label for='Name'>Name</label><br>
     <input type='text' id='Name' name=name><br>
-    <label for='isTeacher'>Are you a Teacher</label> 
-    //CheckBox to see if the person signing up is a teacher
-    <input type="checkbox" class='isTeacher' id='isTeacher'> 
       
     <button type="button" id='btnSubmit'>Submit</button>
     
@@ -32,8 +29,6 @@
       'sb_publishable_eOUJ3K3GNczOncszRwYhyA_A1QAw72F'
     );
 
-    //Teacher Checkbox
-    let teacherCheckbox =  document.getElementById('isTeacher')
     
     //fetch the data from the form
     let usernameElement = document.getElementById('Username');
@@ -52,7 +47,7 @@
  function hash(password) {
    let product = 1;
    //iterates through string
-   for(let i = 0; i < password.length; i++) {
+   for(let i = 0; i < password.length i++) {
      // mutiplies product by the code
      product *= password.charCodeAt(i);
    }
@@ -104,13 +99,12 @@ async function checkValidation() {
   }
 }
 async function uploadCredentials() {
-  getUserType()
   // If the validation is true then upload the credential to the database
   if (await checkValidation() === true) {
     const { data, error } = await supabaseClient
       .from('userinfo')
       .insert([
-        { username: usernameElement.value, name: nameElement.value, password_hash: hash(passwordElement.value), usertype }
+        { username: usernameElement.value, name: nameElement.value, password_hash: hash(passwordElement.value) }
       ]);
     
     if (error) {
@@ -126,18 +120,6 @@ async function uploadCredentials() {
     }
   }
 }
-    let usertype = ''
-    //Function to set the User type based on is the checkbox true
-    function getUserType(){
-      //variable storing the checked value of the checkbox
-      var isChecked = teacherCheckbox.checked();
-     if ( isChecked = true) {
-       usertype = 'Teacher'
-    }
-      else{
-        userType = 'Student'
-      };
-    }
     
   </script>
   </body>

@@ -32,6 +32,8 @@
       'sb_publishable_eOUJ3K3GNczOncszRwYhyA_A1QAw72F'
     );
 
+    //Teacher Checkbox
+    let teacherCheckbox =  document.getElementById('isTeacher')
     
     //fetch the data from the form
     let usernameElement = document.getElementById('Username');
@@ -127,7 +129,7 @@ async function uploadCredentials() {
     let usertype = ''
     //Function to set the User type based on is the checkbox true
     function getUserType(){
-     if document.getElementById('isTeacher').checked = true {
+     if (teacherCheckbox.checked() = true) {
        usertype = 'Teacher'
     }
       else{

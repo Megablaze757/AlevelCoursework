@@ -2,311 +2,146 @@
 <html>
   <head>
     <script src='https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2'></script>
-    <style>
-      .class-section {
-        margin: 15px 0;
-      }
-      .hidden {
-        display: none;
-      }
-      .class-input-container {
-        margin-top: 10px;
-      }
-    </style>
   </head>
   <body>
     <div class='signupForm'>
-      <label for='Username'>Username</label><br>
-      <input type='text' id='Username'><br>
-      
-      <label for='Password'>Password</label><br>
-      <input type='password' id='Password'><br>
+    <label for='Username'>Username</label><br>
+    <input type='text' id='Username' username=username><br>
+    
+    <label for='Password'>Password</label><br>
+    <input type='text' id='Password' password=password><br>
 
-      <label for='Name'>Name</label><br>
-      <input type='text' id='Name'><br>
+    <label for='Name'>Name</label><br>
+    <input type='text' id='Name' name=name><br>
+    <label for='isTeacher'>Are you a Teacher</label> 
+    //CheckBox to see if the person signing up is a teacher
+    <input type="checkbox" class='isTeacher' id='isTeacher'> 
       
-      <label for='isTeacher'>Are you a Teacher</label> 
-      <input type="checkbox" class='isTeacher' id='isTeacher'><br><br>
-      
-      <!-- Class Selection Section -->
-      <div class='class-section'>
-        <label for='classSelect'>Select Class:</label><br>
-        <select id='classSelect'>
-          <option value=''>Loading classes...</option>
-        </select>
-        
-        <!-- New Class Input (hidden by default, shown for teachers or when "Other" is selected) -->
-        <div id='newClassContainer' class='class-input-container hidden'>
-          <label for='newClass'>Or enter new class name:</label><br>
-          <input type='text' id='newClass' placeholder='Enter class name'>
-          <button type='button' id='addClassBtn'>Add New Class</button>
-        </div>
-        
-        <!-- Alternative option in dropdown -->
-        <div id='otherOptionContainer'></div>
-      </div>
-      
-      <button type="button" id='btnSubmit'>Submit</button>
-      
-      <div class='statusMessage' id='statusMessage'></div>
+    <button type="button" id='btnSubmit'>Submit</button>
+    
+    <div class='statusMessage' id='statusMessage'></div>
     </div>
-
   <script>
-    // Supabase configuration
+    //The supabase url
+    const supabase_url = 'https://pxjndwrkafegopsolnde.supabase.co'
+    //Supabase key
+    const supabase_key = 'sb_publishable_eOUJ3K3GNczOncszRwYhyA_A1QAw72F'
+    //Initialize supabase client
     const supabaseClient = supabase.createClient(
       'https://pxjndwrkafegopsolnde.supabase.co',
       'sb_publishable_eOUJ3K3GNczOncszRwYhyA_A1QAw72F'
     );
 
-    // DOM Elements
-    let teacherCheckbox = document.getElementById('isTeacher');
+    //Teacher Checkbox
+    let teacherCheckbox =  document.getElementById('isTeacher')
+    
+    //fetch the data from the form
     let usernameElement = document.getElementById('Username');
     let passwordElement = document.getElementById('Password');
-    let nameElement = document.getElementById('Name');
-    let statusElement = document.getElementById('statusMessage');
-    let classSelect = document.getElementById('classSelect');
-    let newClassContainer = document.getElementById('newClassContainer');
-    let newClassInput = document.getElementById('newClass');
-    let addClassBtn = document.getElementById('addClassBtn');
+    let nameElement = document.getElementById('Name')
+
+    //get the status element
+    let statusElement = document.getElementById('statusMessage')
+
+    //Update the status message
+    function updateStatus(message) {
+    statusElement.textContent = message;
     
-    let userType = 'Student';
-
-    // Load classes from Supabase on page load
-    async function loadClasses() {
-      try {
-        const { data: classes, error } = await supabaseClient
-          .from('classes')
-          .select('class_name')
-          .order('class_name');
-
-        if (error) throw error;
-
-        // Clear existing options
-        classSelect.innerHTML = '<option value="">Select a class</option>';
-        
-        // Add classes to dropdown
-        classes.forEach(cls => {
-          let option = document.createElement('option');
-          option.value = cls.class_name;
-          option.textContent = cls.class_name;
-          classSelect.appendChild(option);
-        });
-
-        // Add "Other" option for new classes
-        let otherOption = document.createElement('option');
-        otherOption.value = 'other';
-        otherOption.textContent = '-- Add New Class --';
-        classSelect.appendChild(otherOption);
-
-      } catch (error) {
-        console.error('Error loading classes:', error);
-        classSelect.innerHTML = '<option value="">Error loading classes</option>';
-      }
     }
+    //This is the function to hash the password of the user
+ function hash(password) {
+   let product = 1;
+   //iterates through string
+   for(let i = 0; i < password.length; i++) {
+     // mutiplies product by the code
+     product *= password.charCodeAt(i);
+   }
+   return product
+ }
 
-    // Update class input visibility based on selection and user type
-    function updateClassInputVisibility() {
-      let selectedValue = classSelect.value;
-      let isTeacher = teacherCheckbox.checked;
-      
-      // Show new class input if:
-      // 1. User selects "other" OR
-      // 2. User is a teacher and no classes exist OR
-      // 3. User is a teacher and wants to add a new class
-      if (selectedValue === 'other' || (isTeacher && selectedValue === '')) {
-        newClassContainer.classList.remove('hidden');
-      } else {
-        newClassContainer.classList.add('hidden');
-        newClassInput.value = ''; // Clear input when hidden
-      }
-    }
 
-    // Add new class to database (only teachers can do this)
-    async function addNewClass() {
-      let className = newClassInput.value.trim();
-      
-      if (!className) {
-        updateStatus('Please enter a class name');
-        return;
-      }
+    document.addEventListener('DOMContentLoaded', function () {
+      //Get the element of the submit button   
+      let button = document.getElementById('btnSubmit');
+      // Add event listener to the button
+      button.addEventListener('click', function () {
 
-      if (!teacherCheckbox.checked) {
-        updateStatus('Only teachers can add new classes');
-        return;
-      }
 
-      try {
-        // Check if class already exists
-        const { data: existingClass, error: checkError } = await supabaseClient
-          .from('classes')
-          .select('class_name')
-          .eq('class_name', className)
-          .single();
+        uploadCredentials()
+      });
 
-        if (existingClass) {
-          updateStatus('This class already exists');
-          return;
-        }
 
-        // Add new class
-        const { data, error } = await supabaseClient
-          .from('classes')
-          .insert([{ class_name: className }]);
-
-        if (error) throw error;
-
-        // Reload classes and select the new one
-        await loadClasses();
-        classSelect.value = className;
-        newClassContainer.classList.add('hidden');
-        newClassInput.value = '';
-        updateStatus('New class added successfully!', true);
-
-      } catch (error) {
-        console.error('Error adding class:', error);
-        updateStatus('Failed to add class: ' + error.message);
-      }
-    }
-
-    // Update status message
-    function updateStatus(message, isSuccess = false) {
-      statusElement.textContent = message;
-      statusElement.style.color = isSuccess ? 'green' : 'red';
-    }
-
-    // Hash password function
-    function hash(password) {
-      let product = 1;
-      for(let i = 0; i < password.length; i++) {
-        product *= password.charCodeAt(i);
-      }
-      return product;
-    }
-
-    // Validation function
-    async function checkValidation() {
-      const { data, error } = await supabaseClient
-        .from('userinfo')
-        .select('username')
-        .eq('username', usernameElement.value);
-      
-      if ((error || !data || data.length === 0) && (usernameElement.value.length > 0)) {
-        if (passwordElement.value.length > 8 && !passwordElement.value.includes(' ')) {
-          if (nameElement.value.length > 2 && nameElement.value.length < 50 && /^[a-zA-Z]+$/.test(nameElement.value)) {
-            
-            // Validate class selection
-            let selectedClass = classSelect.value;
-            if (!selectedClass || selectedClass === '') {
-              updateStatus('Please select a class');
-              return false;
-            }
-            
-            // If "other" is selected, check if a new class name was entered
-            if (selectedClass === 'other') {
-              if (!newClassInput.value.trim()) {
-                updateStatus('Please enter a new class name or select an existing class');
-                return false;
-              }
-              if (!teacherCheckbox.checked) {
-                updateStatus('Only teachers can create new classes');
-                return false;
-              }
-            }
-            
-            return true;
-          } else {
-            updateStatus('Name must be 3-49 letters only');
-            return false;
-          }
-        } else {
-          updateStatus('Password must be >8 characters and contain no spaces');
-          return false;
-        }
-      } else {
-        updateStatus('Username taken or invalid');
+    });
+async function checkValidation() {
+  // check if all credentials meet validation requirements
+  const { data, error } = await supabaseClient
+    .from('userinfo')
+    .select('username')
+    .eq('username', usernameElement.value);
+  
+  // Checks to make sure that no username exists in the database and that username length > 0
+  if ((error || !data || data.length === 0) && (usernameElement.value.length > 0)) {
+    // Checks if spaces to prevent malicious sql injection
+    if (passwordElement.value.length > 8 && !passwordElement.value.includes(' ')) {
+      // Makes sure they send a valid name
+      if (nameElement.value.length > 2 && nameElement.value.length < 50 && /^[a-zA-Z]+$/.test(nameElement.value)) {
+        // If meets all validation criteria check validation is true
+        return true;  // RETURN true instead of assigning to function name
+      } 
+      else {
+        updateStatus('Name Invalid');
         return false;
       }
+    } 
+    else {
+      updateStatus('Password Invalid');
+      return false;
     }
-
-    // Upload credentials function
-    async function uploadCredentials() {
-      getUserType();
-      
-      if (await checkValidation() === true) {
-        // Determine the final class name
-        let className = classSelect.value;
-        if (className === 'other') {
-          className = newClassInput.value.trim();
-          
-          // Add the new class to database if teacher
-          if (teacherCheckbox.checked) {
-            await addNewClass();
-          }
-        }
-
-        const { data, error } = await supabaseClient
-          .from('userinfo')
-          .insert([
-            { 
-              username: usernameElement.value, 
-              name: nameElement.value, 
-              password_hash: hash(passwordElement.value), 
-              user_type: userType,
-              class_name: className
-            }
-          ]);
+  } 
+  else {
+    updateStatus('Username invalid');
+    return false;
+  }
+}
+async function uploadCredentials() {
+  getUserType()
+  // If the validation is true then upload the credential to the database
+  if (await checkValidation() === true) {
+    const { data, error } = await supabaseClient
+      .from('userinfo')
+      .insert([
+        { username: usernameElement.value, name: nameElement.value, password_hash: hash(passwordElement.value), user_type: userType }
         
-        if (error) {
-          console.error('Upload error:', error);
-          updateStatus('Registration failed: ' + error.message);
-        } else {
-          console.log('Upload successful:', data);
-          updateStatus('Registration successful!', true);
-          setTimeout(() => {
-            window.location.href = 'index.html';
-          }, 1500);
-        }
-      }
+      ]);
+    
+    if (error) {
+      console.error('Upload error:', error);
+      updateStatus('Registration failed: ' + error.message, false);
+    } else {
+      console.log('Upload successful:', data);
+      updateStatus('Registration successful!', true);
+      setTimeout(() => {
+            window.location.href = 'index.html'
+        //added a delay to allow the user to have time to see the message before redirecting.    
+        },1500)
     }
-
-    // Get user type
-    function getUserType() {
-      userType = teacherCheckbox.checked ? 'Teacher' : 'Student';
+  }
+}
+    let usertype = ''
+    //Function to set the User type based on is the checkbox true
+    function getUserType(){
+      
+      //variable storing the checked value of the checkbox
+      var isChecked = teacherCheckbox.checked;
+      console.log(isChecked)
+     if ( isChecked) {
+       userType = 'Teacher'
     }
-
-    // Event Listeners
-    document.addEventListener('DOMContentLoaded', function () {
-      // Load classes on page load
-      loadClasses();
-      
-      // Submit button
-      document.getElementById('btnSubmit').addEventListener('click', uploadCredentials);
-      
-      // Class select change
-      classSelect.addEventListener('change', updateClassInputVisibility);
-      
-      // Teacher checkbox change
-      teacherCheckbox.addEventListener('change', function() {
-        updateClassInputVisibility();
-        // If teacher unchecks while new class input is showing, hide it
-        if (!this.checked && newClassInput.value) {
-          newClassContainer.classList.add('hidden');
-          classSelect.value = '';
-        }
-      });
-      
-      // Add class button
-      addClassBtn.addEventListener('click', addNewClass);
-      
-      // Allow Enter key in new class input
-      newClassInput.addEventListener('keypress', function(e) {
-        if (e.key === 'Enter') {
-          e.preventDefault();
-          addNewClass();
-        }
-      });
-    });
-
+      else{
+        userType = 'Student'
+      };
+    }
+    
   </script>
   </body>
 </html>

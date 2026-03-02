@@ -15,7 +15,25 @@
     <input type='text' id='Name' name=name><br>
     <label for='isTeacher'>Are you a Teacher</label> 
     //CheckBox to see if the person signing up is a teacher
-    <input type="checkbox" class='isTeacher' id='isTeacher'> 
+    <input type="checkbox" class='isTeacher' id='isTeacher'>
+      
+      
+      <!-- School Selection -->
+      <div class='schoolSection'>
+        <label for='schoolSelect'>Select School</label><br>
+
+        <!-- Dropdown for schools -->
+        <select id="schoolSelect">
+          <option value="">Loading schools...</option>
+        </select>
+
+        <!-- Container for adding a new school hidden by default -->
+         <div id='newSchoolContainer' style='display:none;'>
+            <label for'newSchool'>Add a new school</label>
+            <input type="text" id="newSchool" placeholder="Enter school name">
+            <button type="button" id="addSchoolBtn">Add School</button>
+          </div>
+      </div>
       
     <button type="button" id='btnSubmit'>Submit</button>
     

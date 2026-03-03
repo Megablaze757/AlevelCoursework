@@ -149,6 +149,33 @@
         newSchoolContainer.style.display = 'none';
       };
     }
+    //Function to add a new school
+    async function addNewSchool() {
+      let newSchoolName = newSchoolInput.value.trim()
+
+      //Check if school is already in the database
+      const {data,error} = await supabaseClient
+        .from('schools')
+        .select('school')
+        .eq('schoolName')
+      // If theres an error then the school is not found so upload the new school.
+      if(error) {
+        const {data,error} = await supabaseClient
+          .from('schools')
+          .insert([{school: newSchoolName}])
+
+        //reload the table and select the new school
+        await loadSchools();
+        schoolSelect.value = data[0].school;
+        selectedSchool = data[0].school;
+        newSchoolContainer.style.display = 'none';
+        updateStatus('School added successfully');
+      }
+      else{
+        updateStatus('School Exists');
+      };
+      
+    }
 
 
 
@@ -180,6 +207,8 @@
       //load Schools
       loadSchools()
       schoolSelect.addEventListener('change', toggleAddSchool);
+
+      addSchoolBtn.addEventListener('click', addNewSchool);
       
       
       //Get the element of the submit button   

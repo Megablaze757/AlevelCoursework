@@ -126,8 +126,14 @@
         schoolSelect.appendChild(option);
         
         
+        
       });
-      
+
+    //Add other option to the dropdown
+    let otherOption = document.CreateElement('option');
+    otherOption.value = 'other';
+    otherOption.textContent = 'Add another School';
+    schoolSelect.appendChild(otherOption);
     }
 
 

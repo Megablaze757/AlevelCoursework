@@ -33,6 +33,50 @@
       padding: 6px 12px;
 
     }
+    /* Class section styling */
+.class-section {
+    margin: 20px 0;
+    padding: 15px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    background-color: #fafafa;
+}
+
+/* Style for class dropdown */
+#classSelect {
+    width: 250px;
+    padding: 8px;
+    margin: 5px 0;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+}
+
+/* Style for disabled dropdown */
+#classSelect:disabled {
+    background-color: #f5f5f5;
+    cursor: not-allowed;
+
+}
+
+/* Style for new class input area */
+#newClassContainer {
+    margin-top: 10px;
+    padding: 10px;
+
+}
+
+#newClass {
+    width: 200px;
+    padding: 6px;
+
+}
+
+#addClassBtn {
+    padding: 6px 12px;
+
+}
+
+
 
     
     
@@ -70,6 +114,27 @@
             <button type="button" id="addSchoolBtn">Add School</button>
           </div>
       </div>
+      
+      <!-- Class section -->
+      <div class='classSection' id='classSection' style='display: none;'>
+        <label for='classSelect'> Select class></label><br>
+
+        <!-- Class dropdown -->
+        <select id='classSelect' disabled>
+          <option value=''> Select school first</option>
+        </select>
+
+        <!-- container for adding a new class -->
+        <div id='newClassContainer' style='display: none;'>
+          <label for='newSchool'>Add a new Class</label><br>
+          <input type='text' id='newClass' placeholder='Enter class name'>
+          <button type='button' id='addClassBtn> Add Class </button>
+            
+          
+        </div>
+        
+      </div>
+        
       
     <button type="button" id='btnSubmit'>Submit</button>
     

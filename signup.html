@@ -108,7 +108,8 @@
     
     async function loadSchools() {
         //Fetch the data from the schools table
-        const {data: error} = await supabaseClient
+        const {data, error} = await supabaseClient
+          
           .from('schools')
           .select('school')
           .order('school');

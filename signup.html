@@ -157,7 +157,7 @@
       const {data,error} = await supabaseClient
         .from('schools')
         .select('school')
-        .eq('schoolName')
+        .eq('school', newSchoolName)
       // If theres an error then the school is not found so upload the new school.
       if(error) {
         const {data,error} = await supabaseClient

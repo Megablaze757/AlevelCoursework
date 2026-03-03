@@ -65,7 +65,7 @@
 
         <!-- Container for adding a new school hidden by default -->
          <div id='newSchoolContainer' style='display:none;'>
-            <label for'newSchool'>Add a new school</label>
+            <label for='newSchool'>Add a new school</label>
             <input type="text" id="newSchool" placeholder="Enter school name">
             <button type="button" id="addSchoolBtn">Add School</button>
           </div>
@@ -173,7 +173,9 @@
    return product
  }
 
+    schoolSelect.addEventListener('change', toggleAddSchool());
 
+    
     document.addEventListener('DOMContentLoaded', function () {
       //load Schools
       loadSchools()

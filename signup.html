@@ -115,6 +115,18 @@
           .order('school');
 
         console.log(data)
+      //Get rid of loading message
+      schoolSelect.innerHtml '<option value=''> Select a School</option>';
+
+      //Add each school to the dropdown
+      data.forEach(school => {
+        let option = document.createElement('option')
+        option.value = data.school;
+        option.textContent = data.school;
+        schoolSelect.appendChild(option);
+        
+        
+      });
       
     }
 

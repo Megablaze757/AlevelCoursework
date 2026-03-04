@@ -332,7 +332,7 @@ function toggleNewClassInput() {
         .from('classes')
         .select('class_name')
         .eq('class_name', className)
-        .eq('school', selectedSchoolId)
+        .eq('school', schoolSelect.value)
       //if not found then add to the database
       if (error) {
         //Add new class 

@@ -339,7 +339,7 @@ function toggleNewClassInput() {
         const {data,error} = await supabaseClient
           .from('classes')
           .insert([{
-            class_code: hash(className + schoolName),
+            class_code: hash(className + school),
             class_name: className,
             school: selectedSchool.value
           }]);

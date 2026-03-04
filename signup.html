@@ -334,8 +334,12 @@ async function addNewClass() {
       .eq('school', schoolSelect.value)
     
     //if not found then add to the database
-    if (error) {
-      //Add new class 
+    if (data && data.length > 0) {
+        // Class already exists
+        updateStatus('Class already exists');) {
+     
+    } else {
+       //Add new class 
       const {data, error} = await supabaseClient
         .from('classes')
         .insert([{
@@ -344,8 +348,6 @@ async function addNewClass() {
           school: schoolSelect.value
         }]);
       updateStatus('class added successfully');
-    } else {
-      updateStatus('class not added');
     }
     
     //Reload the table

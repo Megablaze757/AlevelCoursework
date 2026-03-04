@@ -70,7 +70,7 @@
       const { data, error } = await supabaseClient
         //Sql query to fetch username
         .from('userinfo')
-        .select('username, password_hash')
+        .select('*')
         .eq('username', usernameElement.value)
 
 
@@ -95,12 +95,17 @@
           updateStatus('Login Succesful')
           //Store users information in sessions storage
           sessionStorage.setItem('currentUser',data[0].username);
-          
-          //Make page redirect to the main page after login is successful
+          if(data[0].usertype === 'Teacher') {
+          setTimeout(() => {
+            window.location.href = 'teacher.html'
+        //added a delay to allow the user to have time to see the message before redirecting.    
+        },1500)
+          else{//Make page redirect to the main page after login is successful
           setTimeout(() => {
             window.location.href = 'main.html'
         //added a delay to allow the user to have time to see the message before redirecting.    
         },1500)
+        }
         }
         else {
           updateStatus('Password Incorrect')

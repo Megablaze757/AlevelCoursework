@@ -334,7 +334,7 @@ async function addNewClass() {
       .eq('school', schoolSelect.value)
     
     //if not found then add to the database
-    if (error) {
+    if (data && data.length === 0) {
       //Add new class 
       let classCode = 0;
       let combinedString = className + schoolSelect.value;

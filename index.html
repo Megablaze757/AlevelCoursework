@@ -92,16 +92,17 @@
 
         
         console.log(hashedPassword)
-        if (data[0].password_hash === hashedPassword) {
+if (data[0].password_hash === hashedPassword) {
           updateStatus('Login Succesful')
           //Store users information in sessions storage
           sessionStorage.setItem('currentUser',data[0].username);
+          //Check if teacher
           if(data[0].usertype === 'Teacher') {
           setTimeout(() => {
             window.location.href = 'teacher.html'
         //added a delay to allow the user to have time to see the message before redirecting.    
         },1500)
-          else{//Make page redirect to the main page after login is successful
+          } else {//Make page redirect to the main page after login is successful
           setTimeout(() => {
             window.location.href = 'main.html'
         //added a delay to allow the user to have time to see the message before redirecting.    

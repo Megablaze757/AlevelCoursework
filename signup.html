@@ -334,7 +334,7 @@ function toggleNewClassInput() {
         .eq('class_name', className)
         .eq('school_id', selectedSchoolId)
       //if not found then add to the database
-      if ({error}) {
+      if (error) {
         //Add new class 
         const {data,error} = await supabaseClient
           .from('classes')
@@ -365,6 +365,7 @@ function toggleNewClassInput() {
       });
 
       addSchoolBtn.addEventListener('click', addNewSchool);
+      addClassBtn.addEventListener('click', addNewClass);
       
       
       //Get the element of the submit button   

@@ -198,7 +198,7 @@
         schoolSelect.appendChild(option);
         
         
-      loadClasses(schoolSelect.value)
+      
       });
 
     //Add other option to the dropdown
@@ -289,7 +289,11 @@
     document.addEventListener('DOMContentLoaded', function () {
       //load Schools
       loadSchools()
-      schoolSelect.addEventListener('change', toggleAddSchool);
+
+      schoolSelect.addEventListener('change', function() {
+        toggleAddSchool();
+        loadClasses(schoolSelect.value);
+      });
   
 
       addSchoolBtn.addEventListener('click', addNewSchool);

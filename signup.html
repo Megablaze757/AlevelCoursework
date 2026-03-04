@@ -253,9 +253,11 @@
       //if no school selected, hide class section
       if(!school) {
         classSection.style.display = 'none';
+        classSelect.disabled = true;
       }
       //Show classes section
       classSection.style.display = 'block';
+      classSelect.disabled = false;
       
     }
 
@@ -288,7 +290,7 @@
       //load Schools
       loadSchools()
       schoolSelect.addEventListener('change', toggleAddSchool);
-      loadClasses(selectedSchool)
+      loadClasses(schoolSelect.value)
 
       addSchoolBtn.addEventListener('click', addNewSchool);
       

@@ -258,6 +258,23 @@
       else {//Show classes section
       classSection.style.display = 'block';
       classSelect.disabled = false;
+
+      //Load classes from supabase
+      const{data: classes, error} = await supabaseClient
+        .from('classes')
+        .select('class_name')
+        .eq('school',school)
+        .order('class_name');
+
+        classSelect.inner.HTML = '<option value="">Select a class</option>';
+        
+        //Add classes to the dropdown
+        classes.forEach(cls => {
+          let option = document.createElement('option');
+          option.value = cls.class_name;
+          option.textContent = cls.class_name;
+          classSelect.appendChild(option);
+        }
       };
     }
 

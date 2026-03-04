@@ -334,20 +334,24 @@ async function addNewClass() {
       .eq('school', schoolSelect.value)
     
     //if not found then add to the database
-    if (data && data.length > 0) {
-        // Class already exists
-        updateStatus('Class already exists'); 
-     
-    } else {
-       //Add new class 
+    if (error) {
+      //Add new class 
+      let classCode = 0;
+      let combinedString = className + schoolSelect.value;
+      for (let i = 0; i < combinedString.length; i++) {
+        classCode += combinedString.charCodeAt(i);
+      }
+      
       const {data, error} = await supabaseClient
         .from('classes')
         .insert([{
-          class_code: hash(className + schoolSelect.value),
+          class_code: classCode,
           class_name: className,
           school: schoolSelect.value
         }]);
       updateStatus('class added successfully');
+    } else {
+      updateStatus('class not added');
     }
     
     //Reload the table

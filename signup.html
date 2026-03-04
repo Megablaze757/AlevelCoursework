@@ -266,7 +266,7 @@
         .eq('school',school)
         .order('class_name');
 
-        classSelect.inner.HTML = '<option value="">Select a class</option>';
+        classSelect.innerHTML = '<option value="">Select a class</option>';
         
         //Add classes to the dropdown
         classes.forEach(cls => {
@@ -274,8 +274,8 @@
           option.value = cls.class_name;
           option.textContent = cls.class_name;
           classSelect.appendChild(option);
-        }
-      };
+        });
+      }
     }
 
 

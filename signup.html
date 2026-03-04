@@ -391,35 +391,47 @@ async function addNewClass() {
 
     });
 async function checkValidation() {
-  // check if all credentials meet validation requirements
-  const { data, error } = await supabaseClient
-    .from('userinfo')
-    .select('username')
-    .eq('username', usernameElement.value);
-  
-  // Checks to make sure that no username exists in the database and that username length > 0
-  if ((error || !data || data.length === 0) && (usernameElement.value.length > 0)) {
-    // Checks if spaces to prevent malicious sql injection
-    if (passwordElement.value.length > 8 && !passwordElement.value.includes(' ')) {
-      // Makes sure they send a valid name
-      if (nameElement.value.length > 2 && nameElement.value.length < 50 && /^[a-zA-Z]+$/.test(nameElement.value)) {
-        // If meets all validation criteria check validation is true
-        return true;  // RETURN true instead of assigning to function name
-      } 
-      else {
-        updateStatus('Name Invalid');
+   
+let selectedClass = classSelect.value;
+let selectedSchool = schoolSelect.value;
+
+// check if all credentials meet validation requirements
+const { data, error } = await supabaseClient
+  .from('userinfo')
+  .select('username')
+  .eq('username', usernameElement.value);
+
+// Checks to make sure that no username exists in the database and that username length > 0
+if ((error || !data || data.length === 0) && (usernameElement.value.length > 0)) {
+  // Checks if spaces to prevent malicious sql injection
+  if (passwordElement.value.length > 8 && !passwordElement.value.includes(' ')) {
+    // Makes sure they send a valid name
+    if (nameElement.value.length > 2 && nameElement.value.length < 50 && /^[a-zA-Z]+$/.test(nameElement.value)) {
+      // check if school is valid
+      if (selectedSchool && selectedSchool !== '' && !(selectedSchool === 'other' )) {
+        // Check if the class is valid
+        if (selectedClass && selectedClass !== '' && selectedClass !== 'none' && !(selectedClass === 'other'  )) {
+          // If meets all validation criteria check validation is true
+          return true;
+        } else {
+          updateStatus('Class invalid');
+          return false;
+        }
+      } else {
+        updateStatus('School invalid');
         return false;
       }
-    } 
-    else {
-      updateStatus('Password Invalid');
+    } else {
+      updateStatus('Name invalid');
       return false;
     }
-  } 
-  else {
-    updateStatus('Username invalid');
+  } else {
+    updateStatus('Password invalid');
     return false;
   }
+} else {
+  updateStatus('Username invalid');
+  return false;
 }
 async function uploadCredentials() {
   getUserType()
@@ -428,7 +440,7 @@ async function uploadCredentials() {
     const { data, error } = await supabaseClient
       .from('userinfo')
       .insert([
-        { username: usernameElement.value, name: nameElement.value, password_hash: hash(passwordElement.value), user_type: userType }
+        { username: usernameElement.value, name: nameElement.value, password_hash: hash(passwordElement.value), user_type: userType, class: classSelect.value, school: schoolSelect.value }
         
       ]);
     

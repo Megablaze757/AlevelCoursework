@@ -276,9 +276,26 @@
           classSelect.appendChild(option);
         });
       }
+
+    //Other option for adding new classes
+    let otherOption = document.createElement('option');
+    otherOption.value = 'other';
+    otherOption.textContent = 'Add new Class';
+    classSelect.appendChild('otherOption');
+      
     }
 
-
+function toggleNewClassInput() {
+  let selectedValue = classSelect.value;
+  // If the value is other then show the new class bit
+  if (selectedValue === 'other') {
+    newClassContainer.style.display = 'block';
+    
+  }
+  else {
+    newClassContainer.style.display = 'none';
+  }
+}
 
 
 
@@ -311,7 +328,10 @@
         toggleAddSchool();
         loadClasses(schoolSelect.value);
       });
-  
+      classSelect.addEventListener('change', function() {
+        toggleNewClassInput();
+   
+      });
 
       addSchoolBtn.addEventListener('click', addNewSchool);
       

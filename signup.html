@@ -343,6 +343,11 @@ function toggleNewClassInput() {
             class_name: className,
             school: schoolSelect.value
           }]);
+      }
+        updateStatus('class added successfully')
+     else{
+        updateStatus('class not added')
+        };
         //Reload the table
         await loadClasses(selectedSchool.value);
       

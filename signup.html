@@ -328,7 +328,7 @@ function toggleNewClassInput() {
     }
     else{
       //Check if the class exists in this school
-      const {data: error} = await supabaseClient
+      const {data, error} = await supabaseClient
         .from('classes')
         .select('class_name')
         .eq('class_name', className)

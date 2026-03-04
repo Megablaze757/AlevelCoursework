@@ -75,10 +75,6 @@
     padding: 6px 12px;
 
 }
-
-
-
-    
     
   </style>
   </head>
@@ -86,17 +82,15 @@
   <body>
     <div class='signupForm'>
     <label for='Username'>Username</label><br>
-    <input type='text' id='Username' username=username><br>
+    <input type='text' id='Username'><br>
     
     <label for='Password'>Password</label><br>
-    <input type='text' id='Password' password=password><br>
+    <input type='password' id='Password'><br>
 
     <label for='Name'>Name</label><br>
-    <input type='text' id='Name' name=name><br>
+    <input type='text' id='Name'><br>
     <label for='isTeacher'>Are you a Teacher</label> 
-    //CheckBox to see if the person signing up is a teacher
     <input type="checkbox" class='isTeacher' id='isTeacher'>
-      
       
       <!-- School Selection -->
       <div class='schoolSection'>
@@ -117,20 +111,18 @@
       
       <!-- Class section -->
       <div class='classSection' id='classSection' style='display: none;'>
-        <label for='classSelect'> Select class></label><br>
+        <label for='classSelect'>Select class</label><br>
 
         <!-- Class dropdown -->
         <select id='classSelect' disabled>
-          <option value=''> Select school first</option>
+          <option value=''>Select school first</option>
         </select>
 
         <!-- container for adding a new class -->
         <div id='newClassContainer' style='display: none;'>
-          <label for='newSchool'>Add a new Class</label><br>
+          <label for='newClass'>Add a new Class</label><br>
           <input type='text' id='newClass' placeholder='Enter class name'>
-          <button type='button' id='addClassBtn'> Add Class </button>
-            
-          
+          <button type='button' id='addClassBtn'>Add Class</button>     
         </div>
         
       </div>
@@ -141,34 +133,23 @@
     <div class='statusMessage' id='statusMessage'></div>
     </div>
   <script>
-    //The supabase url
+    //The supabase url and key
     const supabase_url = 'https://pxjndwrkafegopsolnde.supabase.co'
-    //Supabase key
-    const supabase_key = 'sb_publishable_eOUJ3K3GNczOncszRwYhyA_A1QAw72F'
-    //Initialize supabase client
-    const supabaseClient = supabase.createClient(
-      'https://pxjndwrkafegopsolnde.supabase.co',
-      'sb_publishable_eOUJ3K3GNczOncszRwYhyA_A1QAw72F'
-    );
-
-    //Teacher Checkbox
-    let teacherCheckbox =  document.getElementById('isTeacher')
+    const supabase_key = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InB4am5kd3JrYWZlZ29wc29sbmRlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MDk4NTYwMDAsImV4cCI6MjAyNTQzMjAwMH0.YOUR_ACTUAL_ANON_KEY' // You need to use the anon key, not the publishable key
     
-    //fetch the data from the form
+    //Initialize supabase client
+    const supabaseClient = supabase.createClient(supabase_url, supabase_key);
+
+    // Get DOM elements
+    let teacherCheckbox = document.getElementById('isTeacher')
     let usernameElement = document.getElementById('Username');
     let passwordElement = document.getElementById('Password');
     let nameElement = document.getElementById('Name')
-
-    //get the status element
     let statusElement = document.getElementById('statusMessage')
-
-    //Get The School selection elements
     let schoolSelect = document.getElementById('schoolSelect');
     let newSchoolContainer = document.getElementById('newSchoolContainer');
     let newSchoolInput = document.getElementById('newSchool');
     let addSchoolBtn = document.getElementById('addSchoolBtn');
-    
-    //Add class section elements
     let classSection = document.getElementById('classSection');
     let classSelect = document.getElementById('classSelect');
     let newClassContainer = document.getElementById('newClassContainer');
@@ -176,203 +157,316 @@
     let addClassBtn = document.getElementById('addClassBtn');
 
     //Variable to store the selected school
-    let selectedSchoolId = null;
+    let selectedSchool = null;
+    let userType = '';
     
     async function loadSchools() {
-        //Fetch the data from the schools table
-        const {data, error} = await supabaseClient
-          
-          .from('schools')
-          .select('school')
-          .order('school');
+        try {
+            //Fetch the data from the schools table
+            const { data, error } = await supabaseClient
+                .from('schools')
+                .select('school')
+                .order('school');
 
-        console.log(data)
-      //Get rid of loading message
-      schoolSelect.innerHTML = '<option value=""> Select a School</option>';
+            if (error) throw error;
 
-      //Add each school to the dropdown
-      data.forEach(school => {
-        let option = document.createElement('option')
-        option.value = school.school;
-        option.textContent = school.school;
-        schoolSelect.appendChild(option);
-        
-        
-        
-      });
+            console.log(data);
+            
+            //Clear loading message
+            schoolSelect.innerHTML = '<option value="">Select a School</option>';
 
-    //Add other option to the dropdown
-    let otherOption = document.createElement('option');
-    otherOption.value = 'other';
-    otherOption.textContent = 'Add another School';
-    schoolSelect.appendChild(otherOption);
+            //Add each school to the dropdown
+            data.forEach(school => {
+                let option = document.createElement('option');
+                option.value = school.school;
+                option.textContent = school.school;
+                schoolSelect.appendChild(option);
+            });
+
+            //Add other option to the dropdown
+            let otherOption = document.createElement('option');
+            otherOption.value = 'other';
+            otherOption.textContent = 'Add another School';
+            schoolSelect.appendChild(otherOption);
+        } catch (error) {
+            console.error('Error loading schools:', error);
+            updateStatus('Error loading schools');
+        }
     }
 
     //Show or hide the new school option
     function toggleAddSchool() {
-      let selectedValue = schoolSelect.value;
-
-      // IF other is selected then 
-      if (selectedValue === 'other') {
-        newSchoolContainer.style.display = 'block';
-    
-      }
-      else {
-        newSchoolContainer.style.display = 'none';
-      };
+        let selectedValue = schoolSelect.value;
+        if (selectedValue === 'other') {
+            newSchoolContainer.style.display = 'block';
+        } else {
+            newSchoolContainer.style.display = 'none';
+            if (selectedValue) {
+                selectedSchool = selectedValue;
+                loadClasses(selectedSchool);
+            }
+        }
     }
+    
     //Function to add a new school
     async function addNewSchool() {
-      let newSchoolName = newSchoolInput.value.trim()
+        let newSchoolName = newSchoolInput.value.trim();
+        
+        if (!newSchoolName) {
+            updateStatus('Please enter a school name');
+            return;
+        }
 
-      //Check if school is already in the database
-      const {data,error} = await supabaseClient
-        .from('schools')
-        .select('school')
-        .eq('school', newSchoolName)
-      // If theres an error then the school is not found so upload the new school.
-      if(error) {
-        const {data,error} = await supabaseClient
-          .from('schools')
-          .insert([{school: newSchoolName}])
+        try {
+            //Check if school is already in the database
+            const { data: existingData, error: checkError } = await supabaseClient
+                .from('schools')
+                .select('school')
+                .eq('school', newSchoolName);
 
-        //reload the table and select the new school
-        await loadSchools();
-        schoolSelect.value = data[0].school;
-        selectedSchool = data[0].school;
-        newSchoolContainer.style.display = 'none';
-        updateStatus('School added successfully');
-      }
-      else{
-        updateStatus('School Exists');
-      };
-      
+            if (checkError) throw checkError;
+
+            if (existingData && existingData.length > 0) {
+                updateStatus('School already exists');
+                schoolSelect.value = existingData[0].school;
+                selectedSchool = existingData[0].school;
+                newSchoolContainer.style.display = 'none';
+                loadClasses(selectedSchool);
+            } else {
+                // Add new school
+                const { data, error } = await supabaseClient
+                    .from('schools')
+                    .insert([{ school: newSchoolName }])
+                    .select();
+
+                if (error) throw error;
+
+                //reload the table and select the new school
+                await loadSchools();
+                schoolSelect.value = newSchoolName;
+                selectedSchool = newSchoolName;
+                newSchoolContainer.style.display = 'none';
+                newSchoolInput.value = '';
+                updateStatus('School added successfully');
+                loadClasses(selectedSchool);
+            }
+        } catch (error) {
+            console.error('Error adding school:', error);
+            updateStatus('Error adding school');
+        }
     }
+    
     //Load Classes for a specific School
     async function loadClasses(school) {
-      //if no school selected, hide class section
-      if(!school) {
-        classSection.style.display = 'none';
-      }
-      //Show classes section
-      classSection.style.display = 'block';
-      
+        if (!school) {
+            classSection.style.display = 'none';
+            classSelect.disabled = true;
+            return;
+        }
+
+        try {
+            // Show classes section
+            classSection.style.display = 'block';
+            classSelect.disabled = false;
+            
+            // You would need a classes table in your database
+            // This is just a placeholder - you'll need to create a classes table
+            const { data, error } = await supabaseClient
+                .from('classes') // Make sure this table exists
+                .select('class_name')
+                .eq('school', school)
+                .order('class_name');
+
+            if (error) {
+                // If classes table doesn't exist, just show a message
+                console.log('Classes table may not exist yet');
+                classSelect.innerHTML = '<option value="">No classes available</option>';
+                return;
+            }
+
+            classSelect.innerHTML = '<option value="">Select a class</option>';
+            
+            data.forEach(cls => {
+                let option = document.createElement('option');
+                option.value = cls.class_name;
+                option.textContent = cls.class_name;
+                classSelect.appendChild(option);
+            });
+
+            // Add other option
+            let otherOption = document.createElement('option');
+            otherOption.value = 'other';
+            otherOption.textContent = 'Add another class';
+            classSelect.appendChild(otherOption);
+
+        } catch (error) {
+            console.error('Error loading classes:', error);
+        }
     }
 
-
-
-
-
-
-    
     //Update the status message
     function updateStatus(message) {
-    statusElement.textContent = message;
-    
+        statusElement.textContent = message;
     }
-    //This is the function to hash the password of the user
- function hash(password) {
-   let product = 1;
-   //iterates through string
-   for(let i = 0; i < password.length; i++) {
-     // mutiplies product by the code
-     product *= password.charCodeAt(i);
-   }
-   return product
- }
+    
+    //This is the function to hash the password of the user (simple hash for demo - use proper hashing in production)
+    function hash(password) {
+        let product = 1;
+        for(let i = 0; i < password.length; i++) {
+            product *= password.charCodeAt(i);
+        }
+        return product.toString();
+    }
 
-  
+    async function checkValidation() {
+        try {
+            // Check if username exists
+            const { data, error } = await supabaseClient
+                .from('userinfo')
+                .select('username')
+                .eq('username', usernameElement.value);
+            
+            // Checks to make sure that no username exists in the database and that username length > 0
+            if (error) throw error;
+            
+            if (data && data.length > 0) {
+                updateStatus('Username already exists');
+                return false;
+            }
+            
+            if (usernameElement.value.length === 0) {
+                updateStatus('Username required');
+                return false;
+            }
+            
+            // Check password
+            if (passwordElement.value.length < 8) {
+                updateStatus('Password must be at least 8 characters');
+                return false;
+            }
+            
+            if (passwordElement.value.includes(' ')) {
+                updateStatus('Password cannot contain spaces');
+                return false;
+            }
+            
+            // Check name
+            if (nameElement.value.length < 2 || nameElement.value.length > 50) {
+                updateStatus('Name must be between 2 and 50 characters');
+                return false;
+            }
+            
+            if (!/^[a-zA-Z\s]+$/.test(nameElement.value)) {
+                updateStatus('Name can only contain letters and spaces');
+                return false;
+            }
+            
+            // Check if school is selected
+            if (!selectedSchool) {
+                updateStatus('Please select a school');
+                return false;
+            }
+            
+            return true;
+        } catch (error) {
+            console.error('Validation error:', error);
+            updateStatus('Error validating form');
+            return false;
+        }
+    }
+    
+    async function uploadCredentials() {
+        getUserType();
+        
+        if (await checkValidation() === true) {
+            try {
+                const { data, error } = await supabaseClient
+                    .from('userinfo')
+                    .insert([
+                        { 
+                            username: usernameElement.value, 
+                            name: nameElement.value, 
+                            password_hash: hash(passwordElement.value), 
+                            user_type: userType,
+                            school: selectedSchool,
+                            class: classSelect.value !== 'other' && classSelect.value !== '' ? classSelect.value : null
+                        }
+                    ]);
+                
+                if (error) throw error;
+                
+                console.log('Upload successful:', data);
+                updateStatus('Registration successful!');
+                setTimeout(() => {
+                    window.location.href = 'index.html';
+                }, 1500);
+            } catch (error) {
+                console.error('Upload error:', error);
+                updateStatus('Registration failed: ' + error.message);
+            }
+        }
+    }
 
+    //Function to set the User type based on checkbox
+    function getUserType(){
+        var isChecked = teacherCheckbox.checked;
+        console.log(isChecked);
+        if (isChecked) {
+            userType = 'Teacher';
+        } else {
+            userType = 'Student';
+        }
+    }
+
+    // Toggle new class input
+    function toggleAddClass() {
+        if (classSelect.value === 'other') {
+            newClassContainer.style.display = 'block';
+        } else {
+            newClassContainer.style.display = 'none';
+        }
+    }
+
+    // Add new class function
+    async function addNewClass() {
+        let newClassName = newClassInput.value.trim();
+        
+        if (!newClassName || !selectedSchool) {
+            updateStatus('Please enter a class name');
+            return;
+        }
+
+        try {
+            // You'll need a classes table in your database
+            const { data, error } = await supabaseClient
+                .from('classes') // Make sure this table exists
+                .insert([{ class_name: newClassName, school: selectedSchool }])
+                .select();
+
+            if (error) throw error;
+
+            await loadClasses(selectedSchool);
+            classSelect.value = newClassName;
+            newClassContainer.style.display = 'none';
+            newClassInput.value = '';
+            updateStatus('Class added successfully');
+        } catch (error) {
+            console.error('Error adding class:', error);
+            updateStatus('Error adding class');
+        }
+    }
     
     document.addEventListener('DOMContentLoaded', function () {
-      //load Schools
-      loadSchools()
-      schoolSelect.addEventListener('change', toggleAddSchool);
-      loadClasses(selectedSchool)
-
-      addSchoolBtn.addEventListener('click', addNewSchool);
-      
-      
-      //Get the element of the submit button   
-      let button = document.getElementById('btnSubmit');
-      // Add event listener to the button
-      button.addEventListener('click', function () {
-
-
-        uploadCredentials()
-      });
-
-
-    });
-async function checkValidation() {
-  // check if all credentials meet validation requirements
-  const { data, error } = await supabaseClient
-    .from('userinfo')
-    .select('username')
-    .eq('username', usernameElement.value);
-  
-  // Checks to make sure that no username exists in the database and that username length > 0
-  if ((error || !data || data.length === 0) && (usernameElement.value.length > 0)) {
-    // Checks if spaces to prevent malicious sql injection
-    if (passwordElement.value.length > 8 && !passwordElement.value.includes(' ')) {
-      // Makes sure they send a valid name
-      if (nameElement.value.length > 2 && nameElement.value.length < 50 && /^[a-zA-Z]+$/.test(nameElement.value)) {
-        // If meets all validation criteria check validation is true
-        return true;  // RETURN true instead of assigning to function name
-      } 
-      else {
-        updateStatus('Name Invalid');
-        return false;
-      }
-    } 
-    else {
-      updateStatus('Password Invalid');
-      return false;
-    }
-  } 
-  else {
-    updateStatus('Username invalid');
-    return false;
-  }
-}
-async function uploadCredentials() {
-  getUserType()
-  // If the validation is true then upload the credential to the database
-  if (await checkValidation() === true) {
-    const { data, error } = await supabaseClient
-      .from('userinfo')
-      .insert([
-        { username: usernameElement.value, name: nameElement.value, password_hash: hash(passwordElement.value), user_type: userType }
+        loadSchools();
         
-      ]);
-    
-    if (error) {
-      console.error('Upload error:', error);
-      updateStatus('Registration failed: ' + error.message, false);
-    } else {
-      console.log('Upload successful:', data);
-      updateStatus('Registration successful!', true);
-      setTimeout(() => {
-            window.location.href = 'index.html'
-        //added a delay to allow the user to have time to see the message before redirecting.    
-        },1500)
-    }
-  }
-}
-    let usertype = ''
-    //Function to set the User type based on is the checkbox true
-    function getUserType(){
-      
-      //variable storing the checked value of the checkbox
-      var isChecked = teacherCheckbox.checked;
-      console.log(isChecked)
-     if ( isChecked) {
-       userType = 'Teacher'
-    }
-      else{
-        userType = 'Student'
-      };
-    }
+        schoolSelect.addEventListener('change', toggleAddSchool);
+        classSelect.addEventListener('change', toggleAddClass);
+        addSchoolBtn.addEventListener('click', addNewSchool);
+        addClassBtn.addEventListener('click', addNewClass);
+        
+        let button = document.getElementById('btnSubmit');
+        button.addEventListener('click', uploadCredentials);
+    });
     
   </script>
   </body>

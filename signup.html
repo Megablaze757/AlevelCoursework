@@ -317,6 +317,37 @@ function toggleNewClassInput() {
    return product
  }
 
+    //Function to add a new class
+  async function addNewClass() {
+    let className = newClassInput.value.trim();
+
+    //Make sure the value is filled
+    if (!className) {
+      updateStatus('Enter Class Name');
+      return;
+    }
+    else{
+      //Check if the class exists in this school
+      const {data: error} = await supabaseClient
+        .from('classes')
+        .select('class_name')
+        .eq('class_name', className)
+        .eq('school_id', selectedSchoolId)
+      //if not found then add to the database
+      if ({error}) {
+        //Add new class 
+        const {data,error} = await supabaseClient
+          .from('classes')
+          .insert([{
+            class_name: className,
+            school: selectedSchool.value
+          }]);
+        //Reload the table
+        await loadClasses(selectedSchool.value);
+      
+      
+    };
+  }
   
 
     

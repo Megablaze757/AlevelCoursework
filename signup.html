@@ -116,7 +116,7 @@
       </div>
       
       <!-- Class section -->
-      <div class='classSection' id='classSection' style='display: none;'>
+      <div class='classSection' id='classSection' style='display: block;'>
         <label for='classSelect'> Select class></label><br>
 
         <!-- Class dropdown -->
@@ -251,7 +251,7 @@
     //Load Classes for a specific School
     async function loadClasses(school) {
       //if no school selected, hide class section
-      if(!school) {
+      if(!school || school === '' || school === 'other') {
         classSection.style.display = 'none';
         classSelect.disabled = true;
       }

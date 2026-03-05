@@ -347,7 +347,7 @@ async function getStyle(){
   //Query learning style
   const{data:learningStyle , error} = await supabaseClient
      .from('adaptive_settings')
-     .select('preffered_style')
+     .select('prefered_style')
      .eq('student_id')
   return learningStyle.preffered_style;
 }

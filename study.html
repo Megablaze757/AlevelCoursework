@@ -300,14 +300,15 @@ let questions = [];
             
           }
         
-// Get the strengths of the user selected
- async function getStrengths () {
+// Get the strengths of the user
+async function getStrengths () {
         const{data: strengths, error} = await supabaseClient
             .from('strengths')
             .select('*')
             .eq('student_id', 'StudentTest')
   console.log(strengths);
 }
+
 //Get the weaknesses of the user
 async function getWeaknesses () {
           const{data: weaknesses, error} = await supabaseClient
@@ -316,14 +317,14 @@ async function getWeaknesses () {
             .eq('student_id', 'StudentTest')
   console.log(weaknesses);
 }
+
 //Get the topic performance
 async function orderTopics () {
+  const weaknesses = await getWeaknesses()
   const{data: orderedTopics, error} = await supabaseClient
-    const weaknesses = await getWeaknesses
     .from('topic_performance')
-    .select('topic_id', 'accuracy_percent')
-    .eq('student_id','StudentTest')
-    .eq('topic_id')
+    .select('topic_id, accuracy_percent')
+    .eq('student_id', 'StudentTest')
   console.log(orderedTopics);
 }
 

@@ -340,6 +340,28 @@ async function orderTopics () {
   
   console.log(orderedTopics);
 }
+//Get the preffered learning style
+async function getStyle(){
+  //Query learning style
+  const{data:learningStyle , error} = await supabaseClient
+     .from('adaptive_settings)
+     .select('preffered_style')
+     .eq('student_id')
+  return learningStyle.preffered_style;
+}
+        
+//Function to get the questions
+async function getQuestion (weakestTopic) {
+  let style = getStyle()
+  //Get questions of weakest topic of preffered style
+  const {data: questions, error} = await supabaseClient
+    .from('questions')
+    .select('*')
+    .eq('question_type', style)
+    .eq('topic_id', weakestTopic')
+  console.log(questions)
+  
+}
           //Function to display the question takes the question ID as a parameter
           function displayQuestion(question_id) {
                 const questionHolder = document.getElementById('questionHolder');
@@ -355,6 +377,7 @@ async function orderTopics () {
             getStrengths();
             getWeaknesses();
             orderTopics();
+            getQuestion(orderedTopics[0,0])
 
 
 

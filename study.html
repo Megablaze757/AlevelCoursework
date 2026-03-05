@@ -339,6 +339,7 @@ async function orderTopics () {
   }
   
   console.log(orderedTopics);
+  return orderedTopics;
 }
 //Get the preffered learning style
 async function getStyle(){
@@ -377,7 +378,7 @@ async function getQuestion (weakestTopic) {
             getStrengths();
             getWeaknesses();
             orderTopics();
-            getQuestion(orderedTopics[0,0])
+            getQuestion(orderedTopics[0].topic_id);
 
 
 

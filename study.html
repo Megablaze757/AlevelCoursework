@@ -312,9 +312,18 @@ let questions = [];
 async function getWeaknesses () {
           const{data: weaknesses, error} = await supabaseClient
             .from('weaknesses')
-            .select('*')
+            .select('topic_id')
             .eq('student_id', 'StudentTest')
   console.log(weaknesses);
+}
+//Get the topic performance
+async function orderTopics () {
+  const{data: orderedTopics, error} = await supabaseClient
+    .from('topic_performance')
+    .select('topic_id', 'accuray_percent')
+    .eq('student_id','StudentTest')
+    .eq('topic_id', weaknesses)
+  console.log(orderedTopics);
 }
 
           //Function to display the question takes the question ID as a parameter
@@ -331,6 +340,7 @@ async function getWeaknesses () {
             displayQuestion(1);
             getStrengths();
             getWeaknesses();
+            orderTopics();
 
 
 

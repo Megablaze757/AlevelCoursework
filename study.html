@@ -378,6 +378,7 @@ async function getQuestion (weakestTopic) {
             getStrengths();
             getWeaknesses();
             orderTopics();
+            const orderedTopics = await orderTopics();
             getQuestion(orderedTopics[0].topic_id);
 
 

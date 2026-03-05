@@ -268,22 +268,6 @@
         }  
         );
 
-// Get the strengths of the user selected
-function getStrengths () {
-        const{data: strengths, error}
-            .from('strengths')
-            .select('*')
-            .eq('student_id', 'studentTest')
-  console.log(strengths);
-}
-//Get the weaknesses of the user
-function getWeaknesses () {
-          const{data: weaknesses, error}
-            .from('weaknesses')
-            .select('*')
-            .eq('student_id', 'studentTest')
-  console.log(weaknesses);
-}
 
 
         
@@ -316,6 +300,22 @@ let questions = [];
             
           }
         
+// Get the strengths of the user selected
+function getStrengths () {
+        const{data: strengths, error}
+            .from('strengths')
+            .select('*')
+            .eq('student_id', 'studentTest')
+  console.log(strengths);
+}
+//Get the weaknesses of the user
+function getWeaknesses () {
+          const{data: weaknesses, error}
+            .from('weaknesses')
+            .select('*')
+            .eq('student_id', 'studentTest')
+  console.log(weaknesses);
+}
 
           //Function to display the question takes the question ID as a parameter
           function displayQuestion(question_id) {

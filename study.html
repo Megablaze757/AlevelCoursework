@@ -358,7 +358,7 @@ async function getQuestion (weakestTopic) {
     .from('questions')
     .select('*')
     .eq('question_type', style)
-    .eq('topic_id', weakestTopic')
+    .eq('topic_id', weakestTopic)
   console.log(questions)
   
 }

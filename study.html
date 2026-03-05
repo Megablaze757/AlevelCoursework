@@ -319,10 +319,11 @@ async function getWeaknesses () {
 //Get the topic performance
 async function orderTopics () {
   const{data: orderedTopics, error} = await supabaseClient
+    const weaknesses = await getWeaknesses();
     .from('topic_performance')
-    .select('topic_id', 'accuray_percent')
+    .select('topic_id', 'accuracy_percent')
     .eq('student_id','StudentTest')
-    .eq('topic_id', weaknesses)
+    .eq('topic_id')
   console.log(orderedTopics);
 }
 

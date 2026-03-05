@@ -355,15 +355,69 @@ async function getStyle(){
         
 //Function to get the questions
 async function getQuestion (weakestTopic) {
-  let style = await getStyle()
-  //Get questions of weakest topic of preffered style
-  const {data: questions, error} = await supabaseClient
+async function getQuestion(weakestTopic) {
+  console.log('🔍 Starting getQuestion function...');
+  console.log('📌 Weakest topic ID received:', weakestTopic);
+  
+  let style = await getStyle();
+  console.log('🎨 Preferred style:', style);
+  
+  // First, let's see ALL questions to understand what's available
+  const { data: allQuestions, error: allError } = await supabaseClient
+    .from('questions')
+    .select('*')
+  
+  console.log('📊 All questions in database:', allQuestions);
+  console.log('📊 Total questions count:', allQuestions ? allQuestions.length : 0);
+  
+  if (allError) {
+    console.error('❌ Error fetching all questions:', allError);
+  }
+  
+  // Now try the filtered query
+  console.log(`🔎 Filtering for topic_id: "${weakestTopic}" and question_type: "${style}"`);
+  
+  const { data: questions, error } = await supabaseClient
     .from('questions')
     .select('*')
     .eq('question_type', style)
     .eq('topic_id', weakestTopic)
-  console.log(questions)
   
+  console.log('📦 Filtered questions result:', questions);
+  console.log('📏 Filtered questions count:', questions ? questions.length : 0);
+  
+  if (error) {
+    console.error('❌ Error in filtered query:', error);
+  }
+  
+  // If no questions found with both filters, try just by topic
+  if (!questions || questions.length === 0) {
+    console.log('⚠️ No questions found with both filters. Trying just by topic_id...');
+    
+    const { data: topicQuestions, error: topicError } = await supabaseClient
+      .from('questions')
+      .select('*')
+      .eq('topic_id', weakestTopic)
+    
+    console.log('📦 Questions by topic only:', topicQuestions);
+    
+    if (topicQuestions && topicQuestions.length > 0) {
+      console.log('✅ Found questions for this topic, but none with your preferred style');
+      console.log('📋 Available question types for this topic:', 
+        [...new Set(topicQuestions.map(q => q.question_type))]);
+    }
+  }
+  
+  // Also check if the topic exists at all
+  const { data: topicCheck, error: topicError } = await supabaseClient
+    .from('topics')
+    .select('*')
+    .eq('topic_id', weakestTopic)
+  
+  console.log('📚 Topic check:', topicCheck);
+  
+  return questions || [];
+}
 }
           //Function to display the question takes the question ID as a parameter
           function displayQuestion(question_id) {

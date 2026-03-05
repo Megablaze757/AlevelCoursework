@@ -302,7 +302,7 @@ let questions = [];
         
 // Get the strengths of the user selected
 function getStrengths () {
-        const{data: strengths, error}
+        const{data: strengths, error} = await supabaseClient
             .from('strengths')
             .select('*')
             .eq('student_id', 'studentTest')
@@ -310,7 +310,7 @@ function getStrengths () {
 }
 //Get the weaknesses of the user
 function getWeaknesses () {
-          const{data: weaknesses, error}
+          const{data: weaknesses, error} = await supabaseClient
             .from('weaknesses')
             .select('*')
             .eq('student_id', 'studentTest')

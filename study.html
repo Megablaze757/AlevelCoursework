@@ -348,13 +348,13 @@ async function getStyle(){
   const{data:learningStyle , error} = await supabaseClient
      .from('adaptive_settings')
      .select('prefered_style')
-     .eq('student_id')
+     .eq('student_id', 'StudentTest')
   return learningStyle.prefered_style;
 }
         
 //Function to get the questions
 async function getQuestion (weakestTopic) {
-  let style = getStyle()
+  let style = await getStyle()
   //Get questions of weakest topic of preffered style
   const {data: questions, error} = await supabaseClient
     .from('questions')

@@ -226,6 +226,19 @@
         //Correct and Incorrect answer Variables
         let correctCount = 0
         let incorrectCount = 0
+
+
+        //Current Batch of questions
+        let sessionQuestions = [];
+        //Question we are on
+        let currentQuestionIndex = 0;
+        //Questions Asked
+        let askedQuestionIds = [];
+        //Amount of that topic correct
+        let topicCorrect = ();
+        //Total answered
+        let topicTotal ={];
+        
         
         let question_id = 1;
         //Get the Answer elements
@@ -234,10 +247,14 @@
 
         //Add a click handler
         //Function to check answer on click
-        checkAnswer.addEventListener('click', function () {
+        checkAnswer.addEventListener('click',async function () {
           //Get users answer and remove capitalisation
           const userAnswer = answerBox.value.trim().toLowerCase();
-          const correctAnswer = questions[question_id].correct_answer.toLowerCase();
+          //Get the question currently in the session
+          const currentQuestion = sessionQuestions[currentQuestionIndex];
+          const correctAnswer = currentQuestion.correct_answer.toLowerCase();
+          const topicId = currentQuestion.topic_id;
+          const studentId = 'StudentTest';
           console.log(correctAnswer);
           
 
@@ -250,6 +267,8 @@
             correctCount += 1
             //Update Num correct
             numCorrect.textContent = correctCount;
+            //Save to database 
+            await updateTopicperformance(topicId,student_id,true)
           }
           else {
             //Show incorrect feedback message
@@ -261,13 +280,74 @@
             //Update Num incorrect
             
             numIncorrect.textContent = incorrectCount;
+            //Save an incorrect answer to the database
+            await updateTopicPerformance(topicId, studentId, false);
   
 
             
           };
-        
+          //Track the asked questions
+          askedQuestionsIds.push(currentQuestion.id);
+
+          //Move to next question
+          currentQuestionIndex++;
+
+          //Check if ran out of questions
+          if(currentQuestionIndex >= sessionQuestions.length){
+            await loadNewSession()
+          }
+        else{
+          displayCurrentQuestion()
+        }
+          
         }  
         );
+
+        //Update topic performance function
+        async function updateTopicPerformance(topicId, studentId, wasCorrect) {
+          // Get current performance
+          const {data: currentPerformance, error} = await supabaseClient
+            .from('topic_performance')
+            .select('*')
+            .eq('student_id', studentId)
+            .eq('topic_id', topicId);
+          //If the record exists update it
+          if (currentPerformance && currentPerformance.length > 0) {
+            const updatedPerformance = currentPerformance[0];
+
+            //Calculate the new values
+            const newAttempted = updatedPerformance.questions_attempted +1;
+            const newCorrect = updatedPerformance.questions_correct + (wasCorrect ? 1 : 0);
+            const newAccuracy = (newCorrect / newAttempted) * 100
+            
+            
+            //Update the record with the new data
+            const{error} = await supabaseClient 
+            .from('topic_performance')
+            .update({
+                questions_attempted: newAttempted,
+                questions_correct: newCorrect,
+                accuracy_percent: Math.round(newAccuracy)
+            })
+            .eq('performance_id', updatedPerformance.performance_id);
+
+            
+            
+          }
+          //If the record doesnt exist create a new one
+          else {
+            const {error} = await supabaseClient
+              .from('topic_performance')
+              .insert([{
+                student_id: studentId,
+                topic_id: topicId,
+                questions_attempted: 1,
+                questions_correct: wasCorrect ? 1 : 0,
+                accuracy_percent: wasCorrect ? 100 : 0
+              }])
+          }
+          
+        }
 
 
 
@@ -358,18 +438,51 @@ async function getQuestion (weakestTopic) {
   // Get the style - this returns an array like [{preferred_style: 'visual'}]
   let style = await getStyle();
   
-  // Extract the actual style value from the array - FIXED: using 'style' not 'styleArray'
   let preferredStyle = style && style.length > 0 ? style[0].preferred_style : 'mixed';
   
   console.log('Preferred style value:', preferredStyle);
   console.log('Weakest topic:', weakestTopic);
+
+
+
+  //Get the current accuracy
+  const{data:accuracy} = await supabaseClient
+        .from('topic_performance')
+        .select('accuracy_percent')
+        .eq('student_id', 'StudentTest')
+        .eq('topic_id', weakestTopic);
+  //set difficulty based on accuracy 
+    let accuracyValue = 50; // Default
+    let difficultyValue = 3; // Default medium
+    
+    if (accuracy && accuracy.length > 0) {
+        accuracyValue = accuracy[0].accuracy_percent;
+        
+        // Convert accuracy to difficulty level 1-5
+        if (accuracyValue < 40) {
+            difficultyValue = 1; // Easy
+        }
+        else if (accuracyValue >= 40 && accuracyValue < 60) {
+            difficultyValue = 2; // Medium-Easy
+        }
+        else if (accuracyValue >= 60 && accuracyValue < 70) {
+            difficultyValue = 3; // Medium
+        }
+        else if (accuracyValue >= 70 && accuracyValue < 80) {
+            difficultyValue = 4; // Medium-Hard
+        }
+        else if (accuracyValue >= 80) {
+            difficultyValue = 5; // Hard
+        }
+    }
   
   // Get questions of weakest topic of preferred style
   const { data: questions, error } = await supabaseClient
     .from('questions')
     .select('*')
     .eq('question_type', preferredStyle)
-    .eq('topic_id', weakestTopic);
+    .eq('topic_id', weakestTopic)
+    .eq('difficulty', difficultyValue);
   
   if (error) {
     console.error('Error fetching questions:', error);
@@ -379,26 +492,56 @@ async function getQuestion (weakestTopic) {
   console.log('Questions found:', questions);
   return questions;
 }
+
+
+async function loadNewSession () {
+  //Get the weakest topic
+  const orderedTopics = await orderTopics();
+  const weakestTopic = orderedTopics[0].topic_id;
+  //get questions for the weakest topic
+
+  sessionQuestions = await getQuestion(weakestTopic);
+
+  //reset the current question
+  currentQuestionIndex = 0;
+  
+      if (sessionQuestions.length > 0) {
+        displayQuestion();
+  
+    } else {
+        
+    }
+}
+}
+        
+
           //Function to display the question takes the question ID as a parameter
-          function displayQuestion(question_id) {
-                const questionHolder = document.getElementById('questionHolder');
-                const currentQuestion = questions[question_id];
-                const questionText = currentQuestion.question_text;
-                questionHolder.innerHTML = questionText;
+          function displayQuestion() {
+              const questionHolder = document.getElementById('questionHolder');
+              const currentQuestion = sessionQuestions[currentQuestionIndex];
+              const questionText = currentQuestion.question_text;
+              questionHolder.innerHTML = questionText;
             
           }
           document.addEventListener('DOMContentLoaded', async function () {
             
+            //Fetch all questions from the database
             await fetchQuestion()
-            displayQuestion(1);
+            
+            //Load the first session with weakest topic
+            await loadNewSession();
+            
+            //Display the first question
+            displayQuestion();
+            
+            //Get user strengths and weaknesses
             getStrengths();
             getWeaknesses();
-            orderTopics();
+            
+            //Order topics by performance
             const orderedTopics = await orderTopics();
-            getQuestion(orderedTopics[0].topic_id);
-
-
-
+            
+          });
             
             
           });

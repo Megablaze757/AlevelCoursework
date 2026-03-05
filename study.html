@@ -317,30 +317,29 @@ async function getWeaknesses () {
             .eq('student_id', 'StudentTest')
   console.log(weaknesses);
 }
-
-//Get the topic performance
+//Order the topics
 async function orderTopics () {
   const weaknesses = await getWeaknesses()
-  const{data: orderedTopics, error} = await supabaseClient
+  let {data: orderedTopics, error} = await supabaseClient
     .from('topic_performance')
     .select('topic_id, accuracy_percent')
     .eq('student_id', 'StudentTest')
-  console.log(orderedTopics);
-
-  //Bubble sort for orderedTopics
+  
+  // Bubble sort for array of objects
   let len = orderedTopics.length;
   for (let i = 0; i < len - 1; i++) {
-    for (let j = 0; j < len - 1 - 1; j++) {
-      if (orderedTopics[j][1] > orderedTopics[j+1][1]) {
+    for (let j = 0; j < len - 1 - i; j++) {
+      // Use .accuracy_percent instead of [1]
+      if (orderedTopics[j].accuracy_percent > orderedTopics[j + 1].accuracy_percent) {
         let temp = orderedTopics[j];
-        orderedTopics[j] = orderedTopics[j+1];
-        orderedTOpics[j+1] = temp;
+        orderedTopics[j] = orderedTopics[j + 1];
+        orderedTopics[j + 1] = temp;
       }
     }
   }
+  
   console.log(orderedTopics);
 }
-
           //Function to display the question takes the question ID as a parameter
           function displayQuestion(question_id) {
                 const questionHolder = document.getElementById('questionHolder');

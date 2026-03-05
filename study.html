@@ -301,7 +301,7 @@ let questions = [];
           }
         
 // Get the strengths of the user selected
-function getStrengths () {
+ async function getStrengths () {
         const{data: strengths, error} = await supabaseClient
             .from('strengths')
             .select('*')
@@ -309,7 +309,7 @@ function getStrengths () {
   console.log(strengths);
 }
 //Get the weaknesses of the user
-function getWeaknesses () {
+async function getWeaknesses () {
           const{data: weaknesses, error} = await supabaseClient
             .from('weaknesses')
             .select('*')

@@ -356,11 +356,13 @@ async function getStyle(){
 //Function to get the questions
 async function getQuestion (weakestTopic) {
   let style = await getStyle()
+  let preferredStyle = styleArray && styleArray.length > 0 ? styleArray[0].preferred_style : 'mixed';
+  
   //Get questions of weakest topic of preffered style
   const {data: questions, error} = await supabaseClient
     .from('questions')
     .select('*')
-    .eq('question_type', style)
+    .eq('question_type', preferredStyle)
     .eq('topic_id', weakestTopic)
   console.log(questions)
   

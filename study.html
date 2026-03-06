@@ -210,21 +210,6 @@
       gap: 10px;
       flex-wrap: wrap;
     }
-    
-    .debug-info {
-      margin-top: 20px;
-      padding: 10px;
-      background: #f5f5f5;
-      border-radius: 10px;
-      font-size: 12px;
-      max-height: 200px;
-      overflow-y: auto;
-      display: none;
-    }
-    
-    .debug-info.visible {
-      display: block;
-    }
   </style>
   
 </head>
@@ -237,7 +222,6 @@
     <div class='numCorrect' id='numCorrect'>0</div>           
     <div class='numIncorrect' id='numIncorrect'>0</div>     
   </div>
-  <button id="debugToggle" style="margin-top: 10px; padding: 5px; font-size: 12px;">Toggle Debug</button>
 </div>
 
 <!-- Right Column: Question card + End button -->
@@ -252,7 +236,6 @@
       <button class='nextQuestionBtn' id='nextQuestionBtn'>Next Question</button>
     </div>
     <div class='feedback' id='feedback'></div>
-    <div class='debug-info' id='debugInfo'></div>
   </div>
   
   <!-- End Session button Below the card on the bottom right -->
@@ -263,20 +246,6 @@
 </div>
 
 <script>
-  //Debug function
-  function addDebug(message) {
-    const debugDiv = document.getElementById('debugInfo');
-    const timestamp = new Date().toLocaleTimeString();
-    debugDiv.innerHTML += `[${timestamp}] ${message}<br>`;
-    debugDiv.scrollTop = debugDiv.scrollHeight;
-    console.log(message);
-  }
-  
-  //Toggle debug panel
-  document.getElementById('debugToggle').addEventListener('click', function() {
-    document.getElementById('debugInfo').classList.toggle('visible');
-  });
-
   //Correct and Incorrect answer Variables
   let correctCount = 0
   let incorrectCount = 0
@@ -285,7 +254,7 @@
   let sessionQuestions = [];
   //Question we are on
   let currentQuestionIndex = 0;
-  //Questions Asked
+  //Questions Asked (IDs of questions already answered in this session)
   let askedQuestionIds = [];
   
   let student_id = 'StudentTest';
@@ -305,14 +274,9 @@
   // Initialize supabase client
   const supabaseClient = supabase.createClient(supabase_url, supabase_key);
 
-  //Update topic performance function - FIXED VERSION with better debugging
+  //Update topic performance function
   async function updateTopicPerformance(topicId, studentId, wasCorrect) {
-    addDebug(`Updating performance for topic ${topicId}, correct: ${wasCorrect}`);
-    
     try {
-      // First, let's check what columns exist in the topic_performance table
-      addDebug('Fetching current performance record...');
-      
       // Get current performance
       const {data: currentPerformance, error: fetchError} = await supabaseClient
         .from('topic_performance')
@@ -321,91 +285,48 @@
         .eq('topic_id', topicId);
       
       if (fetchError) {
-        addDebug(`ERROR fetching performance: ${JSON.stringify(fetchError)}`);
+        console.error('Error fetching performance:', fetchError);
         return;
       }
       
-      addDebug(`Found ${currentPerformance ? currentPerformance.length : 0} records`);
-      
-      // Log the structure of the record to see what fields exist
+      //If the record exists update it
       if (currentPerformance && currentPerformance.length > 0) {
-        addDebug(`Record fields: ${Object.keys(currentPerformance[0]).join(', ')}`);
-        
-        // Check what the ID field is called
-        const record = currentPerformance[0];
-        let idField = null;
-        
-        // Try to find the ID field - common names: id, performance_id, topic_performance_id
-        if (record.id) idField = 'id';
-        else if (record.performance_id) idField = 'performance_id';
-        else if (record.topic_performance_id) idField = 'topic_performance_id';
-        
-        addDebug(`ID field appears to be: ${idField || 'NOT FOUND'}`);
-        
-        //If the record exists update it
-        const updatedPerformance = record;
+        const updatedPerformance = currentPerformance[0];
 
         //Calculate the new values
         const newAttempted = updatedPerformance.questions_attempted + 1;
         const newCorrect = updatedPerformance.questions_correct + (wasCorrect ? 1 : 0);
         const newAccuracy = (newCorrect / newAttempted) * 100
         
-        addDebug(`Current: attempted=${updatedPerformance.questions_attempted}, correct=${updatedPerformance.questions_correct}`);
-        addDebug(`New: attempted=${newAttempted}, correct=${newCorrect}, accuracy=${Math.round(newAccuracy)}`);
+        // Try to update using the ID field (assuming it's 'id' or 'performance_id')
+        let updateQuery = supabaseClient
+          .from('topic_performance')
+          .update({
+              questions_attempted: newAttempted,
+              questions_correct: newCorrect,
+              accuracy_percent: Math.round(newAccuracy)
+          });
         
-        // Try to update using the correct ID field
-        if (idField) {
-          const updateQuery = supabaseClient
-            .from('topic_performance')
-            .update({
-                questions_attempted: newAttempted,
-                questions_correct: newCorrect,
-                accuracy_percent: Math.round(newAccuracy)
-            });
-          
-          // Apply the filter based on the ID field name
-          if (idField === 'id') {
-            updateQuery.eq('id', updatedPerformance.id);
-            addDebug(`Updating with id = ${updatedPerformance.id}`);
-          } else if (idField === 'performance_id') {
-            updateQuery.eq('performance_id', updatedPerformance.performance_id);
-            addDebug(`Updating with performance_id = ${updatedPerformance.performance_id}`);
-          } else {
-            updateQuery.eq(idField, updatedPerformance[idField]);
-            addDebug(`Updating with ${idField} = ${updatedPerformance[idField]}`);
-          }
-          
-          const {error: updateError} = await updateQuery;
-          
-          if (updateError) {
-            addDebug(`ERROR updating performance: ${JSON.stringify(updateError)}`);
-          } else {
-            addDebug('Performance updated successfully');
-          }
+        // Check which ID field exists
+        if (updatedPerformance.id) {
+          updateQuery = updateQuery.eq('id', updatedPerformance.id);
+        } else if (updatedPerformance.performance_id) {
+          updateQuery = updateQuery.eq('performance_id', updatedPerformance.performance_id);
         } else {
-          addDebug('Could not find ID field, trying update without specific ID (may update multiple records)');
-          
-          // Fallback: update using both student_id and topic_id
-          const {error: updateError} = await supabaseClient
-            .from('topic_performance')
-            .update({
-                questions_attempted: newAttempted,
-                questions_correct: newCorrect,
-                accuracy_percent: Math.round(newAccuracy)
-            })
+          // Fallback to student_id and topic_id
+          updateQuery = updateQuery
             .eq('student_id', studentId)
             .eq('topic_id', topicId);
-          
-          if (updateError) {
-            addDebug(`ERROR in fallback update: ${JSON.stringify(updateError)}`);
-          } else {
-            addDebug('Fallback update successful');
-          }
+        }
+        
+        const {error: updateError} = await updateQuery;
+        
+        if (updateError) {
+          console.error('Error updating performance:', updateError);
         }
       }
       //If the record doesnt exist create a new one
       else {
-        addDebug('No existing record found, creating new one');
         const {error: insertError} = await supabaseClient
           .from('topic_performance')
           .insert([{
@@ -417,26 +338,20 @@
           }]);
         
         if (insertError) {
-          addDebug(`ERROR inserting performance: ${JSON.stringify(insertError)}`);
-        } else {
-          addDebug('New performance record created');
+          console.error('Error inserting performance:', insertError);
         }
       }
     } catch (error) {
-      addDebug(`EXCEPTION in updateTopicPerformance: ${error.message}`);
-      console.error('Full error:', error);
+      console.error('Error in updateTopicPerformance:', error);
     }
   }
 
   //Add a click handler for check answer
   checkAnswer.addEventListener('click', async function () {
-    addDebug('Check answer clicked');
-    
     //Check if there's a question to answer
     if (!sessionQuestions.length || currentQuestionIndex >= sessionQuestions.length) {
       feedback.textContent = 'Please load a question first';
       feedback.className = 'feedback incorrect';
-      addDebug('No question loaded');
       return;
     }
     
@@ -447,7 +362,6 @@
     if (!userAnswer) {
       feedback.textContent = 'Please enter an answer';
       feedback.className = 'feedback incorrect';
-      addDebug('Empty answer');
       return;
     }
     
@@ -456,11 +370,11 @@
     const correctAnswer = currentQuestion.correct_answer.toLowerCase();
     const topicId = currentQuestion.topic_id;
     
-    addDebug(`Question ID: ${currentQuestion.id}, Topic ID: ${topicId}`);
-    addDebug(`User answer: ${userAnswer}, Correct answer: ${correctAnswer}`);
+    console.log('User answer:', userAnswer);
+    console.log('Correct answer:', correctAnswer);
 
     if (userAnswer === correctAnswer) {
-      addDebug('Answer is CORRECT');
+      console.log('correct');
       feedback.textContent = 'Correct! Well done!';
       feedback.className = 'feedback correct';
       correctCount += 1
@@ -468,7 +382,6 @@
       await updateTopicPerformance(topicId, student_id, true);
     }
     else {
-      addDebug('Answer is INCORRECT');
       feedback.textContent = `Incorrect. The correct answer is: ${currentQuestion.correct_answer}`;
       feedback.className = 'feedback incorrect';
       incorrectCount += 1 
@@ -478,126 +391,233 @@
     
     //Track the asked questions
     askedQuestionIds.push(currentQuestion.id);
+    console.log('Asked questions:', askedQuestionIds);
 
     //Disable check answer button until next question is loaded
     checkAnswer.style.opacity = '0.5';
     checkAnswer.style.pointerEvents = 'none';
+    
+    // Automatically load next question after a short delay
+    setTimeout(() => {
+      loadNextUnansweredQuestion();
+    }, 1500);
   });
+
+  // Function to load the next unanswered question
+  async function loadNextUnansweredQuestion() {
+    console.log('Loading next unanswered question');
+    console.log('Current session questions:', sessionQuestions.map(q => q.id));
+    console.log('Asked questions:', askedQuestionIds);
+    
+    // First, try to find an unanswered question in the current session
+    let unansweredInSession = false;
+    
+    for (let i = 0; i < sessionQuestions.length; i++) {
+      if (!askedQuestionIds.includes(sessionQuestions[i].id)) {
+        // Found an unanswered question
+        currentQuestionIndex = i;
+        unansweredInSession = true;
+        console.log(`Found unanswered question at index ${i}: ${sessionQuestions[i].id}`);
+        break;
+      }
+    }
+    
+    if (unansweredInSession) {
+      // Display the unanswered question
+      displayQuestion();
+      answerBox.value = '';
+      feedback.style.display = 'none';
+      checkAnswer.style.opacity = '1';
+      checkAnswer.style.pointerEvents = 'auto';
+    } else {
+      // All questions in current session have been answered
+      console.log('All questions in current session answered, loading new session');
+      
+      // Get the weakest topic and load new questions
+      const orderedTopics = await orderTopics();
+      
+      if (orderedTopics && orderedTopics.length > 0) {
+        const weakestTopic = orderedTopics[0].topic_id;
+        const newQuestions = await getUnansweredQuestions(weakestTopic);
+        
+        if (newQuestions && newQuestions.length > 0) {
+          // Add new questions to the session
+          sessionQuestions = sessionQuestions.concat(newQuestions);
+          console.log(`Added ${newQuestions.length} new questions. Total: ${sessionQuestions.length}`);
+          
+          // Find the first unanswered question (should be the first new one)
+          for (let i = 0; i < sessionQuestions.length; i++) {
+            if (!askedQuestionIds.includes(sessionQuestions[i].id)) {
+              currentQuestionIndex = i;
+              break;
+            }
+          }
+          
+          displayQuestion();
+          answerBox.value = '';
+          feedback.style.display = 'none';
+          checkAnswer.style.opacity = '1';
+          checkAnswer.style.pointerEvents = 'auto';
+        } else {
+          // No new questions available
+          feedback.textContent = 'No more questions available for this topic';
+          feedback.className = 'feedback incorrect';
+          feedback.style.display = 'block';
+        }
+      }
+    }
+  }
+
+  // Get unanswered questions for a topic
+  async function getUnansweredQuestions(topicId) {
+    console.log(`Getting unanswered questions for topic ${topicId}`);
+    
+    // Get the user's preferred learning style
+    let style = await getStyle();
+    let preferredStyle = style && style.length > 0 ? style[0].preferred_style : 'mixed';
+    
+    // Get questions for this topic that haven't been asked yet
+    let allQuestions = [];
+    let page = 0;
+    const pageSize = 10;
+    
+    // Fetch questions in batches until we find some unanswered ones
+    while (true) {
+      const { data: questions, error } = await supabaseClient
+        .from('questions')
+        .select('*')
+        .eq('topic_id', topicId)
+        .eq('question_type', preferredStyle)
+        .range(page * pageSize, (page + 1) * pageSize - 1);
+      
+      if (error || !questions || questions.length === 0) {
+        break;
+      }
+      
+      // Filter out already asked questions
+      const unanswered = questions.filter(q => !askedQuestionIds.includes(q.id));
+      
+      if (unanswered.length > 0) {
+        // Found some unanswered questions
+        return unanswered;
+      }
+      
+      page++;
+    }
+    
+    // If no unanswered questions found with preferred style, try any style
+    if (preferredStyle !== 'mixed') {
+      console.log('No unanswered questions with preferred style, trying mixed');
+      const { data: questions, error } = await supabaseClient
+        .from('questions')
+        .select('*')
+        .eq('topic_id', topicId)
+        .eq('question_type', 'mixed')
+        .limit(5);
+      
+      if (!error && questions) {
+        const unanswered = questions.filter(q => !askedQuestionIds.includes(q.id));
+        if (unanswered.length > 0) {
+          return unanswered;
+        }
+      }
+    }
+    
+    return [];
+  }
 
   //Fetch the Questions needed for the session
   async function fetchQuestion() {
-    addDebug('Fetching all questions');
     const { data, error } = await supabaseClient
       .from('questions')
       .select('*')
     
     if (error) {
-      addDebug(`ERROR fetching questions: ${JSON.stringify(error)}`);
+      console.error('Error fetching questions:', error);
       return;
     }
     
-    questions = data;
-    addDebug(`Fetched ${questions.length} questions`);
+    questions = data;      
   }
 
   //Get the strengths of the user
   async function getStrengths () {
-    addDebug('Fetching strengths');
     const {data: strengths, error} = await supabaseClient
       .from('strengths')
       .select('*')
       .eq('student_id', 'StudentTest')
     
     if (error) {
-      addDebug(`ERROR fetching strengths: ${JSON.stringify(error)}`);
-    } else {
-      addDebug(`Found ${strengths ? strengths.length : 0} strengths`);
+      console.error('Error fetching strengths:', error);
     }
     
-    return strengths;
+    console.log('Strengths:', strengths);
   }
 
   //Get the weaknesses of the user
   async function getWeaknesses () {
-    addDebug('Fetching weaknesses');
     const {data: weaknesses, error} = await supabaseClient
       .from('weaknesses')
       .select('topic_id')
       .eq('student_id', 'StudentTest')
     
     if (error) {
-      addDebug(`ERROR fetching weaknesses: ${JSON.stringify(error)}`);
-    } else {
-      addDebug(`Found ${weaknesses ? weaknesses.length : 0} weaknesses`);
+      console.error('Error fetching weaknesses:', error);
     }
     
+    console.log('Weaknesses:', weaknesses);
     return weaknesses;
   }
 
   //Order the topics
   async function orderTopics () {
-    addDebug('Ordering topics by performance');
-    
+    const weaknesses = await getWeaknesses();
     let {data: orderedTopics, error} = await supabaseClient
       .from('topic_performance')
       .select('topic_id, accuracy_percent')
       .eq('student_id', 'StudentTest');
     
     if (error) {
-      addDebug(`ERROR fetching ordered topics: ${JSON.stringify(error)}`);
+      console.error('Error fetching ordered topics:', error);
       return [];
     }
     
     if (!orderedTopics || orderedTopics.length === 0) {
-      addDebug('No topic performance data found');
+      console.log('No topic performance data found');
       return [];
     }
     
-    addDebug(`Found ${orderedTopics.length} topics with performance data`);
+    // Sort by accuracy_percent (lowest first)
+    orderedTopics.sort((a, b) => a.accuracy_percent - b.accuracy_percent);
     
-    // Bubble sort for array of objects
-    let len = orderedTopics.length;
-    for (let i = 0; i < len - 1; i++) {
-      for (let j = 0; j < len - 1 - i; j++) {
-        if (orderedTopics[j].accuracy_percent > orderedTopics[j + 1].accuracy_percent) {
-          let temp = orderedTopics[j];
-          orderedTopics[j] = orderedTopics[j + 1];
-          orderedTopics[j + 1] = temp;
-        }
-      }
-    }
-    
-    addDebug(`Weakest topic: ${orderedTopics[0].topic_id} with accuracy ${orderedTopics[0].accuracy_percent}%`);
+    console.log('Ordered topics:', orderedTopics);
     return orderedTopics;
   }
 
   //Get the preffered learning style
   async function getStyle(){
-    addDebug('Fetching learning style');
-    
     const {data: learningStyle, error} = await supabaseClient
       .from('adaptive_settings')
       .select('preferred_style')
       .eq('student_id', 'StudentTest');
     
     if (error) {
-      addDebug(`ERROR fetching learning style: ${JSON.stringify(error)}`);
+      console.error('Error fetching learning style:', error);
       return [{preferred_style: 'mixed'}];
     }
     
-    addDebug(`Learning style: ${learningStyle && learningStyle.length > 0 ? learningStyle[0].preferred_style : 'mixed'}`);
+    console.log('Learning style:', learningStyle);
     return learningStyle;
   }
 
-  // Function to get the questions
-  async function getQuestion(weakestTopic) {
-    addDebug(`Getting questions for topic ${weakestTopic}`);
-    
+  // Function to get initial questions for a session
+  async function getInitialQuestions(weakestTopic) {
     // Get the style
     let style = await getStyle();
     let preferredStyle = style && style.length > 0 ? style[0].preferred_style : 'mixed';
     
-    addDebug(`Preferred style: ${preferredStyle}`);
+    console.log('Preferred style value:', preferredStyle);
+    console.log('Weakest topic:', weakestTopic);
 
     //Get the current accuracy
     const {data: accuracy, error: accuracyError} = await supabaseClient
@@ -607,7 +627,7 @@
       .eq('topic_id', weakestTopic);
     
     if (accuracyError) {
-      addDebug(`ERROR fetching accuracy: ${JSON.stringify(accuracyError)}`);
+      console.error('Error fetching accuracy:', accuracyError);
     }
     
     //set difficulty based on accuracy 
@@ -635,7 +655,7 @@
       }
     }
     
-    addDebug(`Accuracy: ${accuracyValue}%, Setting difficulty: ${difficultyValue}`);
+    console.log('Difficulty set to:', difficultyValue);
     
     // Get questions of weakest topic of preferred style
     const { data: questions, error } = await supabaseClient
@@ -643,27 +663,25 @@
       .select('*')
       .eq('question_type', preferredStyle)
       .eq('topic_id', weakestTopic)
-      .eq('difficulty', difficultyValue);
+      .eq('difficulty', difficultyValue)
+      .limit(5); // Get 5 initial questions
     
     if (error) {
-      addDebug(`ERROR fetching questions: ${JSON.stringify(error)}`);
+      console.error('Error fetching questions:', error);
       return [];
     }
     
-    addDebug(`Found ${questions ? questions.length : 0} questions matching criteria`);
+    console.log('Initial questions found:', questions);
     return questions || [];
   }
 
   async function loadNewSession() {
-    addDebug('Loading new session');
-    
     try {
       //Get the weakest topic
       const orderedTopics = await orderTopics();
       
       if (!orderedTopics || orderedTopics.length === 0) {
-        addDebug('No ordered topics found, using fallback');
-        
+        console.error('No ordered topics found');
         // Fallback to any topic
         const {data: fallbackTopics} = await supabaseClient
           .from('topic_performance')
@@ -671,10 +689,9 @@
           .eq('student_id', 'StudentTest');
         
         if (fallbackTopics && fallbackTopics.length > 0) {
-          addDebug(`Using fallback topic: ${fallbackTopics[0].topic_id}`);
-          sessionQuestions = await getQuestion(fallbackTopics[0].topic_id);
+          sessionQuestions = await getInitialQuestions(fallbackTopics[0].topic_id);
         } else {
-          addDebug('No performance data, getting any questions');
+          // If no performance data, just get any questions
           const {data: anyQuestions} = await supabaseClient
             .from('questions')
             .select('*')
@@ -683,7 +700,8 @@
         }
       } else {
         const weakestTopic = orderedTopics[0].topic_id;
-        sessionQuestions = await getQuestion(weakestTopic);
+        //get initial questions for the weakest topic
+        sessionQuestions = await getInitialQuestions(weakestTopic);
       }
       
       //reset the current question
@@ -698,14 +716,13 @@
       checkAnswer.style.pointerEvents = 'auto';
       
       if (sessionQuestions && sessionQuestions.length > 0) {
-        addDebug(`Loaded ${sessionQuestions.length} questions for session`);
+        console.log(`Loaded ${sessionQuestions.length} questions for session`);
         displayQuestion();
       } else {
-        addDebug('No questions available');
         questionHolder.innerHTML = 'No questions available for your current level';
       }
     } catch (error) {
-      addDebug(`ERROR in loadNewSession: ${error.message}`);
+      console.error('Error loading new session:', error);
     }
   }
 
@@ -716,36 +733,23 @@
       const currentQuestion = sessionQuestions[currentQuestionIndex];
       const questionText = currentQuestion.question_text;
       questionHolder.innerHTML = questionText;
-      addDebug(`Displaying question ${currentQuestionIndex + 1}/${sessionQuestions.length}: ${questionText.substring(0, 50)}...`);
+      console.log(`Displaying question ${currentQuestionIndex + 1}/${sessionQuestions.length}: ${questionText.substring(0, 50)}...`);
     } else {
       questionHolder.innerHTML = 'No question available';
-      addDebug('No question to display');
     }
   }
 
   //Next question event listener
   nextQuestion.addEventListener('click', async function() {
-    addDebug('Next question clicked');
-    await loadNewSession();
+    console.log('Next question clicked');
+    await loadNextUnansweredQuestion();
   });
 
   //Initialize the page
   document.addEventListener('DOMContentLoaded', function() {
-    addDebug('Page loaded');
+    console.log('Page loaded');
     numCorrect.textContent = correctCount;
     numIncorrect.textContent = incorrectCount;
-    
-    // Test database connection
-    supabaseClient
-      .from('topic_performance')
-      .select('count', { count: 'exact', head: true })
-      .then(({ count, error }) => {
-        if (error) {
-          addDebug(`Database connection test failed: ${JSON.stringify(error)}`);
-        } else {
-          addDebug(`Database connection successful. Found ${count} records in topic_performance`);
-        }
-      });
   });
 </script>
 </body>

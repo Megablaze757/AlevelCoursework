@@ -368,8 +368,15 @@
   //Add a click handler for check answer
   checkAnswer.addEventListener('click', async function () {
     //Check if there's a question to answer
-    if (!sessionQuestions.length || currentQuestionIndex >= sessionQuestions.length) {
-      feedback.textContent = 'Please load a question first';
+    if (!sessionQuestions || sessionQuestions.length === 0) {
+      feedback.textContent = 'Please click "Next Question" to start the session';
+      feedback.className = 'feedback incorrect';
+      feedback.style.display = 'block';
+      return;
+    }
+    
+    if (currentQuestionIndex >= sessionQuestions.length) {
+      feedback.textContent = 'No more questions in current batch. Click "Next Question" to load more.';
       feedback.className = 'feedback incorrect';
       feedback.style.display = 'block';
       return;
@@ -426,6 +433,9 @@
     console.log('Total questions:', sessionQuestions.length);
     console.log('Asked IDs:', askedQuestionIds);
     
+    // Clear previous feedback
+    feedback.style.display = 'none';
+    
     // Increment to next question
     currentQuestionIndex++;
     
@@ -435,7 +445,6 @@
       console.log('Showing next question in current batch at index:', currentQuestionIndex);
       displayCurrentQuestion();
       answerBox.value = '';
-      feedback.style.display = 'none';
       checkAnswer.style.opacity = '1';
       checkAnswer.style.pointerEvents = 'auto';
     } else {
@@ -453,7 +462,6 @@
         // Show the first new question
         displayCurrentQuestion();
         answerBox.value = '';
-        feedback.style.display = 'none';
         checkAnswer.style.opacity = '1';
         checkAnswer.style.pointerEvents = 'auto';
       } else {
@@ -497,7 +505,6 @@
       // Show the first question of the new topic
       displayCurrentQuestion();
       answerBox.value = '';
-      feedback.style.display = 'none';
       checkAnswer.style.opacity = '1';
       checkAnswer.style.pointerEvents = 'auto';
     } else {
@@ -623,6 +630,11 @@
     try {
       console.log('Initializing session...');
       
+      // Clear previous session data
+      sessionQuestions = [];
+      askedQuestionIds = [];
+      currentQuestionIndex = 0;
+      
       // Get ordered topics
       orderedTopicsList = await orderTopics();
       
@@ -661,7 +673,13 @@
   // Next question button click handler
   nextQuestion.addEventListener('click', async function() {
     console.log('Next question button clicked');
-    await loadNextQuestion();
+    
+    // If this is the first time (no questions loaded), initialize the session
+    if (!sessionQuestions || sessionQuestions.length === 0) {
+      await initializeSession();
+    } else {
+      await loadNextQuestion();
+    }
   });
 
   // Initialize the page when it loads
@@ -670,8 +688,8 @@
     numCorrect.textContent = correctCount;
     numIncorrect.textContent = incorrectCount;
     
-    // Start the session
-    initializeSession();
+    // Don't auto-initialize, wait for user to click "Next Question"
+    questionHolder.innerHTML = 'Click "Next Question" to start the session';
   });
 </script>
 </body>

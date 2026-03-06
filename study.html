@@ -248,6 +248,51 @@
 
         const nextQuestion = document.getElementById('nextQuestionBtn');
 
+        //Update topic performance function
+        async function updateTopicPerformance(topicId, studentId, wasCorrect) {
+          // Get current performance
+          const {data: currentPerformance, error} = await supabaseClient
+            .from('topic_performance')
+            .select('*')
+            .eq('student_id', studentId)
+            .eq('topic_id', topicId);
+          //If the record exists update it
+          if (currentPerformance && currentPerformance.length > 0) {
+            const updatedPerformance = currentPerformance[0];
+
+            //Calculate the new values
+            const newAttempted = updatedPerformance.questions_attempted +1;
+            const newCorrect = updatedPerformance.questions_correct + (wasCorrect ? 1 : 0);
+            const newAccuracy = (newCorrect / newAttempted) * 100
+            
+            
+            //Update the record with the new data
+            const{error} = await supabaseClient 
+            .from('topic_performance')
+            .update({
+                questions_attempted: newAttempted,
+                questions_correct: newCorrect,
+                accuracy_percent: Math.round(newAccuracy)
+            })
+            .eq('performance_id', updatedPerformance.performance_id);
+
+            
+            
+          }
+          //If the record doesnt exist create a new one
+          else {
+            const {error} = await supabaseClient
+              .from('topic_performance')
+              .insert([{
+                student_id: studentId,
+                topic_id: topicId,
+                questions_attempted: 1,
+                questions_correct: wasCorrect ? 1 : 0,
+                accuracy_percent: wasCorrect ? 100 : 0
+              }])
+          }
+          
+        }
         //Add a click handler
         //Function to check answer on click
         checkAnswer.addEventListener('click',async function () {
@@ -306,51 +351,6 @@
         }  
         );
 
-        //Update topic performance function
-        async function updateTopicPerformance(topicId, studentId, wasCorrect) {
-          // Get current performance
-          const {data: currentPerformance, error} = await supabaseClient
-            .from('topic_performance')
-            .select('*')
-            .eq('student_id', studentId)
-            .eq('topic_id', topicId);
-          //If the record exists update it
-          if (currentPerformance && currentPerformance.length > 0) {
-            const updatedPerformance = currentPerformance[0];
-
-            //Calculate the new values
-            const newAttempted = updatedPerformance.questions_attempted +1;
-            const newCorrect = updatedPerformance.questions_correct + (wasCorrect ? 1 : 0);
-            const newAccuracy = (newCorrect / newAttempted) * 100
-            
-            
-            //Update the record with the new data
-            const{error} = await supabaseClient 
-            .from('topic_performance')
-            .update({
-                questions_attempted: newAttempted,
-                questions_correct: newCorrect,
-                accuracy_percent: Math.round(newAccuracy)
-            })
-            .eq('performance_id', updatedPerformance.performance_id);
-
-            
-            
-          }
-          //If the record doesnt exist create a new one
-          else {
-            const {error} = await supabaseClient
-              .from('topic_performance')
-              .insert([{
-                student_id: studentId,
-                topic_id: topicId,
-                questions_attempted: 1,
-                questions_correct: wasCorrect ? 1 : 0,
-                accuracy_percent: wasCorrect ? 100 : 0
-              }])
-          }
-          
-        }
 
 
 

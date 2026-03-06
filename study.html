@@ -418,75 +418,40 @@
     
     // Automatically load next question after a short delay
     setTimeout(() => {
-      loadNextUnansweredQuestion();
+      loadNextQuestion();
     }, 1500);
   });
 
-  // Function to load the next unanswered question
-  async function loadNextUnansweredQuestion() {
-    console.log('Loading next unanswered question');
-    console.log('Current session questions:', sessionQuestions.map(q => q.id));
-    console.log('Asked questions:', askedQuestionIds);
+  // Simplified function to load the next question
+  async function loadNextQuestion() {
+    console.log('Loading next question');
     
     // First, try to find an unanswered question in the current session
-    let unansweredInSession = false;
+    let foundUnanswered = false;
     
     for (let i = 0; i < sessionQuestions.length; i++) {
       if (!askedQuestionIds.includes(sessionQuestions[i].id)) {
-        // Found an unanswered question
         currentQuestionIndex = i;
-        unansweredInSession = true;
-        console.log(`Found unanswered question at index ${i}: ${sessionQuestions[i].id}`);
+        foundUnanswered = true;
         break;
       }
     }
     
-    if (unansweredInSession) {
-      // Display the unanswered question
+    if (foundUnanswered) {
+      // Display the next unanswered question
       displayQuestion();
       answerBox.value = '';
       feedback.style.display = 'none';
       checkAnswer.style.opacity = '1';
       checkAnswer.style.pointerEvents = 'auto';
     } else {
-      // All questions in current session have been answered
-      console.log('All questions in current session answered, loading more questions for current topic');
-      
-      // Try to get more questions for the current topic
-      if (currentTopicId) {
-        const newQuestions = await getUnansweredQuestions(currentTopicId);
-        
-        if (newQuestions && newQuestions.length > 0) {
-          // Add new questions to the session
-          sessionQuestions = sessionQuestions.concat(newQuestions);
-          console.log(`Added ${newQuestions.length} new questions for current topic. Total: ${sessionQuestions.length}`);
-          
-          // Find the first unanswered question (should be the first new one)
-          for (let i = 0; i < sessionQuestions.length; i++) {
-            if (!askedQuestionIds.includes(sessionQuestions[i].id)) {
-              currentQuestionIndex = i;
-              break;
-            }
-          }
-          
-          displayQuestion();
-          answerBox.value = '';
-          feedback.style.display = 'none';
-          checkAnswer.style.opacity = '1';
-          checkAnswer.style.pointerEvents = 'auto';
-        } else {
-          // No more questions for current topic, move to next weakest topic
-          console.log('No more questions for current topic, moving to next weakest topic');
-          await moveToNextWeakestTopic();
-        }
-      } else {
-        // No current topic, load initial session
-        await loadNewSession();
-      }
+      // All questions in current session are answered, move to next topic
+      console.log('All questions answered, moving to next weakest topic');
+      await moveToNextWeakestTopic();
     }
   }
 
-  // Function to move to the next weakest topic
+  // Simplified function to move to the next weakest topic
   async function moveToNextWeakestTopic() {
     console.log('Moving to next weakest topic');
     
@@ -502,37 +467,53 @@
       return;
     }
     
-    // Move to the next topic index
+    // Move to the next topic in the ordered list
     currentTopicIndex++;
     
-    // Check if we've gone through all topics
+    // If we've gone through all topics, loop back to the beginning
     if (currentTopicIndex >= orderedTopicsList.length) {
-      // Loop back to the beginning or show completion message
-      console.log('Completed all topics, starting over');
       currentTopicIndex = 0;
-      
-      // Optional: Show a message that you've completed all topics
-      feedback.textContent = 'Great job! You\'ve covered all topics. Starting over with the weakest topic.';
-      feedback.className = 'feedback correct';
-      feedback.style.display = 'block';
+      console.log('Completed all topics, starting over with the weakest topic');
     }
     
-    // Get the next topic
+    // Get the next topic from the ordered list
     const nextTopic = orderedTopicsList[currentTopicIndex];
     currentTopicId = nextTopic.topic_id;
     
-    // Update topic indicator
-    updateTopicIndicator(currentTopicId);
+    // Update the topic indicator
+    topicIndicator.textContent = `Current Topic: ${currentTopicId}`;
     
-    console.log(`Moving to topic ${currentTopicId} (index ${currentTopicIndex}) with accuracy ${nextTopic.accuracy_percent}%`);
+    console.log(`Moving to topic ${currentTopicId} (weakness rank ${currentTopicIndex + 1})`);
     
     // Get questions for the new topic
-    const newQuestions = await getUnansweredQuestions(currentTopicId);
+    await loadQuestionsForTopic(currentTopicId);
+  }
+
+  // Function to load questions for a specific topic
+  async function loadQuestionsForTopic(topicId) {
+    console.log(`Loading questions for topic ${topicId}`);
     
-    if (newQuestions && newQuestions.length > 0) {
+    // Get the user's preferred learning style
+    let style = await getStyle();
+    let preferredStyle = style && style.length > 0 ? style[0].preferred_style : 'mixed';
+    
+    // Get questions for this topic
+    const { data: questions, error } = await supabaseClient
+      .from('questions')
+      .select('*')
+      .eq('topic_id', topicId)
+      .eq('question_type', preferredStyle)
+      .limit(5);
+    
+    if (error) {
+      console.error('Error fetching questions:', error);
+      return;
+    }
+    
+    if (questions && questions.length > 0) {
       // Add new questions to the session
-      sessionQuestions = sessionQuestions.concat(newQuestions);
-      console.log(`Added ${newQuestions.length} questions for new topic. Total: ${sessionQuestions.length}`);
+      sessionQuestions = sessionQuestions.concat(questions);
+      console.log(`Added ${questions.length} questions for topic ${topicId}`);
       
       // Find the first unanswered question
       for (let i = 0; i < sessionQuestions.length; i++) {
@@ -548,109 +529,10 @@
       checkAnswer.style.opacity = '1';
       checkAnswer.style.pointerEvents = 'auto';
     } else {
-      // If no questions for this topic either, try the next one recursively
-      console.log('No questions for this topic either, trying next');
+      // If no questions for this topic, try the next one
+      console.log('No questions for this topic, trying next');
       await moveToNextWeakestTopic();
     }
-  }
-
-  // Get unanswered questions for a topic
-  async function getUnansweredQuestions(topicId) {
-    console.log(`Getting unanswered questions for topic ${topicId}`);
-    
-    // Get the user's preferred learning style
-    let style = await getStyle();
-    let preferredStyle = style && style.length > 0 ? style[0].preferred_style : 'mixed';
-    
-    // Get the current accuracy for difficulty calculation
-    const {data: accuracy, error: accuracyError} = await supabaseClient
-      .from('topic_performance')
-      .select('accuracy_percent')
-      .eq('student_id', student_id)  // FIXED: Changed from studentId to student_id
-      .eq('topic_id', topicId);
-    
-    if (accuracyError) {
-      console.error('Error fetching accuracy:', accuracyError);
-    }
-    
-    // Set difficulty based on accuracy
-    let difficultyValue = 3; // Default medium
-    
-    if (accuracy && accuracy.length > 0) {
-      const accuracyValue = accuracy[0].accuracy_percent;
-      
-      if (accuracyValue < 40) {
-        difficultyValue = 1; // Easy
-      }
-      else if (accuracyValue >= 40 && accuracyValue < 60) {
-        difficultyValue = 2; // Medium-Easy
-      }
-      else if (accuracyValue >= 60 && accuracyValue < 70) {
-        difficultyValue = 3; // Medium
-      }
-      else if (accuracyValue >= 70 && accuracyValue < 80) {
-        difficultyValue = 4; // Medium-Hard
-      }
-      else if (accuracyValue >= 80) {
-        difficultyValue = 5; // Hard
-      }
-    }
-    
-    // Try with preferred style and difficulty first
-    const { data: questions, error } = await supabaseClient
-      .from('questions')
-      .select('*')
-      .eq('topic_id', topicId)
-      .eq('question_type', preferredStyle)
-      .eq('difficulty', difficultyValue)
-      .limit(10);
-    
-    if (!error && questions) {
-      const unanswered = questions.filter(q => !askedQuestionIds.includes(q.id));
-      if (unanswered.length > 0) {
-        console.log(`Found ${unanswered.length} unanswered questions with preferred settings`);
-        return unanswered;
-      }
-    }
-    
-    // If no questions with preferred difficulty, try all difficulties
-    console.log('No questions with preferred difficulty, trying all difficulties');
-    const { data: allDifficultyQuestions, error: allError } = await supabaseClient
-      .from('questions')
-      .select('*')
-      .eq('topic_id', topicId)
-      .eq('question_type', preferredStyle)
-      .limit(15);
-    
-    if (!allError && allDifficultyQuestions) {
-      const unanswered = allDifficultyQuestions.filter(q => !askedQuestionIds.includes(q.id));
-      if (unanswered.length > 0) {
-        console.log(`Found ${unanswered.length} unanswered questions with any difficulty`);
-        return unanswered;
-      }
-    }
-    
-    // If still no questions, try mixed style
-    if (preferredStyle !== 'mixed') {
-      console.log('No questions with preferred style, trying mixed');
-      const { data: mixedQuestions, error: mixedError } = await supabaseClient
-        .from('questions')
-        .select('*')
-        .eq('topic_id', topicId)
-        .eq('question_type', 'mixed')
-        .limit(15);
-      
-      if (!mixedError && mixedQuestions) {
-        const unanswered = mixedQuestions.filter(q => !askedQuestionIds.includes(q.id));
-        if (unanswered.length > 0) {
-          console.log(`Found ${unanswered.length} unanswered questions with mixed style`);
-          return unanswered;
-        }
-      }
-    }
-    
-    console.log('No unanswered questions found for this topic');
-    return [];
   }
 
   //Get the strengths of the user
@@ -682,9 +564,8 @@
     return weaknesses;
   }
 
-  //Order the topics
+  //Order the topics from weakest to strongest
   async function orderTopics () {
-    const weaknesses = await getWeaknesses();
     let {data: orderedTopics, error} = await supabaseClient
       .from('topic_performance')
       .select('topic_id, accuracy_percent')
@@ -707,7 +588,7 @@
     return orderedTopics;
   }
 
-  //Get the preffered learning style
+  //Get the preferred learning style
   async function getStyle(){
     const {data: learningStyle, error} = await supabaseClient
       .from('adaptive_settings')
@@ -721,80 +602,6 @@
     
     console.log('Learning style:', learningStyle);
     return learningStyle;
-  }
-
-  // Function to get initial questions for a session
-  async function getInitialQuestions(topicId) {
-    console.log(`Getting initial questions for topic ${topicId}`);
-    
-    // Get the style
-    let style = await getStyle();
-    let preferredStyle = style && style.length > 0 ? style[0].preferred_style : 'mixed';
-    
-    //Get the current accuracy
-    const {data: accuracy, error: accuracyError} = await supabaseClient
-      .from('topic_performance')
-      .select('accuracy_percent')
-      .eq('student_id', 'StudentTest')
-      .eq('topic_id', topicId);
-    
-    if (accuracyError) {
-      console.error('Error fetching accuracy:', accuracyError);
-    }
-    
-    //set difficulty based on accuracy 
-    let accuracyValue = 50; // Default
-    let difficultyValue = 3; // Default medium
-    
-    if (accuracy && accuracy.length > 0) {
-      accuracyValue = accuracy[0].accuracy_percent;
-      
-      // Convert accuracy to difficulty level 1-5
-      if (accuracyValue < 40) {
-        difficultyValue = 1; // Easy
-      }
-      else if (accuracyValue >= 40 && accuracyValue < 60) {
-        difficultyValue = 2; // Medium-Easy
-      }
-      else if (accuracyValue >= 60 && accuracyValue < 70) {
-        difficultyValue = 3; // Medium
-      }
-      else if (accuracyValue >= 70 && accuracyValue < 80) {
-        difficultyValue = 4; // Medium-Hard
-      }
-      else if (accuracyValue >= 80) {
-        difficultyValue = 5; // Hard
-      }
-    }
-    
-    console.log('Difficulty set to:', difficultyValue);
-    
-    // Get questions for this topic
-    const { data: questions, error } = await supabaseClient
-      .from('questions')
-      .select('*')
-      .eq('question_type', preferredStyle)
-      .eq('topic_id', topicId)
-      .eq('difficulty', difficultyValue)
-      .limit(5);
-    
-    if (error) {
-      console.error('Error fetching questions:', error);
-      return [];
-    }
-    
-    // Filter out already asked questions
-    const unanswered = questions ? questions.filter(q => !askedQuestionIds.includes(q.id)) : [];
-    
-    console.log(`Found ${unanswered.length} unanswered questions for initial session`);
-    return unanswered || [];
-  }
-
-  // Update the topic indicator
-  function updateTopicIndicator(topicId) {
-    // You might want to fetch the topic name from a topics table
-    // For now, just show the ID
-    topicIndicator.textContent = `Current Topic: ${topicId}`;
   }
 
   async function loadNewSession() {
@@ -815,32 +622,13 @@
       currentTopicId = orderedTopicsList[0].topic_id;
       
       // Update topic indicator
-      updateTopicIndicator(currentTopicId);
+      topicIndicator.textContent = `Current Topic: ${currentTopicId}`;
       
-      console.log(`Starting with weakest topic: ${currentTopicId} (accuracy: ${orderedTopicsList[0].accuracy_percent}%)`);
+      console.log(`Starting with weakest topic: ${currentTopicId}`);
       
-      // Get initial questions for the weakest topic
-      sessionQuestions = await getInitialQuestions(currentTopicId);
+      // Load questions for the weakest topic
+      await loadQuestionsForTopic(currentTopicId);
       
-      // Reset current question index
-      currentQuestionIndex = 0;
-      
-      // Clear answer box and feedback
-      answerBox.value = '';
-      feedback.style.display = 'none';
-      
-      // Re-enable check answer button
-      checkAnswer.style.opacity = '1';
-      checkAnswer.style.pointerEvents = 'auto';
-      
-      if (sessionQuestions && sessionQuestions.length > 0) {
-        console.log(`Loaded ${sessionQuestions.length} questions for session`);
-        displayQuestion();
-      } else {
-        // If no questions for weakest topic, try next topic
-        console.log('No questions for weakest topic, trying next');
-        await moveToNextWeakestTopic();
-      }
     } catch (error) {
       console.error('Error loading new session:', error);
     }
@@ -851,9 +639,8 @@
     const questionHolder = document.getElementById('questionHolder');
     if (sessionQuestions && sessionQuestions.length > 0 && currentQuestionIndex < sessionQuestions.length) {
       const currentQuestion = sessionQuestions[currentQuestionIndex];
-      const questionText = currentQuestion.question_text;
-      questionHolder.innerHTML = questionText;
-      console.log(`Displaying question ${currentQuestionIndex + 1}/${sessionQuestions.length}: ${questionText.substring(0, 50)}...`);
+      questionHolder.innerHTML = currentQuestion.question_text;
+      console.log(`Displaying question ${currentQuestionIndex + 1} of ${sessionQuestions.length}`);
     } else {
       questionHolder.innerHTML = 'No question available';
     }
@@ -862,7 +649,7 @@
   //Next question event listener
   nextQuestion.addEventListener('click', async function() {
     console.log('Next question clicked');
-    await loadNextUnansweredQuestion();
+    await loadNextQuestion();
   });
 
   //Initialize the page
@@ -870,6 +657,9 @@
     console.log('Page loaded');
     numCorrect.textContent = correctCount;
     numIncorrect.textContent = incorrectCount;
+    
+    // Load initial session
+    loadNewSession();
   });
 </script>
 </body>

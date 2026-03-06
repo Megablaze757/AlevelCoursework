@@ -249,7 +249,23 @@
 
         const nextQuestion = document.getElementById('nextQuestionBtn');
 
-        //Update topic performance function
+
+
+
+        
+let questions = [];
+      
+        
+          // The supabase url
+  const supabase_url = 'https://pxjndwrkafegopsolnde.supabase.co'
+  // Supabase key
+  const supabase_key = 'sb_publishable_eOUJ3K3GNczOncszRwYhyA_A1QAw72F'
+  // Initialize supabase client
+  const supabaseClient = supabase.createClient(
+    'https://pxjndwrkafegopsolnde.supabase.co',
+    'sb_publishable_eOUJ3K3GNczOncszRwYhyA_A1QAw72F'
+  );
+                //Update topic performance function
         async function updateTopicPerformance(topicId, studentId, wasCorrect) {
           // Get current performance
           const {data: currentPerformance, error} = await supabaseClient
@@ -353,21 +369,6 @@
         );
 
 
-
-
-        
-let questions = [];
-      
-        
-          // The supabase url
-  const supabase_url = 'https://pxjndwrkafegopsolnde.supabase.co'
-  // Supabase key
-  const supabase_key = 'sb_publishable_eOUJ3K3GNczOncszRwYhyA_A1QAw72F'
-  // Initialize supabase client
-  const supabaseClient = supabase.createClient(
-    'https://pxjndwrkafegopsolnde.supabase.co',
-    'sb_publishable_eOUJ3K3GNczOncszRwYhyA_A1QAw72F'
-  );
                 //Fetch the Questionns needed for the session
         async function fetchQuestion() {
           

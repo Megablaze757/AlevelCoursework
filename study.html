@@ -208,6 +208,7 @@
         <input type='text' class='answerBox' id='answerBox'>        
         <div class='checkAnswer' id='checkAnswer'>Check answer</div>  <!-- Added text -->
       <div class='feedback' id='feedback'></div>
+      <button class='nextQuestionBtn' id='nextQuestionBtn'>Next Question</button>
         
       </div>
       
@@ -243,7 +244,9 @@
         let question_id = 1;
         //Get the Answer elements
         const checkAnswer = document.getElementById('checkAnswer');
-        const answerBox = document.getElementById('answerBox')
+        const answerBox = document.getElementById('answerBox');
+
+        const nextQuestion = document.getElementById('nextQuestionBtn');
 
         //Add a click handler
         //Function to check answer on click
@@ -522,9 +525,12 @@ async function loadNewSession () {
               const questionText = currentQuestion.question_text;
               questionHolder.innerHTML = questionText;
             
-          }
+          }S
           document.addEventListener('DOMContentLoaded', async function () {
             
+            
+            //Next question event listner and function 
+            nextQuestion.addEventListener('click', async function() {
             //Fetch all questions from the database
             await fetchQuestion()
             
@@ -540,7 +546,7 @@ async function loadNewSession () {
             
             //Order topics by performance
             const orderedTopics = await orderTopics();
-            
+            });
           });
             
             

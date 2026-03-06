@@ -241,7 +241,7 @@
   
   <!-- Question container -->
   <div class='questionContainer'>
-    <div class='question' id='questionHolder'>Click "Start Session" to begin</div>
+    <div class='question' id='questionHolder'>Click "Next Question" to start</div>
     <input type='text' class='answerBox' id='answerBox' placeholder="Enter your answer">        
     <div class="button-group">
       <div class='checkAnswer' id='checkAnswer'>Check answer</div>
@@ -382,8 +382,8 @@
       return;
     }
     
-    //Get users answer and remove capitalisation
-    const userAnswer = answerBox.value.trim().toLowerCase();
+    //Get users answer
+    const userAnswer = answerBox.value.trim();
     
     //Check if answer is empty
     if (!userAnswer) {
@@ -395,13 +395,14 @@
     
     //Get the question currently in the session
     const currentQuestion = sessionQuestions[currentQuestionIndex];
-    const correctAnswer = currentQuestion.correct_answer.toLowerCase();
+    const correctAnswer = currentQuestion.correct_answer;
     const topicId = currentQuestion.topic_id;
     
     console.log('User answer:', userAnswer);
     console.log('Correct answer:', correctAnswer);
 
-    if (userAnswer === correctAnswer) {
+    // Compare answers (case insensitive)
+    if (userAnswer.toLowerCase() === correctAnswer.toLowerCase()) {
       console.log('correct');
       feedback.textContent = 'Correct! Well done!';
       feedback.className = 'feedback correct';
@@ -410,7 +411,7 @@
       await updateTopicPerformance(topicId, student_id, true);
     }
     else {
-      feedback.textContent = `Incorrect. The correct answer is: ${currentQuestion.correct_answer}`;
+      feedback.textContent = `Incorrect. The correct answer is: ${correctAnswer}`;
       feedback.className = 'feedback incorrect';
       incorrectCount += 1 
       numIncorrect.textContent = incorrectCount;
@@ -421,35 +422,39 @@
     feedback.style.display = 'block';
     
     //Track the asked questions
-    askedQuestionIds.push(currentQuestion.id);
+    if (!askedQuestionIds.includes(currentQuestion.id)) {
+      askedQuestionIds.push(currentQuestion.id);
+    }
+    
     console.log('Asked questions:', askedQuestionIds);
-    console.log('Session questions:', sessionQuestions.map(q => q.id));
+    console.log('Current index:', currentQuestionIndex);
   });
 
   // Function to load the next question
   async function loadNextQuestion() {
-    console.log('Loading next question');
-    console.log('Current index:', currentQuestionIndex);
+    console.log('=== Loading Next Question ===');
+    console.log('Before - Current index:', currentQuestionIndex);
     console.log('Total questions:', sessionQuestions.length);
     console.log('Asked IDs:', askedQuestionIds);
     
     // Clear previous feedback
     feedback.style.display = 'none';
+    answerBox.value = '';
     
-    // Increment to next question
+    // Move to the next question
     currentQuestionIndex++;
+    console.log('After increment - New index:', currentQuestionIndex);
     
     // Check if we have a question at this index
     if (currentQuestionIndex < sessionQuestions.length) {
       // We have another question in the current batch
       console.log('Showing next question in current batch at index:', currentQuestionIndex);
       displayCurrentQuestion();
-      answerBox.value = '';
       checkAnswer.style.opacity = '1';
       checkAnswer.style.pointerEvents = 'auto';
     } else {
       // We've reached the end of current batch, need more questions
-      console.log('End of current batch, loading more questions');
+      console.log('End of current batch, loading more questions for topic:', currentTopicId);
       
       // Try to get more questions for current topic
       const newQuestions = await getQuestionsForTopic(currentTopicId);
@@ -459,9 +464,8 @@
         sessionQuestions = sessionQuestions.concat(newQuestions);
         console.log(`Added ${newQuestions.length} new questions. Total: ${sessionQuestions.length}`);
         
-        // Show the first new question
+        // Show the first new question (currentQuestionIndex is already at the new position)
         displayCurrentQuestion();
-        answerBox.value = '';
         checkAnswer.style.opacity = '1';
         checkAnswer.style.pointerEvents = 'auto';
       } else {
@@ -475,6 +479,7 @@
   // Function to move to the next topic in the ordered list
   async function moveToNextTopic() {
     console.log('Moving to next topic');
+    console.log('Current topic index:', currentTopicIndex);
     
     // Move to next topic index
     currentTopicIndex++;
@@ -494,6 +499,9 @@
     
     console.log(`Moving to topic ${currentTopicId} (index ${currentTopicIndex})`);
     
+    // Reset currentQuestionIndex to point to the next position
+    // (it was incremented before calling this function)
+    
     // Get questions for the new topic
     const newQuestions = await getQuestionsForTopic(currentTopicId);
     
@@ -502,7 +510,7 @@
       sessionQuestions = sessionQuestions.concat(newQuestions);
       console.log(`Added ${newQuestions.length} questions for new topic`);
       
-      // Show the first question of the new topic
+      // Show the first question of the new topic (at currentQuestionIndex)
       displayCurrentQuestion();
       answerBox.value = '';
       checkAnswer.style.opacity = '1';

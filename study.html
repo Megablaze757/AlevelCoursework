@@ -241,7 +241,7 @@
   
   <!-- Question container -->
   <div class='questionContainer'>
-    <div class='question' id='questionHolder'>Click "Next Question" to start</div>
+    <div class='question' id='questionHolder'>Click "Start Session" to begin</div>
     <input type='text' class='answerBox' id='answerBox' placeholder="Enter your answer">        
     <div class="button-group">
       <div class='checkAnswer' id='checkAnswer'>Check answer</div>
@@ -251,7 +251,7 @@
   </div>
   
   <!-- End Session button Below the card on the bottom right -->
-  <div class='endSession' id='endSession'>End session</div>
+  <div class='endSession' id='endSession' onclick="location.reload()">End session</div>
 
 </div>  <!-- end of card-area -->
 
@@ -317,7 +317,7 @@
         const newCorrect = updatedPerformance.questions_correct + (wasCorrect ? 1 : 0);
         const newAccuracy = (newCorrect / newAttempted) * 100
         
-        // Try to update using the ID field (assuming it's 'id' or 'performance_id')
+        // Try to update using the ID field
         let updateQuery = supabaseClient
           .from('topic_performance')
           .update({
@@ -371,6 +371,7 @@
     if (!sessionQuestions.length || currentQuestionIndex >= sessionQuestions.length) {
       feedback.textContent = 'Please load a question first';
       feedback.className = 'feedback incorrect';
+      feedback.style.display = 'block';
       return;
     }
     
@@ -381,6 +382,7 @@
     if (!userAnswer) {
       feedback.textContent = 'Please enter an answer';
       feedback.className = 'feedback incorrect';
+      feedback.style.display = 'block';
       return;
     }
     
@@ -408,90 +410,106 @@
       await updateTopicPerformance(topicId, student_id, false);
     };
     
+    //Show feedback
+    feedback.style.display = 'block';
+    
     //Track the asked questions
     askedQuestionIds.push(currentQuestion.id);
     console.log('Asked questions:', askedQuestionIds);
-
-    //Disable check answer button until next question is loaded
-    checkAnswer.style.opacity = '0.5';
-    checkAnswer.style.pointerEvents = 'none';
-    
-    // Automatically load next question after a short delay
-    setTimeout(() => {
-      loadNextQuestion();
-    }, 1500);
+    console.log('Session questions:', sessionQuestions.map(q => q.id));
   });
 
-  // Simplified function to load the next question
+  // Function to load the next question
   async function loadNextQuestion() {
     console.log('Loading next question');
+    console.log('Current index:', currentQuestionIndex);
+    console.log('Total questions:', sessionQuestions.length);
+    console.log('Asked IDs:', askedQuestionIds);
     
-    // First, try to find an unanswered question in the current session
-    let foundUnanswered = false;
+    // Increment to next question
+    currentQuestionIndex++;
     
-    for (let i = 0; i < sessionQuestions.length; i++) {
-      if (!askedQuestionIds.includes(sessionQuestions[i].id)) {
-        currentQuestionIndex = i;
-        foundUnanswered = true;
-        break;
-      }
-    }
-    
-    if (foundUnanswered) {
-      // Display the next unanswered question
-      displayQuestion();
+    // Check if we have a question at this index
+    if (currentQuestionIndex < sessionQuestions.length) {
+      // We have another question in the current batch
+      console.log('Showing next question in current batch at index:', currentQuestionIndex);
+      displayCurrentQuestion();
       answerBox.value = '';
       feedback.style.display = 'none';
       checkAnswer.style.opacity = '1';
       checkAnswer.style.pointerEvents = 'auto';
     } else {
-      // All questions in current session are answered, move to next topic
-      console.log('All questions answered, moving to next weakest topic');
-      await moveToNextWeakestTopic();
+      // We've reached the end of current batch, need more questions
+      console.log('End of current batch, loading more questions');
+      
+      // Try to get more questions for current topic
+      const newQuestions = await getQuestionsForTopic(currentTopicId);
+      
+      if (newQuestions && newQuestions.length > 0) {
+        // Add new questions to the session
+        sessionQuestions = sessionQuestions.concat(newQuestions);
+        console.log(`Added ${newQuestions.length} new questions. Total: ${sessionQuestions.length}`);
+        
+        // Show the first new question
+        displayCurrentQuestion();
+        answerBox.value = '';
+        feedback.style.display = 'none';
+        checkAnswer.style.opacity = '1';
+        checkAnswer.style.pointerEvents = 'auto';
+      } else {
+        // No more questions for current topic, move to next topic
+        console.log('No more questions for current topic, moving to next');
+        await moveToNextTopic();
+      }
     }
   }
 
-  // Simplified function to move to the next weakest topic
-  async function moveToNextWeakestTopic() {
-    console.log('Moving to next weakest topic');
+  // Function to move to the next topic in the ordered list
+  async function moveToNextTopic() {
+    console.log('Moving to next topic');
     
-    // Get ordered topics if we don't have them
-    if (!orderedTopicsList || orderedTopicsList.length === 0) {
-      orderedTopicsList = await orderTopics();
-    }
-    
-    if (!orderedTopicsList || orderedTopicsList.length === 0) {
-      feedback.textContent = 'No topics available';
-      feedback.className = 'feedback incorrect';
-      feedback.style.display = 'block';
-      return;
-    }
-    
-    // Move to the next topic in the ordered list
+    // Move to next topic index
     currentTopicIndex++;
     
-    // If we've gone through all topics, loop back to the beginning
+    // If we've gone through all topics, loop back
     if (currentTopicIndex >= orderedTopicsList.length) {
       currentTopicIndex = 0;
-      console.log('Completed all topics, starting over with the weakest topic');
+      console.log('Completed all topics, starting over');
     }
     
-    // Get the next topic from the ordered list
+    // Get the next topic
     const nextTopic = orderedTopicsList[currentTopicIndex];
     currentTopicId = nextTopic.topic_id;
     
-    // Update the topic indicator
+    // Update topic indicator
     topicIndicator.textContent = `Current Topic: ${currentTopicId}`;
     
-    console.log(`Moving to topic ${currentTopicId} (weakness rank ${currentTopicIndex + 1})`);
+    console.log(`Moving to topic ${currentTopicId} (index ${currentTopicIndex})`);
     
     // Get questions for the new topic
-    await loadQuestionsForTopic(currentTopicId);
+    const newQuestions = await getQuestionsForTopic(currentTopicId);
+    
+    if (newQuestions && newQuestions.length > 0) {
+      // Add new questions to the session
+      sessionQuestions = sessionQuestions.concat(newQuestions);
+      console.log(`Added ${newQuestions.length} questions for new topic`);
+      
+      // Show the first question of the new topic
+      displayCurrentQuestion();
+      answerBox.value = '';
+      feedback.style.display = 'none';
+      checkAnswer.style.opacity = '1';
+      checkAnswer.style.pointerEvents = 'auto';
+    } else {
+      // If no questions for this topic, try the next one
+      console.log('No questions for this topic, trying next');
+      await moveToNextTopic();
+    }
   }
 
-  // Function to load questions for a specific topic
-  async function loadQuestionsForTopic(topicId) {
-    console.log(`Loading questions for topic ${topicId}`);
+  // Function to get questions for a topic
+  async function getQuestionsForTopic(topicId) {
+    console.log(`Getting questions for topic ${topicId}`);
     
     // Get the user's preferred learning style
     let style = await getStyle();
@@ -507,31 +525,27 @@
     
     if (error) {
       console.error('Error fetching questions:', error);
-      return;
+      return [];
     }
     
-    if (questions && questions.length > 0) {
-      // Add new questions to the session
-      sessionQuestions = sessionQuestions.concat(questions);
-      console.log(`Added ${questions.length} questions for topic ${topicId}`);
-      
-      // Find the first unanswered question
-      for (let i = 0; i < sessionQuestions.length; i++) {
-        if (!askedQuestionIds.includes(sessionQuestions[i].id)) {
-          currentQuestionIndex = i;
-          break;
-        }
-      }
-      
-      displayQuestion();
-      answerBox.value = '';
-      feedback.style.display = 'none';
-      checkAnswer.style.opacity = '1';
-      checkAnswer.style.pointerEvents = 'auto';
+    // Filter out questions that have already been asked
+    const newQuestions = questions ? questions.filter(q => !askedQuestionIds.includes(q.id)) : [];
+    
+    console.log(`Found ${newQuestions.length} new questions for topic ${topicId}`);
+    return newQuestions;
+  }
+
+  // Function to display the current question
+  function displayCurrentQuestion() {
+    const questionHolder = document.getElementById('questionHolder');
+    
+    if (sessionQuestions && sessionQuestions.length > 0 && currentQuestionIndex < sessionQuestions.length) {
+      const currentQuestion = sessionQuestions[currentQuestionIndex];
+      questionHolder.innerHTML = currentQuestion.question_text;
+      console.log(`Displaying question ${currentQuestionIndex + 1} of ${sessionQuestions.length}: ${currentQuestion.id}`);
     } else {
-      // If no questions for this topic, try the next one
-      console.log('No questions for this topic, trying next');
-      await moveToNextWeakestTopic();
+      questionHolder.innerHTML = 'No questions available';
+      console.log('No question to display');
     }
   }
 
@@ -604,16 +618,17 @@
     return learningStyle;
   }
 
-  async function loadNewSession() {
+  // Initialize the session
+  async function initializeSession() {
     try {
+      console.log('Initializing session...');
+      
       // Get ordered topics
       orderedTopicsList = await orderTopics();
       
       if (!orderedTopicsList || orderedTopicsList.length === 0) {
         console.error('No ordered topics found');
-        feedback.textContent = 'No topics available';
-        feedback.className = 'feedback incorrect';
-        feedback.style.display = 'block';
+        questionHolder.innerHTML = 'No topics available';
         return;
       }
       
@@ -626,40 +641,37 @@
       
       console.log(`Starting with weakest topic: ${currentTopicId}`);
       
-      // Load questions for the weakest topic
-      await loadQuestionsForTopic(currentTopicId);
+      // Get questions for the weakest topic
+      sessionQuestions = await getQuestionsForTopic(currentTopicId);
+      
+      if (sessionQuestions && sessionQuestions.length > 0) {
+        currentQuestionIndex = 0;
+        displayCurrentQuestion();
+        console.log(`Loaded ${sessionQuestions.length} questions for session`);
+      } else {
+        console.log('No questions for weakest topic, trying next');
+        await moveToNextTopic();
+      }
       
     } catch (error) {
-      console.error('Error loading new session:', error);
+      console.error('Error initializing session:', error);
     }
   }
 
-  //Function to display the question
-  function displayQuestion() {
-    const questionHolder = document.getElementById('questionHolder');
-    if (sessionQuestions && sessionQuestions.length > 0 && currentQuestionIndex < sessionQuestions.length) {
-      const currentQuestion = sessionQuestions[currentQuestionIndex];
-      questionHolder.innerHTML = currentQuestion.question_text;
-      console.log(`Displaying question ${currentQuestionIndex + 1} of ${sessionQuestions.length}`);
-    } else {
-      questionHolder.innerHTML = 'No question available';
-    }
-  }
-
-  //Next question event listener
+  // Next question button click handler
   nextQuestion.addEventListener('click', async function() {
-    console.log('Next question clicked');
+    console.log('Next question button clicked');
     await loadNextQuestion();
   });
 
-  //Initialize the page
+  // Initialize the page when it loads
   document.addEventListener('DOMContentLoaded', function() {
     console.log('Page loaded');
     numCorrect.textContent = correctCount;
     numIncorrect.textContent = incorrectCount;
     
-    // Load initial session
-    loadNewSession();
+    // Start the session
+    initializeSession();
   });
 </script>
 </body>

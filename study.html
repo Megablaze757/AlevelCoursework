@@ -566,8 +566,12 @@
     const {data: accuracy, error: accuracyError} = await supabaseClient
       .from('topic_performance')
       .select('accuracy_percent')
-      .eq('student_id', studentId)
+      .eq('student_id', student_id)  // FIXED: Changed from studentId to student_id
       .eq('topic_id', topicId);
+    
+    if (accuracyError) {
+      console.error('Error fetching accuracy:', accuracyError);
+    }
     
     // Set difficulty based on accuracy
     let difficultyValue = 3; // Default medium
@@ -592,55 +596,36 @@
       }
     }
     
-    // Get questions for this topic that haven't been asked yet
-    let allQuestions = [];
-    let page = 0;
-    const pageSize = 5;
-    
-    // Try with preferred style first
-    while (true) {
-      const { data: questions, error } = await supabaseClient
-        .from('questions')
-        .select('*')
-        .eq('topic_id', topicId)
-        .eq('question_type', preferredStyle)
-        .eq('difficulty', difficultyValue)
-        .range(page * pageSize, (page + 1) * pageSize - 1);
-      
-      if (error) {
-        console.error('Error fetching questions:', error);
-        break;
-      }
-      
-      if (!questions || questions.length === 0) {
-        break;
-      }
-      
-      // Filter out already asked questions
-      const unanswered = questions.filter(q => !askedQuestionIds.includes(q.id));
-      
-      if (unanswered.length > 0) {
-        // Found some unanswered questions
-        return unanswered;
-      }
-      
-      page++;
-    }
-    
-    // If no unanswered questions found with preferred style and difficulty, try other difficulties
-    console.log('No questions with preferred difficulty, trying other difficulties');
-    
-    // Try all difficulties for this topic
+    // Try with preferred style and difficulty first
     const { data: questions, error } = await supabaseClient
       .from('questions')
       .select('*')
       .eq('topic_id', topicId)
       .eq('question_type', preferredStyle)
+      .eq('difficulty', difficultyValue)
       .limit(10);
     
     if (!error && questions) {
       const unanswered = questions.filter(q => !askedQuestionIds.includes(q.id));
       if (unanswered.length > 0) {
+        console.log(`Found ${unanswered.length} unanswered questions with preferred settings`);
+        return unanswered;
+      }
+    }
+    
+    // If no questions with preferred difficulty, try all difficulties
+    console.log('No questions with preferred difficulty, trying all difficulties');
+    const { data: allDifficultyQuestions, error: allError } = await supabaseClient
+      .from('questions')
+      .select('*')
+      .eq('topic_id', topicId)
+      .eq('question_type', preferredStyle)
+      .limit(15);
+    
+    if (!allError && allDifficultyQuestions) {
+      const unanswered = allDifficultyQuestions.filter(q => !askedQuestionIds.includes(q.id));
+      if (unanswered.length > 0) {
+        console.log(`Found ${unanswered.length} unanswered questions with any difficulty`);
         return unanswered;
       }
     }
@@ -653,17 +638,18 @@
         .select('*')
         .eq('topic_id', topicId)
         .eq('question_type', 'mixed')
-        .limit(10);
+        .limit(15);
       
       if (!mixedError && mixedQuestions) {
         const unanswered = mixedQuestions.filter(q => !askedQuestionIds.includes(q.id));
         if (unanswered.length > 0) {
+          console.log(`Found ${unanswered.length} unanswered questions with mixed style`);
           return unanswered;
         }
       }
     }
     
-    // No questions found for this topic
+    console.log('No unanswered questions found for this topic');
     return [];
   }
 

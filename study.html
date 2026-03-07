@@ -505,8 +505,16 @@ async function getQuestion(topicId) {
     questions = allQuestions;
   }
   
-  console.log('Questions found:', questions?.length || 0);
-  return questions || [];
+  // Filter out questions that have already been answered
+  if (questions && questions.length > 0) {
+    const unansweredQuestions = questions.filter(q => !askedQuestionIds.includes(q.id));
+    console.log('Total questions found:', questions.length);
+    console.log('Already answered IDs:', askedQuestionIds);
+    console.log('Unanswered questions:', unansweredQuestions.length);
+    return unansweredQuestions;
+  }
+  
+  return [];
 }
 
 // Load new session

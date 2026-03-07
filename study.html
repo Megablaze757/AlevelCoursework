@@ -248,7 +248,7 @@
         const answerBox = document.getElementById('answerBox');
 
         const nextQuestion = document.getElementById('nextQuestionBtn');
-        const topicIndicator = document.getElementById('topicIndicator');
+
 
 
 
@@ -542,7 +542,7 @@ nextQuestion.addEventListener('click', async function() {
     orderedTopicsList = await orderTopics();
     currentTopicIndex = 0;
     currentTopicId = orderedTopicsList[0].topic_id;
-    topicIndicator.textContent = `Current Topic: ${currentTopicId}`;
+
     sessionQuestions = await getQuestion(currentTopicId);
     currentQuestionIndex = 0;
     displayQuestion();

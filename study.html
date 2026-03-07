@@ -360,6 +360,13 @@ checkAnswer.addEventListener('click', async function() {
   // Move to next question index
   currentQuestionIndex++;
   console.log(' Next question index:', currentQuestionIndex);
+  if (currentQuestionIndex < sessionQuestions.length) {
+  displayQuestion();
+  } 
+  else {
+  console.log('loading new session');
+  await loadNewSession();
+  }
 });
 
                 //Fetch the Questionns needed for the session

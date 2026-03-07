@@ -533,24 +533,34 @@ async function loadNewSession () {
             
             //Next question event listner and function 
             nextQuestion.addEventListener('click', async function() {
-            //Fetch all questions from the database
-            await fetchQuestion()
-            
-            //Load the first session with weakest topic
-            await loadNewSession();
-            
-            //Display the first question
-            displayQuestion();
-            
-            //Get user strengths and weaknesses
-            getStrengths();
-            getWeaknesses();
-            
-            //Order topics by performance
-            const orderedTopics = await orderTopics();
-            });
-          });
-            
+      console.log('Next question clicked');
+  
+      //Fetch all questions from the database
+      console.log('Fetching questions');
+      await fetchQuestion();
+      console.log('Fetched questions count', questions.length);
+  
+      //Load the first session with weakest topic
+      console.log('Loading new session');
+      await loadNewSession();
+      console.log('Session questions loaded:', sessionQuestions.length);
+  
+      //Display the first question
+      console.log('Displaying question at index:', currentQuestionIndex);
+      displayQuestion();
+  
+      //Check if questionHolder has content after displayQuestion
+      const questionHolder = document.getElementById('questionHolder');
+
+  
+      //Get user strengths and weaknesses
+      getStrengths();
+      getWeaknesses();
+  
+      //Order topics by performance
+      const orderedTopics = await orderTopics();
+      console.log('Ordered topics:', orderedTopics);
+});
             
           
           

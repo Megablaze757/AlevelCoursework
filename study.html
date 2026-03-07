@@ -312,62 +312,55 @@ let questions = [];
         }
         //Add a click handler
         //Function to check answer on click
-        checkAnswer.addEventListener('click',async function () {
-          //Get users answer and remove capitalisation
-          const userAnswer = answerBox.value.trim().toLowerCase();
-          //Get the question currently in the session
-          const currentQuestion = sessionQuestions[currentQuestionIndex];
-          const correctAnswer = currentQuestion.correct_answer.toLowerCase();
-          const topicId = currentQuestion.topic_id;
-          const studentId = 'StudentTest';
-          console.log(correctAnswer);
-          
-
-          if (userAnswer === correctAnswer) {
-            console.log('correct');
-            //show Correct feedback text and colour
-            feedback.textContent = 'Correct';
-            feedback.className = 'feedback correct';
-            //Add one to the correct count
-            correctCount += 1
-            //Update Num correct
-            numCorrect.textContent = correctCount;
-            //Save to database 
-            await updateTopicPerformance(topicId,student_id,true)
-          }
-          else {
-            //Show incorrect feedback message
-            feedback.textContent = 'Incorrect';
-            
-            feedback.className = 'feedback incorrect';
-            //Add one to the incorrect count
-            incorrectCount += 1 
-            //Update Num incorrect
-            
-            numIncorrect.textContent = incorrectCount;
-            //Save an incorrect answer to the database
-            await updateTopicPerformance(topicId, studentId, false);
+        // Check answer button
+checkAnswer.addEventListener('click', async function() {
+  // Check if there's a question to answer
+  if (sessionQuestions.length === 0) {
+    feedback.textContent = 'Please click Next Question first';
+    feedback.className = 'feedback incorrect';
+    feedback.style.display = 'block';
+    return;
+  }
   
-
-            
-          };
-          //Track the asked questions
-          askedQuestionIds.push(currentQuestion.id);
-
-          //Move to next question
-          currentQuestionIndex++;
-
-          //Check if ran out of questions
-          if(currentQuestionIndex >= sessionQuestions.length){
-            await loadNewSession()
-          }
-        else{
-          displayCurrentQuestion()
-        }
-          
-        }  
-        );
-
+  // Get user answer
+  const userAnswer = answerBox.value.trim().toLowerCase();
+  if (!userAnswer) {
+    feedback.textContent = 'Please enter an answer';
+    feedback.className = 'feedback incorrect';
+    feedback.style.display = 'block';
+    return;
+  }
+  
+  // Get current question
+  const currentQuestion = sessionQuestions[currentQuestionIndex];
+  const correctAnswer = currentQuestion.correct_answer.toLowerCase();
+  const topicId = currentQuestion.topic_id;
+  
+  // Check if correct
+  if (userAnswer === correctAnswer) {
+    feedback.textContent = 'Correct!';
+    feedback.className = 'feedback correct';
+    correctCount++;
+    numCorrect.textContent = correctCount;
+    await updateTopicPerformance(topicId, student_id, true);
+  } else {
+    feedback.textContent = `Incorrect. The correct answer is: ${currentQuestion.correct_answer}`;
+    feedback.className = 'feedback incorrect';
+    incorrectCount++;
+    numIncorrect.textContent = incorrectCount;
+    await updateTopicPerformance(topicId, student_id, false);
+  }
+  
+  // Show feedback
+  feedback.style.display = 'block';
+  
+  // Mark question as answered
+  askedQuestionIds.push(currentQuestion.id);
+  
+  // Move to next question index
+  currentQuestionIndex++;
+  console.log(' Next question index:', currentQuestionIndex);
+});
 
                 //Fetch the Questionns needed for the session
         async function fetchQuestion() {

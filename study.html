@@ -500,23 +500,29 @@ async function getQuestion (weakestTopic) {
 }
 
 
-async function loadNewSession () {
-  //Get the weakest topic
-  const orderedTopics = await orderTopics();
-  const weakestTopic = orderedTopics[0].topic_id;
-  //get questions for the weakest topic
-
-  sessionQuestions = await getQuestion(weakestTopic);
-
-  //reset the current question
-  currentQuestionIndex = 0;
+// Load new session
+async function loadNewSession() {
+  orderedTopicsList = await orderTopics();
+  if (!orderedTopicsList || orderedTopicsList.length === 0) return;
   
-      if (sessionQuestions.length > 0) {
-        displayQuestion();
-  
-    } else {
-        
+  // Try each topic until we find one with questions
+  for (let i = 0; i < orderedTopicsList.length; i++) {
+    currentTopicIndex = i;
+    currentTopicId = orderedTopicsList[i].topic_id;
+    console.log('Trying topic:', currentTopicId);
+    
+    sessionQuestions = await getQuestion(currentTopicId);
+    
+    if (sessionQuestions.length > 0) {
+      console.log('Found questions for topic:', currentTopicId);
+      currentQuestionIndex = 0;
+      displayQuestion();
+      return;
     }
+  }
+  
+  // If we get here, no topics have questions
+  questionHolder.innerHTML = 'No questions available for any topic';
 }
 
         

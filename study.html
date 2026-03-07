@@ -443,65 +443,71 @@ async function getStyle(){
 }
         
 // Function to get the questions
-async function getQuestion (weakestTopic) {
-  // Get the style - this returns an array like [{preferred_style: 'visual'}]
-  let style = await getStyle();
+async function getQuestion(topicId) {
+  console.log('Getting questions for topic:', topicId);
   
+  // Get the style
+  let style = await getStyle();
   let preferredStyle = style && style.length > 0 ? style[0].preferred_style : 'mixed';
   
-  console.log('Preferred style value:', preferredStyle);
-  console.log('Weakest topic:', weakestTopic);
-
-
-
   //Get the current accuracy
-  const{data:accuracy} = await supabaseClient
-        .from('topic_performance')
-        .select('accuracy_percent')
-        .eq('student_id', 'StudentTest')
-        .eq('topic_id', weakestTopic);
-  //set difficulty based on accuracy 
-    let accuracyValue = 50; // Default
-    let difficultyValue = 3; // Default medium
-    
-    if (accuracy && accuracy.length > 0) {
-        accuracyValue = accuracy[0].accuracy_percent;
-        
-        // Convert accuracy to difficulty level 1-5
-        if (accuracyValue < 40) {
-            difficultyValue = 1; // Easy
-        }
-        else if (accuracyValue >= 40 && accuracyValue < 60) {
-            difficultyValue = 2; // Medium-Easy
-        }
-        else if (accuracyValue >= 60 && accuracyValue < 70) {
-            difficultyValue = 3; // Medium
-        }
-        else if (accuracyValue >= 70 && accuracyValue < 80) {
-            difficultyValue = 4; // Medium-Hard
-        }
-        else if (accuracyValue >= 80) {
-            difficultyValue = 5; // Hard
-        }
-    }
+  const {data:accuracy} = await supabaseClient
+    .from('topic_performance')
+    .select('accuracy_percent')
+    .eq('student_id', 'StudentTest')
+    .eq('topic_id', topicId);
   
-  // Get questions of weakest topic of preferred style
-  const { data: questions, error } = await supabaseClient
+  //set difficulty based on accuracy 
+  let accuracyValue = 50; // Default
+  let difficultyValue = 3; // Default medium
+  
+  if (accuracy && accuracy.length > 0) {
+    accuracyValue = accuracy[0].accuracy_percent;
+    
+    // Convert accuracy to difficulty level 1-5
+    if (accuracyValue < 40) {
+      difficultyValue = 1; // Easy
+    }
+    else if (accuracyValue >= 40 && accuracyValue < 60) {
+      difficultyValue = 2; // Medium-Easy
+    }
+    else if (accuracyValue >= 60 && accuracyValue < 70) {
+      difficultyValue = 3; // Medium
+    }
+    else if (accuracyValue >= 70 && accuracyValue < 80) {
+      difficultyValue = 4; // Medium-Hard
+    }
+    else if (accuracyValue >= 80) {
+      difficultyValue = 5; // Hard
+    }
+  }
+  
+  console.log('Trying difficulty:', difficultyValue);
+  
+  // First try: Get questions with specific difficulty
+  let { data: questions, error } = await supabaseClient
     .from('questions')
     .select('*')
     .eq('question_type', preferredStyle)
-    .eq('topic_id', weakestTopic)
+    .eq('topic_id', topicId)
     .eq('difficulty', difficultyValue);
   
-  if (error) {
-    console.error('Error fetching questions:', error);
-    return [];
+  // If no questions found, try all difficulties for this topic
+  if (!questions || questions.length === 0) {
+    console.log('No questions at difficulty', difficultyValue, 'trying all difficulties');
+    
+    const { data: allQuestions } = await supabaseClient
+      .from('questions')
+      .select('*')
+      .eq('question_type', preferredStyle)
+      .eq('topic_id', topicId);
+    
+    questions = allQuestions;
   }
   
-  console.log('Questions found:', questions);
-  return questions;
+  console.log('Questions found:', questions?.length || 0);
+  return questions || [];
 }
-
 
 // Load new session
 async function loadNewSession() {

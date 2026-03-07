@@ -1,602 +1,561 @@
-<!DOCTYPE html>
-<html>
-<head>
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  
-  <style>
-    /* Remove browser Defaults */
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    }
-
-    /* Create a nice backgroud*/
-    body{
-      background: linear-gradient(145deg, #f6f9fc 0%, #edf2f9 100%);
-      min-height: 100vh;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      padding: 1.5rem;
-    }
-    /* 2 column layout */
-    .layout {
-      display: flex;
-      align-items: flex-start;
-      gap: 2rem;
-      max-width: 1200px;
-      width: 100%;
-    }
-
-    /* Left Column */
-    .scorePanel {
-    min-width: 170px;
-    }
-    
-    .numCorrectContainer {
-      display: flex;
-      gap: 15px;
-      flex-direction: column;
-      background: white;
-      padding: 15px 25px;
-      border-radius: 50px;
-      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-      width: fit-content;
-      margin-bottom: 15px;
-    }
-    /* Number correct box */
-    .numCorrect {
-      background: #e8f5e9;
-      color: #2e7d32;
-      padding: 8px 20px;
-      border-radius: 30px;
-      font-weight: bold;
-      font-size: 18px;
-      border-left: 4px solid #4caf50;
-    }
-
-    /* Number incorrect box */
-    .numIncorrect {
-        background: #ffebee;
-        color: #c62828;
-        padding: 8px 20px;
-        border-radius: 30px;
-        font-weight: bold;
-        font-size: 18px;
-        border-left: 4px solid #ef5350;
-    }
-    
-    /* Card Area  right Column*/
-    .cardArea {
-      display: flex;
-      flex-direction: column;
-      align-items: flex-end;
-      gap: 1rem;
-      flex: 1;
-    }
-    
-    /* End Session button */
-    .endSession {
-      background: transparent;
-      border: 2px dashed #90a4ae;
-      color: #546e7a;
-      padding: 10px 25px;
-      border-radius: 30px;
-      display: inline-block;
-      font-weight: 600;
-      margin-bottom: 25px;
-      cursor: pointer;
-    }
-
-    .endSession:hover {
-      background: #eceff1;
-      border-style: solid;
-    }
-    
-    .questionContainer {
-      background: white;
-      border-radius: 20px;
-      padding: 25px;
-      box-shadow: 0 5px 20px rgba(0,0,0,0.1);
-      max-width: 600px;
-    }
-    
-    /* Question box */
-    .question {
-        background: #f5f9ff;
-        border: 2px solid #bbdefb;
-        border-radius: 15px;
-        padding: 30px 25px;
-        margin-bottom: 20px;
-        font-size: 22px;
-        font-weight: 600;
-        color: #0d47a1;
-    }
-
-    /*Answer input area */
-    .answerBox {
-      background: white;
-      border: 2px solid #b0bec5;
-      border-radius: 50px;
-      padding: 15px 25px;
-      margin-bottom: 15px;
-      font-size: 18px;
-      color: #263238;
-      width: 100%;
-    }
-
-    .answerBox:focus {
-      border-color: #2196f3;
-      outline: none;
-      box-shadow: 0 0 0 3px rgba(33,150,243,0.2);
-    }
-
-    /* Check answer button */
-    .checkAnswer {
-      background: #1976d2;
-      color: white;
-      padding: 15px 30px;
-      border-radius: 50px;
-      font-weight: bold;
-      font-size: 18px;
-      text-align: center;
-      cursor: pointer;
-      transition: background 0.2s;
-      display: inline-block;
-      min-width: 150px;
-      border: none;
-      margin-right: 10px;
-    }
-
-    .checkAnswer:hover {
-      background: #1565c0;
-    }
-
-    .checkAnswer:active {
-      transform: scale(0.98);
-    }
-    
-    .nextQuestionBtn {
-      background: #4caf50;
-      color: white;
-      padding: 15px 30px;
-      border-radius: 50px;
-      font-weight: bold;
-      font-size: 18px;
-      text-align: center;
-      cursor: pointer;
-      transition: background 0.2s;
-      display: inline-block;
-      min-width: 150px;
-      border: none;
-      margin-top: 10px;
-    }
-
-    .nextQuestionBtn:hover {
-      background: #388e3c;
-    }
-
-    /* Feedback message Styling */
-    .feedback {
-      margin-top: 20px;
-      padding: 15px 20px;
-      border-radius: 50px;
-      font-weight: bold;
-      font-size: 18px;
-      text-align: center;
-      transition: all 0.3s ease;
-      display: none; 
-    }
-    
-    /* Correct message styling*/
-    .feedback.correct {
-      background: #e8f5e9;
-      color: #2e7d32;
-      border: 2px solid #4caf50;
-      display: block;
-    }
-    
-    /* Incorrect message styling */
-    .feedback.incorrect {
-      background: #ffebee;
-      color: #c62828;
-      border: 2px solid #ef5350;
-      display: block;
-    }
-    
-    .button-group {
-      display: flex;
-      gap: 10px;
-      flex-wrap: wrap;
-    }
-    
-    /* Topic indicator styling */
-    .topic-indicator {
-      background: #e3f2fd;
-      color: #1565c0;
-      padding: 5px 15px;
-      border-radius: 20px;
-      font-size: 14px;
-      margin-bottom: 10px;
-      display: inline-block;
-    }
-  </style>
-  
-</head>
-<body>
-<div class="layout">
-
-<!-- Left Column: To have the number correct and incorrect -->
-<div class="scorePanel">
-  <div class='numCorrectContainer'>
-    <div class='numCorrect' id='numCorrect'>0</div>           
-    <div class='numIncorrect' id='numIncorrect'>0</div>     
-  </div>
-  <div class="topic-indicator" id="topicIndicator">Current Topic: None</div>
-</div>
-
-<!-- Right Column: Question card + End button -->
-<div class="cardArea">
-  
-  <!-- Question container -->
-  <div class='questionContainer'>
-    <div class='question' id='questionHolder'>Click "Start Session" to begin</div>
-    <input type='text' class='answerBox' id='answerBox' placeholder="Enter your answer">        
-    <div class="button-group">
-      <div class='checkAnswer' id='checkAnswer'>Check answer</div>
-      <button class='nextQuestionBtn' id='nextQuestionBtn'>Next Question</button>
-    </div>
-    <div class='feedback' id='feedback'></div>
-  </div>
-  
-  <!-- End Session button Below the card on the bottom right -->
-  <div class='endSession' id='endSession' onclick="location.reload()">End session</div>
-
-</div>  <!-- end of card-area -->
-
-</div>
-
-<script>
-  // ========== GLOBAL VARIABLES ==========
-  let correctCount = 0;
-  let incorrectCount = 0;
-  
-  // Questions and session tracking
-  let sessionQuestions = [];           // All questions loaded for current session
-  let currentQuestionIndex = 0;        // Index of current question in sessionQuestions
-  let answeredQuestionIds = [];        // IDs of questions already answered
-  
-  // Topic tracking
-  let orderedTopics = [];              // Topics ordered by weakness (weakest first)
-  let currentTopicIndex = 0;           // Index in orderedTopics we're currently on
-  let currentTopicId = null;           // Current topic ID
-  
-  // Student info
-  let student_id = 'StudentTest';
-  
-  // ========== DOM ELEMENTS ==========
-  const checkAnswer = document.getElementById('checkAnswer');
-  const answerBox = document.getElementById('answerBox');
-  const nextQuestion = document.getElementById('nextQuestionBtn');
-  const numCorrect = document.getElementById('numCorrect');
-  const numIncorrect = document.getElementById('numIncorrect');
-  const feedback = document.getElementById('feedback');
-  const questionHolder = document.getElementById('questionHolder');
-  const topicIndicator = document.getElementById('topicIndicator');
-  
-  // ========== SUPABASE SETUP ==========
-  const supabase_url = 'https://pxjndwrkafegopsolnde.supabase.co';
-  const supabase_key = 'sb_publishable_eOUJ3K3GNczOncszRwYhyA_A1QAw72F';
-  const supabaseClient = supabase.createClient(supabase_url, supabase_key);
-
-  // ========== CORE FUNCTIONS ==========
-  
-  // Update topic performance in database
-  async function updateTopicPerformance(topicId, studentId, wasCorrect) {
-    try {
-      // Get current performance
-      const { data: currentPerf } = await supabaseClient
-        .from('topic_performance')
-        .select('*')
-        .eq('student_id', studentId)
-        .eq('topic_id', topicId);
+<DOCTYPE html>
+  <html>
+    <head>
+      <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
       
-      if (currentPerf && currentPerf.length > 0) {
-        // Update existing record
-        const perf = currentPerf[0];
-        const newAttempted = perf.questions_attempted + 1;
-        const newCorrect = perf.questions_correct + (wasCorrect ? 1 : 0);
-        const newAccuracy = (newCorrect / newAttempted) * 100;
+      <style>
+        /* Remove browser Defaults */
+        * {
+          margin: 0;
+          padding: 0;
+          box-sizing: border-box;
+        }
+
+        /* Create a nice backgroud*/
+        body{
+          background: linear-gradient(145deg, #f6f9fc 0%, #edf2f9 100%);
+          min-height: 100vh;
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          padding: 1.5rem;
+        }
+        /* 2 column layout */
+        .layout {
+          display: flex;
+          align-items: flex-start;
+          gap: 2rem;
+          max-width: 1200px;
+          width: 100%;
+        }
+
+        /* Left Column */
+        .scorePanel {
+        min-width: 170px;
+        }
         
-        await supabaseClient
-          .from('topic_performance')
-          .update({
-            questions_attempted: newAttempted,
-            questions_correct: newCorrect,
-            accuracy_percent: Math.round(newAccuracy)
-          })
-          .eq('perfomance_id', perf.perfomance_id);
-      } else {
-        // Create new record
-        await supabaseClient
-          .from('topic_performance')
-          .insert([{
-            student_id: studentId,
-            topic_id: topicId,
-            questions_attempted: 1,
-            questions_correct: wasCorrect ? 1 : 0,
-            accuracy_percent: wasCorrect ? 100 : 0
-          }]);
+
+
+          
+        .numCorrectContainer {
+          display: flex;
+          gap: 15px;
+          flex-direction: column;
+          background: white;
+          padding: 15px 25px;
+          border-radius: 50px;
+          box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+          width: fit-content;
+          margin-bottom: 15px;
+        }
+        /* Number correct box */
+        .numCorrect {
+          background: #e8f5e9;
+          color: #2e7d32;
+          padding: 8px 20px;
+          border-radius: 30px;
+          font-weight: bold;
+          font-size: 18px;
+          border-left: 4px solid #4caf50;
       }
-    } catch (error) {
-      console.error('Error updating performance:', error);
-    }
-  }
 
-  // Get topics ordered by weakness (lowest accuracy first)
-  async function getOrderedTopics() {
-    const { data, error } = await supabaseClient
-      .from('topic_performance')
-      .select('topic_id, accuracy_percent')
-      .eq('student_id', student_id);
-    
-    if (error || !data || data.length === 0) {
-      console.log('No performance data, using default topics');
-      // Fallback to any available topics
-      const { data: topics } = await supabaseClient
-        .from('topics')
-        .select('topic_id')
-        .limit(5);
-      return topics || [];
+/* Number incorrect box */
+        .numIncorrect {
+            background: #ffebee;
+            color: #c62828;
+            padding: 8px 20px;
+            border-radius: 30px;
+            font-weight: bold;
+            font-size: 18px;
+            border-left: 4px solid #ef5350;
+        }
+        
+        /* Card Area  right Column*/
+        .cardArea {
+          display: flex;
+          flex-direction: column;
+          align-items: flex-end;
+          gap: 1rem;
+          flex: 1;
+        }
+        
+        /* End Session button */
+        .endSession {
+          background: transparent;
+          border: 2px dashed #90a4ae;
+          color: #546e7a;
+          padding: 10px 25px;
+          border-radius: 30px;
+          display: inline-block;
+          font-weight: 600;
+          margin-bottom: 25px;
+          cursor: pointer;
     }
-    
-    // Sort by accuracy (lowest first = weakest)
-    return data.sort((a, b) => a.accuracy_percent - b.accuracy_percent);
-  }
 
-  // Get user's preferred learning style
-  async function getPreferredStyle() {
-    const { data, error } = await supabaseClient
-      .from('adaptive_settings')
-      .select('preferred_style')
-      .eq('student_id', student_id);
-    
-    if (error || !data || data.length === 0) {
-      return 'mixed'; // Default
-    }
-    return data[0].preferred_style;
+      .endSession:hover {
+        background: #eceff1;
+        border-style: solid;
   }
+        .questionContainer {
+          background: white;
+          border-radius: 20px;
+           padding: 25px;
+          box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+          max-width: 600px;
+    }
+        /* Question box */
+        .question {
+            background: #f5f9ff;
+            border: 2px solid #bbdefb;
+            border-radius: 15px;
+            padding: 30px 25px;
+            margin-bottom: 20px;
+            font-size: 22px;
+            font-weight: 600;
+            color: #0d47a1;
+      }
 
-  // Get questions for a specific topic
-  async function getQuestionsForTopic(topicId, count = 3) {
-    const preferredStyle = await getPreferredStyle();
-    
-    const { data, error } = await supabaseClient
-      .from('questions')
-      .select('*')
-      .eq('topic_id', topicId)
-      .eq('question_type', preferredStyle)
-      .limit(count);
-    
-    if (error) {
-      console.error('Error fetching questions:', error);
-      return [];
-    }
-    
-    // Filter out already answered questions
-    const newQuestions = data.filter(q => !answeredQuestionIds.includes(q.question_id));
-    console.log(`Found ${newQuestions.length} new questions for topic ${topicId}`);
-    return newQuestions;
-  }
+        /*Answer input area */
+      .answerBox {
+          background: white;
+          border: 2px solid #b0bec5;
+          border-radius: 50px;
+          padding: 15px 25px;
+          margin-bottom: 15px;
+          font-size: 18px;
+          color: #263238;
+}
 
-  // Load next set of questions for current topic
-  async function loadMoreQuestionsForCurrentTopic() {
-    console.log('Loading more questions for current topic:', currentTopicId);
-    const newQuestions = await getQuestionsForTopic(currentTopicId, 3);
-    
-    if (newQuestions.length > 0) {
-      sessionQuestions = sessionQuestions.concat(newQuestions);
-      console.log(`Added ${newQuestions.length} questions. Total: ${sessionQuestions.length}`);
-      return true;
-    }
-    return false;
-  }
+      .answerBox:focus {
+          border-color: #2196f3;
+          outline: none;
+          box-shadow: 0 0 0 3px rgba(33,150,243,0.2);
+}
 
-  // Move to next weakest topic
-  async function moveToNextTopic() {
-    console.log('Moving to next topic');
-    
-    if (!orderedTopics || orderedTopics.length === 0) {
-      orderedTopics = await getOrderedTopics();
-    }
-    
-    if (orderedTopics.length === 0) {
-      questionHolder.innerHTML = 'No topics available';
-      return false;
-    }
-    
-    // Move to next topic index
-    currentTopicIndex++;
-    
-    // If we've gone through all topics, loop back
-    if (currentTopicIndex >= orderedTopics.length) {
-      currentTopicIndex = 0;
-      console.log('Completed all topics, starting over');
-    }
-    
-    currentTopicId = orderedTopics[currentTopicIndex].topic_id;
-    topicIndicator.textContent = `Current Topic: ${currentTopicId}`;
-    console.log(`Now on topic ${currentTopicId} (index ${currentTopicIndex})`);
-    
-    // Load questions for new topic
-    const newQuestions = await getQuestionsForTopic(currentTopicId, 3);
-    
-    if (newQuestions.length > 0) {
-      sessionQuestions = sessionQuestions.concat(newQuestions);
-      return true;
-    }
-    
-    // If no questions for this topic, try next one recursively
-    return await moveToNextTopic();
-  }
+        /* Check answer button */
+    .checkAnswer {
+    background: #1976d2;
+    color: white;
+    padding: 15px 30px;
+    border-radius: 50px;
+    font-weight: bold;
+    font-size: 18px;
+    text-align: center;
+    cursor: pointer;
+    transition: background 0.2s;
+    display: inline-block;
+    min-width: 150px;
+}
 
-  // Display current question
-  function displayCurrentQuestion() {
-    if (sessionQuestions.length === 0 || currentQuestionIndex >= sessionQuestions.length) {
-      questionHolder.innerHTML = 'No questions available';
-      return;
-    }
-    
-    const question = sessionQuestions[currentQuestionIndex];
-    questionHolder.innerHTML = question.question_text;
-    console.log(`Displaying question ${currentQuestionIndex + 1}/${sessionQuestions.length}`);
-  }
+.checkAnswer:hover {
+    background: #1565c0;
+}
 
-  // Load next question (called when Next Question button is clicked)
-  async function loadNextQuestion() {
-    console.log('=== LOAD NEXT QUESTION ===');
-    console.log('Current index:', currentQuestionIndex);
-    console.log('Total questions:', sessionQuestions.length);
-    console.log('Answered IDs:', answeredQuestionIds);
-    
-    // Clear feedback and input
-    feedback.style.display = 'none';
-    answerBox.value = '';
-    
-    // Move to next question
-    currentQuestionIndex++;
-    console.log('New index:', currentQuestionIndex);
-    
-    // Check if we have a question at this index
-    if (currentQuestionIndex < sessionQuestions.length) {
-      // We have a question in current batch
-      displayCurrentQuestion();
-      checkAnswer.style.opacity = '1';
-      checkAnswer.style.pointerEvents = 'auto';
-      return;
-    }
-    
-    // We need more questions
-    console.log('Need more questions for current topic');
-    const moreLoaded = await loadMoreQuestionsForCurrentTopic();
-    
-    if (moreLoaded) {
-      // We added more questions, show the next one
-      displayCurrentQuestion();
-      checkAnswer.style.opacity = '1';
-      checkAnswer.style.pointerEvents = 'auto';
-    } else {
-      // No more questions for current topic, move to next topic
-      console.log('No more questions for current topic, moving to next');
-      const moved = await moveToNextTopic();
+/* Add button text since div is empty */
+.checkAnswer:empty::before {
+    content: "Check Answer";
+}
+
+.checkAnswer:active {
+    transform: scale(0.98);
+}
+        /* Feedback message Styling */
+.feedback {
+  margin-top: 20px;
+  padding: 15px 20px;
+  border-radius: 50px;
+  font-weight: bold;
+  font-size: 18px;
+  text-align: center;
+  transition: all 0.3s ease;
+  display: none; 
+}
+/* Correct message styling*/
+.feedback.correct {
+  background: #e8f5e9;
+  color: #2e7d32;
+  border: 2px solid #4caf50;
+  display: block;
+}
+/* Incorrect message styling */
+.feedback.incorrect {
+  background: #ffebee;
+  color: #c62828;
+  border: 2px solid #ef5350;
+  display: block;
+}
+        
+      </style>
       
-      if (moved) {
-        displayCurrentQuestion();
-        checkAnswer.style.opacity = '1';
-        checkAnswer.style.pointerEvents = 'auto';
-      } else {
-        questionHolder.innerHTML = 'No more questions available';
+    </head>
+    <body>
+  <div class="layout">
+    
+    <!-- Left Column: To have the number correct and incorrect -->
+    <div class="scorePanel">
+      <div class='numCorrectContainer'>
+        <div class='numCorrect' id='numCorrect'></div>           
+        <div class='numIncorrect' id='numIncorrect'></div>     
+      </div>
+    </div>
+    
+    <!-- Right Column: Question card + End button -->
+    <div class="cardArea">
+      
+      <!-- Question container -->
+      <div class='questionContainer'>
+        <div class='question' id='questionHolder'></div>
+        <input type='text' class='answerBox' id='answerBox'>        
+        <div class='checkAnswer' id='checkAnswer'>Check answer</div>  <!-- Added text -->
+      <div class='feedback' id='feedback'></div>
+      <button class='nextQuestionBtn' id='nextQuestionBtn'>Next Question</button>
+        
+      </div>
+      
+      
+      
+      <!-- End Session button Below the card on the bottom right -->
+      <div class='endSession' id='endSession'>End session</div>       <!-- Added text -->
+
+
+      
+    </div>  <!-- end of card-area -->
+    
+  </div>
+      <script>
+        
+        //Correct and Incorrect answer Variables
+        let correctCount = 0
+        let incorrectCount = 0
+
+
+        //Current Batch of questions
+        let sessionQuestions = [];
+        //Question we are on
+        let currentQuestionIndex = 0;
+        //Questions Asked
+        let askedQuestionIds = [];
+        //Amount of that topic correct
+        let topicCorrect = [];
+        //Total answered
+        let topicTotal =[];
+        
+        
+        let question_id = 1;
+        let student_id = 'StudentTest';
+        //Get the Answer elements
+        const checkAnswer = document.getElementById('checkAnswer');
+        const answerBox = document.getElementById('answerBox');
+
+        const nextQuestion = document.getElementById('nextQuestionBtn');
+
+
+
+
+        
+let questions = [];
+      
+        
+          // The supabase url
+  const supabase_url = 'https://pxjndwrkafegopsolnde.supabase.co'
+  // Supabase key
+  const supabase_key = 'sb_publishable_eOUJ3K3GNczOncszRwYhyA_A1QAw72F'
+  // Initialize supabase client
+  const supabaseClient = supabase.createClient(
+    'https://pxjndwrkafegopsolnde.supabase.co',
+    'sb_publishable_eOUJ3K3GNczOncszRwYhyA_A1QAw72F'
+  );
+                //Update topic performance function
+        async function updateTopicPerformance(topicId, studentId, wasCorrect) {
+          // Get current performance
+          const {data: currentPerformance, error} = await supabaseClient
+            .from('topic_performance')
+            .select('*')
+            .eq('student_id', studentId)
+            .eq('topic_id', topicId);
+          //If the record exists update it
+          if (currentPerformance && currentPerformance.length > 0) {
+            const updatedPerformance = currentPerformance[0];
+
+            //Calculate the new values
+            const newAttempted = updatedPerformance.questions_attempted +1;
+            const newCorrect = updatedPerformance.questions_correct + (wasCorrect ? 1 : 0);
+            const newAccuracy = (newCorrect / newAttempted) * 100
+            
+            
+            //Update the record with the new data
+            const{error} = await supabaseClient 
+            .from('topic_performance')
+            .update({
+                questions_attempted: newAttempted,
+                questions_correct: newCorrect,
+                accuracy_percent: Math.round(newAccuracy)
+            })
+            .eq('performance_id', updatedPerformance.performance_id);
+
+            
+            
+          }
+          //If the record doesnt exist create a new one
+          else {
+            const {error} = await supabaseClient
+              .from('topic_performance')
+              .insert([{
+                student_id: studentId,
+                topic_id: topicId,
+                questions_attempted: 1,
+                questions_correct: wasCorrect ? 1 : 0,
+                accuracy_percent: wasCorrect ? 100 : 0
+              }])
+          }
+          
+        }
+        //Add a click handler
+        //Function to check answer on click
+        checkAnswer.addEventListener('click',async function () {
+          //Get users answer and remove capitalisation
+          const userAnswer = answerBox.value.trim().toLowerCase();
+          //Get the question currently in the session
+          const currentQuestion = sessionQuestions[currentQuestionIndex];
+          const correctAnswer = currentQuestion.correct_answer.toLowerCase();
+          const topicId = currentQuestion.topic_id;
+          const studentId = 'StudentTest';
+          console.log(correctAnswer);
+          
+
+          if (userAnswer === correctAnswer) {
+            console.log('correct');
+            //show Correct feedback text and colour
+            feedback.textContent = 'Correct';
+            feedback.className = 'feedback correct';
+            //Add one to the correct count
+            correctCount += 1
+            //Update Num correct
+            numCorrect.textContent = correctCount;
+            //Save to database 
+            await updateTopicPerformance(topicId,student_id,true)
+          }
+          else {
+            //Show incorrect feedback message
+            feedback.textContent = 'Incorrect';
+            
+            feedback.className = 'feedback incorrect';
+            //Add one to the incorrect count
+            incorrectCount += 1 
+            //Update Num incorrect
+            
+            numIncorrect.textContent = incorrectCount;
+            //Save an incorrect answer to the database
+            await updateTopicPerformance(topicId, studentId, false);
+  
+
+            
+          };
+          //Track the asked questions
+          askedQuestionIds.push(currentQuestion.id);
+
+          //Move to next question
+          currentQuestionIndex++;
+
+          //Check if ran out of questions
+          if(currentQuestionIndex >= sessionQuestions.length){
+            await loadNewSession()
+          }
+        else{
+          displayCurrentQuestion()
+        }
+          
+        }  
+        );
+
+
+                //Fetch the Questionns needed for the session
+        async function fetchQuestion() {
+          
+         
+          const { data, error } = await supabaseClient
+                   //Sql query to fetch questions
+            
+                   .from('questions')
+                   .select('*')
+
+          
+          questions = data;      
+          
+            
+            
+          }
+        
+// Get the strengths of the user
+async function getStrengths () {
+        const{data: strengths, error} = await supabaseClient
+            .from('strengths')
+            .select('*')
+            .eq('student_id', 'StudentTest')
+  console.log(strengths);
+}
+
+//Get the weaknesses of the user
+async function getWeaknesses () {
+          const{data: weaknesses, error} = await supabaseClient
+            .from('weaknesses')
+            .select('topic_id')
+            .eq('student_id', 'StudentTest')
+  console.log(weaknesses);
+}
+//Order the topics
+async function orderTopics () {
+  const weaknesses = await getWeaknesses()
+  let {data: orderedTopics, error} = await supabaseClient
+    .from('topic_performance')
+    .select('topic_id, accuracy_percent')
+    .eq('student_id', 'StudentTest')
+  
+  // Bubble sort for array of objects
+  let len = orderedTopics.length;
+  for (let i = 0; i < len - 1; i++) {
+    for (let j = 0; j < len - 1 - i; j++) {
+      // Use .accuracy_percent instead of [1]
+      if (orderedTopics[j].accuracy_percent > orderedTopics[j + 1].accuracy_percent) {
+        let temp = orderedTopics[j];
+        orderedTopics[j] = orderedTopics[j + 1];
+        orderedTopics[j + 1] = temp;
       }
     }
   }
+  
+  console.log(orderedTopics);
+  return orderedTopics;
+}
+//Get the preffered learning style
+async function getStyle(){
+  //Query learning style
+  const{data:learningStyle , error} = await supabaseClient
+     .from('adaptive_settings')
+     .select('preferred_style')
+     .eq('student_id', 'StudentTest')
+  console.log(learningStyle)
+  return learningStyle;
+}
+        
+// Function to get the questions
+async function getQuestion (weakestTopic) {
+  // Get the style - this returns an array like [{preferred_style: 'visual'}]
+  let style = await getStyle();
+  
+  let preferredStyle = style && style.length > 0 ? style[0].preferred_style : 'mixed';
+  
+  console.log('Preferred style value:', preferredStyle);
+  console.log('Weakest topic:', weakestTopic);
 
-  // Handle check answer
-  checkAnswer.addEventListener('click', async function() {
-    // Check if we have a question
-    if (sessionQuestions.length === 0 || currentQuestionIndex >= sessionQuestions.length) {
-      feedback.textContent = 'Please click Next Question to start';
-      feedback.className = 'feedback incorrect';
-      feedback.style.display = 'block';
-      return;
-    }
-    
-    const userAnswer = answerBox.value.trim();
-    if (!userAnswer) {
-      feedback.textContent = 'Please enter an answer';
-      feedback.className = 'feedback incorrect';
-      feedback.style.display = 'block';
-      return;
-    }
-    
-    const currentQuestion = sessionQuestions[currentQuestionIndex];
-    const isCorrect = userAnswer.toLowerCase() === currentQuestion.correct_answer.toLowerCase();
-    
-    // Update score
-    if (isCorrect) {
-      correctCount++;
-      numCorrect.textContent = correctCount;
-      feedback.textContent = 'Correct! Well done!';
-      feedback.className = 'feedback correct';
-    } else {
-      incorrectCount++;
-      numIncorrect.textContent = incorrectCount;
-      feedback.textContent = `Incorrect. The correct answer is: ${currentQuestion.correct_answer}`;
-      feedback.className = 'feedback incorrect';
-    }
-    
-    feedback.style.display = 'block';
-    
-    // Track answered question
-    answeredQuestionIds.push(currentQuestion.question_id);
-    
-    // Update database
-    await updateTopicPerformance(currentQuestion.topic_id, student_id, isCorrect);
-    
-    // Disable check answer until next question
-    checkAnswer.style.opacity = '0.5';
-    checkAnswer.style.pointerEvents = 'none';
-  });
 
-  // Initialize session
-  async function initializeSession() {
-    console.log('=== INITIALIZING SESSION ===');
+
+  //Get the current accuracy
+  const{data:accuracy} = await supabaseClient
+        .from('topic_performance')
+        .select('accuracy_percent')
+        .eq('student_id', 'StudentTest')
+        .eq('topic_id', weakestTopic);
+  //set difficulty based on accuracy 
+    let accuracyValue = 50; // Default
+    let difficultyValue = 3; // Default medium
     
-    // Get ordered topics
-    orderedTopics = await getOrderedTopics();
-    console.log('Ordered topics:', orderedTopics);
-    
-    if (orderedTopics.length === 0) {
-      questionHolder.innerHTML = 'No topics available';
-      return;
+    if (accuracy && accuracy.length > 0) {
+        accuracyValue = accuracy[0].accuracy_percent;
+        
+        // Convert accuracy to difficulty level 1-5
+        if (accuracyValue < 40) {
+            difficultyValue = 1; // Easy
+        }
+        else if (accuracyValue >= 40 && accuracyValue < 60) {
+            difficultyValue = 2; // Medium-Easy
+        }
+        else if (accuracyValue >= 60 && accuracyValue < 70) {
+            difficultyValue = 3; // Medium
+        }
+        else if (accuracyValue >= 70 && accuracyValue < 80) {
+            difficultyValue = 4; // Medium-Hard
+        }
+        else if (accuracyValue >= 80) {
+            difficultyValue = 5; // Hard
+        }
     }
-    
-    // Start with weakest topic
-    currentTopicIndex = 0;
-    currentTopicId = orderedTopics[0].topic_id;
-    topicIndicator.textContent = `Current Topic: ${currentTopicId}`;
-    
-    // Load initial questions
-    sessionQuestions = await getQuestionsForTopic(currentTopicId, 3);
-    currentQuestionIndex = 0;
-    
-    if (sessionQuestions.length > 0) {
-      displayCurrentQuestion();
-    } else {
-      // No questions for weakest topic, try next
-      await moveToNextTopic();
-    }
+  
+  // Get questions of weakest topic of preferred style
+  const { data: questions, error } = await supabaseClient
+    .from('questions')
+    .select('*')
+    .eq('question_type', preferredStyle)
+    .eq('topic_id', weakestTopic)
+    .eq('difficulty', difficultyValue);
+  
+  if (error) {
+    console.error('Error fetching questions:', error);
+    return [];
   }
+  
+  console.log('Questions found:', questions);
+  return questions;
+}
 
-  // Next question button click
-  nextQuestion.addEventListener('click', async function() {
-    console.log('Next Question clicked');
-    
-    // If no questions loaded yet, initialize
-    if (sessionQuestions.length === 0) {
-      await initializeSession();
+
+async function loadNewSession () {
+  //Get the weakest topic
+  const orderedTopics = await orderTopics();
+  const weakestTopic = orderedTopics[0].topic_id;
+  //get questions for the weakest topic
+
+  sessionQuestions = await getQuestion(weakestTopic);
+
+  //reset the current question
+  currentQuestionIndex = 0;
+  
+      if (sessionQuestions.length > 0) {
+        displayQuestion();
+  
     } else {
-      await loadNextQuestion();
+        
     }
-  });
+}
 
-  // Page load
-  document.addEventListener('DOMContentLoaded', function() {
-    console.log('Page loaded');
-    numCorrect.textContent = correctCount;
-    numIncorrect.textContent = incorrectCount;
-    questionHolder.innerHTML = 'Click Next Question to start';
-  });
-</script>
-</body>
-</html>
+        
+
+          //Function to display the question takes the question ID as a parameter
+          function displayQuestion() {
+              const questionHolder = document.getElementById('questionHolder');
+              const currentQuestion = sessionQuestions[currentQuestionIndex];
+              const questionText = currentQuestion.question_text;
+              questionHolder.innerHTML = questionText;
+            
+          }
+          document.addEventListener('DOMContentLoaded', async function () {
+            
+            
+            //Next question event listner and function 
+            nextQuestion.addEventListener('click', async function() {
+            //Fetch all questions from the database
+            await fetchQuestion()
+            
+            //Load the first session with weakest topic
+            await loadNewSession();
+            
+            //Display the first question
+            displayQuestion();
+            
+            //Get user strengths and weaknesses
+            getStrengths();
+            getWeaknesses();
+            
+            //Order topics by performance
+            const orderedTopics = await orderTopics();
+            });
+          });
+            
+            
+          
+          
+
+    console.log('Selected Topic:', sessionStorage.getItem('selectedTopic'));
+  </script>
+    </body>
+  </html>

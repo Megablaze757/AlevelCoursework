@@ -531,34 +531,49 @@ async function loadNewSession () {
           document.addEventListener('DOMContentLoaded', async function () {
             
             
-            //Next question event listner and function 
-            nextQuestion.addEventListener('click', async function() {
-      console.log('Next question clicked');
+// Next question event listener
+nextQuestion.addEventListener('click', async function() {
+  console.log('Next question clicked');
   
-      //Create new session if we've run out of question
-      if (sessionQuestions.length === 0) {
-        console.log('First time - loading session');
-        await fetchQuestion();
-        await loadNewSession();
+  // First time - load session
+  if (sessionQuestions.length === 0) {
+    console.log('First time - loading session');
+    orderedTopicsList = await orderTopics();
+    currentTopicIndex = 0;
+    currentTopicId = orderedTopicsList[0].topic_id;
+    topicIndicator.textContent = `Current Topic: ${currentTopicId}`;
+    sessionQuestions = await getQuestion(currentTopicId);
+    currentQuestionIndex = 0;
+    displayQuestion();
+    return;
+  }
+  
+  // Check if we have a question at current index
+  if (currentQuestionIndex < sessionQuestions.length) {
+    console.log('Displaying question at index:', currentQuestionIndex);
+    displayQuestion();
+  } else {
+    console.log('No more questions for this topic, moving to next topic');
+    
+    // Move to next topic
+    currentTopicIndex++;
+    if (currentTopicIndex >= orderedTopicsList.length) {
+      currentTopicIndex = 0;
     }
-  
-
-      //Display the first question
-      console.log('Displaying question at index:', currentQuestionIndex);
+    
+    currentTopicId = orderedTopicsList[currentTopicIndex].topic_id;
+    topicIndicator.textContent = `Current Topic: ${currentTopicId}`;
+    
+    // Load questions for new topic
+    sessionQuestions = await getQuestion(currentTopicId);
+    currentQuestionIndex = 0;
+    
+    if (sessionQuestions.length > 0) {
       displayQuestion();
-  
-      //Check if questionHolder has content after displayQuestion
-      const questionHolder = document.getElementById('questionHolder');
-
-  
-      //Get user strengths and weaknesses
-      getStrengths();
-      getWeaknesses();
-  
-      //Order topics by performance
-      const orderedTopics = await orderTopics();
-      console.log('Ordered topics:', orderedTopics);
-});
+    } else {
+      questionHolder.innerHTML = 'No questions for this topic';
+    }
+  }
           });
             
           

@@ -527,14 +527,20 @@ async function loadNewSession() {
 
         
 
-          //Function to display the question takes the question ID as a parameter
-          function displayQuestion() {
-              const questionHolder = document.getElementById('questionHolder');
-              const currentQuestion = sessionQuestions[currentQuestionIndex];
-              const questionText = currentQuestion.question_text;
-              questionHolder.innerHTML = questionText;
-            
-          }
+// Display question
+function displayQuestion() {
+  console.log('displayQuestion - sessionQuestions:', sessionQuestions);
+  console.log('displayQuestion - currentQuestionIndex:', currentQuestionIndex);
+  
+  if (sessionQuestions && sessionQuestions.length > 0 && currentQuestionIndex < sessionQuestions.length) {
+    const currentQuestion = sessionQuestions[currentQuestionIndex];
+    console.log('Current question:', currentQuestion);
+    questionHolder.innerHTML = currentQuestion.question_text;
+  } else {
+    console.log('No question to display');
+    questionHolder.innerHTML = 'No questions available';
+  }
+}
           document.addEventListener('DOMContentLoaded', async function () {
             
             
@@ -546,12 +552,25 @@ nextQuestion.addEventListener('click', async function() {
   if (sessionQuestions.length === 0) {
     console.log('First time - loading session');
     orderedTopicsList = await orderTopics();
-    currentTopicIndex = 0;
-    currentTopicId = orderedTopicsList[0].topic_id;
-
-    sessionQuestions = await getQuestion(currentTopicId);
-    currentQuestionIndex = 0;
-    displayQuestion();
+    
+    // Try each topic until we find one with questions
+    for (let i = 0; i < orderedTopicsList.length; i++) {
+      currentTopicIndex = i;
+      currentTopicId = orderedTopicsList[i].topic_id;
+      console.log('Trying topic:', currentTopicId);
+      
+      sessionQuestions = await getQuestion(currentTopicId);
+      
+      if (sessionQuestions && sessionQuestions.length > 0) {
+        console.log('Found questions for topic:', currentTopicId);
+        currentQuestionIndex = 0;
+        displayQuestion();
+        return;
+      }
+    }
+    
+    // If we get here, no topics have questions
+    questionHolder.innerHTML = 'No questions available for any topic';
     return;
   }
   
@@ -569,19 +588,18 @@ nextQuestion.addEventListener('click', async function() {
     }
     
     currentTopicId = orderedTopicsList[currentTopicIndex].topic_id;
-    topicIndicator.textContent = `Current Topic: ${currentTopicId}`;
     
     // Load questions for new topic
     sessionQuestions = await getQuestion(currentTopicId);
     currentQuestionIndex = 0;
     
-    if (sessionQuestions.length > 0) {
+    if (sessionQuestions && sessionQuestions.length > 0) {
       displayQuestion();
     } else {
       questionHolder.innerHTML = 'No questions for this topic';
     }
   }
-          });
+});
             });
           
           

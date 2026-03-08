@@ -374,7 +374,7 @@ display: block;
 <!-- End Session Modal -->
 <div class="modal" id="endSessionModal">
   <div class="modalContent">
-    <h2>📊 Session Summary</h2>
+    
     
     <div class="topicSummary">
       <div class="topicHeader">
@@ -408,6 +408,13 @@ display: block;
   </div>
 </div>
   <script>
+    const endSessionModal = document.getElementById('endSessionModal');
+    const topicList = document.getElementById('topicList');
+    const modalCorrect = document.getElementById('modalCorrect');
+    const modalIncorrect = document.getElementById('modalIncorrect');
+    const modalAccuracy = document.getElementById('modalAccuracy');
+    const newSessionBtn = document.getElementById('newSessionBtn');
+    const closeModalBtn = document.getElementById('closeModalBtn');
     
     //Correct and Incorrect answer Variables
     let correctCount = 0
@@ -779,7 +786,27 @@ if (sessionQuestions && sessionQuestions.length > 0) {
 }
 }
 });
+//End Session button click handler
+endSession.addEventListener('click', async function() {
+  //Dummy Data
+  topicList.innerHTML = '<div class="topicItem"><div class="topicName">Test Topic</div><div class="topicBefore">50%</div><div class="topicAfter">75%</div><div class="topicChange positive">+25%</div></div>';
+  
+  modalCorrect.textContent = correctCount;
+  modalIncorrect.textContent = incorrectCount;
+  modalAccuracy.textContent = '75%';
+  
+  // Show modal
+  endSessionModal.style.display = 'flex';
+});
+
+
+
+// Close modal button
+closeModalBtn.addEventListener('click', function() {
+  endSessionModal.style.display = 'none';
+});
         });
+  
       
       
 

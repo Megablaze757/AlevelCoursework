@@ -444,6 +444,9 @@ display: block;
     let orderedTopicsList = [];
     let currentTopicIndex = 0;
     let currentTopicId = null;
+
+    //Store Intial accuracies
+    let initialTopicAccuracies = {};
     
 let questions = [];
   
@@ -456,6 +459,27 @@ const supabaseClient = supabase.createClient(
 'https://pxjndwrkafegopsolnde.supabase.co',
 'sb_publishable_eOUJ3K3GNczOncszRwYhyA_A1QAw72F'
 );
+
+
+    //Get initial accuracies
+    async function getInitialAccuracies() {
+      //Query Initial accuracies
+      const{data} await supabaseClient
+        .from('topic_performance')
+        .select('topic_id, accuracy_percent')
+        .eq('student_id', student_id);
+        
+        if (performances) {
+            performances.forEach(p => {
+            initialTopicAccuracies[p.topic_id] = p.accuracy_percent || 0;
+    });
+  }
+  console.log('Initial accuracies:', initialTopicAccuracies);
+        
+    }
+    getInitialAccuracies();
+
+    
             //Update topic performance function
     async function updateTopicPerformance(topicId, studentId, wasCorrect) {
       // Get current performance
@@ -745,18 +769,90 @@ if (sessionQuestions && sessionQuestions.length > 0) {
 }
 });
 
+// End Session button click handler
 endSession.addEventListener('click', async function() {
-  topicList.innerHTML = '<div class="topicItem"><div class="topicName">Test Topic</div><div class="topicBefore">50%</div><div class="topicAfter">75%</div><div class="topicChange positive">+25%</div></div>';
+  // Get all topics
+  const { data: topics } = await supabaseClient
+    .from('topics')
+    .select('topic_id, topic_name');
+  
+  // Get current performance
+  const { data: performances } = await supabaseClient
+    .from('topic_performance')
+    .select('topic_id, accuracy_percent')
+    .eq('student_id', student_id);
+  
+  // Create an object of accuracies
+  let currentAccuracies = {};
+  if (performances) {
+    performances.forEach(p => {
+      currentAccuracies[p.topic_id] = p.accuracy_percent || 0;
+    });
+  }
+  
+  // Build topic list HTML
+  let topicHTML = '';
+  for (let topic of topics) {
+    const topicId = topic.topic_id;
+    const initial = initialTopicAccuracies[topicId] || 0;
+    const current = currentAccuracies[topicId] || 0;
+    const change = current - initial;
+    const changeClass = change >= 0 ? 'positive' : 'negative';
+    const changeSymbol = change >= 0 ? '+' : '';
+    
+    topicHTML += `
+      <div class="topicItem">
+        <div class="topicName">${topic.topic_name}</div>
+        <div class="topicBefore">${initial}%</div>
+        <div class="topicAfter">${current}%</div>
+        <div class="topicChange ${changeClass}">${changeSymbol}${change}%</div>
+      </div>
+    `;
+  }
+  
+  topicList.innerHTML = topicHTML;
+  
+  // Update session stats
+  const totalQuestions = correctCount + incorrectCount;
+  const accuracy = totalQuestions > 0 ? Math.round((correctCount/totalQuestions)*100) : 0;
   
   modalCorrect.textContent = correctCount;
   modalIncorrect.textContent = incorrectCount;
-  modalAccuracy.textContent = '75%';
+  modalAccuracy.textContent = accuracy + '%';
   
+
+  // Show modal
   endSessionModal.style.display = 'flex';
 });
 
+
+
+// Close modal button
 closeModalBtn.addEventListener('click', function() {
   endSessionModal.style.display = 'none';
+});
+
+// New Session button
+newSessionBtn.addEventListener('click', function() {
+  // Reset session
+  correctCount = 0;
+  incorrectCount = 0;
+  numCorrect.textContent = correctCount;
+  numIncorrect.textContent = incorrectCount;
+  
+  sessionQuestions = [];
+  currentQuestionIndex = 0;
+  askedQuestionIds = [];
+  
+  feedback.style.display = 'none';
+  answerBox.value = '';
+  questionHolder.innerHTML = 'Click Next Question to start';
+  
+  // Hide modal
+  endSessionModal.style.display = 'none';
+  
+  // Update initial accuracies for new session
+  getInitialAccuracies();
 });
 
 });

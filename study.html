@@ -567,15 +567,7 @@ checkAnswer.addEventListener('click', async function() {
   // Clear answer box
   answerBox.value = '';
   
-  // Move to next question index
-  currentQuestionIndex++;
-  
-  if (currentQuestionIndex < sessionQuestions.length) {
-    displayQuestion();
-  } else {
-    console.log('loading new session');
-    await loadNewSession();
-  }
+  // Don't auto-move to next question - wait for Next Question click
 });
 
 // End Session button click handler
@@ -806,7 +798,10 @@ nextQuestion.addEventListener('click', async function() {
     return;
   }
   
-  // Check if we have a question at current index
+  // Move to next question only when Next Question is clicked
+  currentQuestionIndex++;
+  
+  // Check if we still have questions in current topic
   if (currentQuestionIndex < sessionQuestions.length) {
     displayQuestion();
   } else {

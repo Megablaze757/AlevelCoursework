@@ -436,7 +436,10 @@ display: block;
     //Get the Answer elements
     const checkAnswer = document.getElementById('checkAnswer');
     const answerBox = document.getElementById('answerBox');
-
+    const numCorrect = document.getElementById('numCorrect');
+    const numIncorrect = document.getElementById('numIncorrect');
+    const feedback = document.getElementById('feedback');
+    const questionHolder = document.getElementById('questionHolder');
     const nextQuestion = document.getElementById('nextQuestionBtn');
     let orderedTopicsList = [];
     let currentTopicIndex = 0;
@@ -495,11 +498,8 @@ const supabaseClient = supabase.createClient(
       }
       
     }
-    //Add a click handler
-    //Function to check answer on click
-    // Check answer button
+
 checkAnswer.addEventListener('click', async function() {
-  // Check if there's a question to answer
   if (sessionQuestions.length === 0) {
     feedback.textContent = 'Please click Next Question first';
     feedback.className = 'feedback incorrect';
@@ -507,7 +507,6 @@ checkAnswer.addEventListener('click', async function() {
     return;
   }
   
-  // Get user answer
   const userAnswer = answerBox.value.trim().toLowerCase();
   if (!userAnswer) {
     feedback.textContent = 'Please enter an answer';
@@ -516,12 +515,10 @@ checkAnswer.addEventListener('click', async function() {
     return;
   }
   
-  // Get current question
   const currentQuestion = sessionQuestions[currentQuestionIndex];
   const correctAnswer = currentQuestion.correct_answer.toLowerCase();
   const topicId = currentQuestion.topic_id;
   
-  // Check if correct
   if (userAnswer === correctAnswer) {
     feedback.textContent = 'Correct!';
     feedback.className = 'feedback correct';
@@ -536,30 +533,17 @@ checkAnswer.addEventListener('click', async function() {
     await updateTopicPerformance(topicId, student_id, false);
   }
   
-  // Show feedback
   feedback.style.display = 'block';
-  
-  // Mark question as answered
   askedQuestionIds.push(currentQuestion.question_id);
-  
+});
 
-
-            //Fetch the Questionns needed for the session
     async function fetchQuestion() {
-      
       const { data, error } = await supabaseClient
-               //Sql query to fetch questions
-        
                .from('questions')
                .select('*')
-
-      
       questions = data;      
-      
-        
-      }
+    }
     
-// Get the strengths of the user
 async function getStrengths () {
     const{data: strengths, error} = await supabaseClient
         .from('strengths')
@@ -568,7 +552,6 @@ async function getStrengths () {
 console.log(strengths);
 }
 
-//Get the weaknesses of the user
 async function getWeaknesses () {
       const{data: weaknesses, error} = await supabaseClient
         .from('weaknesses')
@@ -576,7 +559,7 @@ async function getWeaknesses () {
         .eq('student_id', 'StudentTest')
 console.log(weaknesses);
 }
-//Order the topics
+
 async function orderTopics () {
 const weaknesses = await getWeaknesses()
 let {data: orderedTopics, error} = await supabaseClient
@@ -584,11 +567,9 @@ let {data: orderedTopics, error} = await supabaseClient
 .select('topic_id, accuracy_percent')
 .eq('student_id', 'StudentTest')
 
-// Bubble sort for array of objects
 let len = orderedTopics.length;
 for (let i = 0; i < len - 1; i++) {
 for (let j = 0; j < len - 1 - i; j++) {
-  // Use .accuracy_percent instead of [1]
   if (orderedTopics[j].accuracy_percent > orderedTopics[j + 1].accuracy_percent) {
     let temp = orderedTopics[j];
     orderedTopics[j] = orderedTopics[j + 1];
@@ -596,13 +577,11 @@ for (let j = 0; j < len - 1 - i; j++) {
   }
 }
 }
-
 console.log(orderedTopics);
 return orderedTopics;
 }
-//Get the preffered learning style
+
 async function getStyle(){
-//Query learning style
 const{data:learningStyle , error} = await supabaseClient
  .from('adaptive_settings')
  .select('preferred_style')
@@ -611,49 +590,43 @@ console.log(learningStyle)
 return learningStyle;
 }
     
-// Function to get the questions
 async function getQuestion(topicId) {
 console.log('Getting questions for topic:', topicId);
 
-// Get the style
 let style = await getStyle();
 let preferredStyle = style && style.length > 0 ? style[0].preferred_style : 'mixed';
 
-//Get the current accuracy
 const {data:accuracy} = await supabaseClient
 .from('topic_performance')
 .select('accuracy_percent')
 .eq('student_id', 'StudentTest')
 .eq('topic_id', topicId);
 
-//set difficulty based on accuracy 
-let accuracyValue = 50; // Default
-let difficultyValue = 3; // Default medium
+let accuracyValue = 50;
+let difficultyValue = 3;
 
 if (accuracy && accuracy.length > 0) {
 accuracyValue = accuracy[0].accuracy_percent;
 
-// Convert accuracy to difficulty level 1-5
 if (accuracyValue < 40) {
-  difficultyValue = 1; // Easy
+  difficultyValue = 1;
 }
 else if (accuracyValue >= 40 && accuracyValue < 60) {
-  difficultyValue = 2; // Medium-Easy
+  difficultyValue = 2;
 }
 else if (accuracyValue >= 60 && accuracyValue < 70) {
-  difficultyValue = 3; // Medium
+  difficultyValue = 3;
 }
 else if (accuracyValue >= 70 && accuracyValue < 80) {
-  difficultyValue = 4; // Medium-Hard
+  difficultyValue = 4;
 }
 else if (accuracyValue >= 80) {
-  difficultyValue = 5; // Hard
+  difficultyValue = 5;
 }
 }
 
 console.log('Trying difficulty:', difficultyValue);
 
-// First try: Get questions with specific difficulty
 let { data: questions, error } = await supabaseClient
 .from('questions')
 .select('*')
@@ -661,7 +634,6 @@ let { data: questions, error } = await supabaseClient
 .eq('topic_id', topicId)
 .eq('difficulty', difficultyValue);
 
-// If no questions found, try all difficulties for this topic
 if (!questions || questions.length === 0) {
 console.log('No questions at difficulty', difficultyValue, 'trying all difficulties');
 
@@ -674,7 +646,6 @@ const { data: allQuestions } = await supabaseClient
 questions = allQuestions;
 }
 
-// Filter out questions that have already been answered
 if (questions && questions.length > 0) {
 const unansweredQuestions = questions.filter(q => !askedQuestionIds.includes(q.question_id));
 console.log('Total questions found:', questions.length);
@@ -686,12 +657,10 @@ return unansweredQuestions;
 return [];
 }
 
-// Load new session
 async function loadNewSession() {
 orderedTopicsList = await orderTopics();
 if (!orderedTopicsList || orderedTopicsList.length === 0) return;
 
-// Try each topic until we find one with questions
 for (let i = 0; i < orderedTopicsList.length; i++) {
 currentTopicIndex = i;
 currentTopicId = orderedTopicsList[i].topic_id;
@@ -707,13 +676,9 @@ if (sessionQuestions.length > 0) {
 }
 }
 
-// If we get here, no topics have questions
 questionHolder.innerHTML = 'No questions available for any topic';
 }
 
-    
-
-// Display question
 function displayQuestion() {
 console.log('displayQuestion - sessionQuestions:', sessionQuestions);
 console.log('displayQuestion - currentQuestionIndex:', currentQuestionIndex);
@@ -727,19 +692,16 @@ console.log('No question to display');
 questionHolder.innerHTML = 'No questions available';
 }
 }
-      document.addEventListener('DOMContentLoaded', async function () {
+      
+document.addEventListener('DOMContentLoaded', async function () {
         
-        
-// Next question event listener
 nextQuestion.addEventListener('click', async function() {
 console.log('Next question clicked');
 
-// First time - load session
 if (sessionQuestions.length === 0) {
 console.log('First time - loading session');
 orderedTopicsList = await orderTopics();
 
-// Try each topic until we find one with questions
 for (let i = 0; i < orderedTopicsList.length; i++) {
   currentTopicIndex = i;
   currentTopicId = orderedTopicsList[i].topic_id;
@@ -755,19 +717,16 @@ for (let i = 0; i < orderedTopicsList.length; i++) {
   }
 }
 
-// If we get here, no topics have questions
 questionHolder.innerHTML = 'No questions available for any topic';
 return;
 }
 
-// Check if we have a question at current index
 if (currentQuestionIndex < sessionQuestions.length) {
 console.log('Displaying question at index:', currentQuestionIndex);
 displayQuestion();
 } else {
 console.log('No more questions for this topic, moving to next topic');
 
-// Move to next topic
 currentTopicIndex++;
 if (currentTopicIndex >= orderedTopicsList.length) {
   currentTopicIndex = 0;
@@ -775,7 +734,6 @@ if (currentTopicIndex >= orderedTopicsList.length) {
 
 currentTopicId = orderedTopicsList[currentTopicIndex].topic_id;
 
-// Load questions for new topic
 sessionQuestions = await getQuestion(currentTopicId);
 currentQuestionIndex = 0;
 
@@ -786,31 +744,22 @@ if (sessionQuestions && sessionQuestions.length > 0) {
 }
 }
 });
-//End Session button click handler
+
 endSession.addEventListener('click', async function() {
-  //Dummy Data
   topicList.innerHTML = '<div class="topicItem"><div class="topicName">Test Topic</div><div class="topicBefore">50%</div><div class="topicAfter">75%</div><div class="topicChange positive">+25%</div></div>';
   
   modalCorrect.textContent = correctCount;
   modalIncorrect.textContent = incorrectCount;
   modalAccuracy.textContent = '75%';
   
-  // Show modal
   endSessionModal.style.display = 'flex';
 });
 
-
-
-// Close modal button
 closeModalBtn.addEventListener('click', function() {
   endSessionModal.style.display = 'none';
 });
-        });
-  
-      
-      
 
-console.log('Selected Topic:', sessionStorage.getItem('selectedTopic'));
+});
 </script>
 </body>
 </html>

@@ -466,7 +466,7 @@ const supabaseClient = supabase.createClient(
       //Query Initial accuracies
       const{data} await supabaseClient
         .from('topic_performance')
-        .select('topic_id, accuracy_percent')
+        .select('topic_id', accuracy_percent)
         .eq('student_id', student_id);
         
         if (performances) {

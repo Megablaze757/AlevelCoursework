@@ -176,6 +176,167 @@ color: #c62828;
 border: 2px solid #ef5350;
 display: block;
 }
+    /* Modal styles */
+.modal {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0,0,0,0.5);
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.modalContent {
+  background: white;
+  padding: 30px;
+  border-radius: 20px;
+  max-width: 600px;
+  width: 90%;
+  max-height: 80vh;
+  overflow-y: auto;
+  box-shadow: 0 5px 30px rgba(0,0,0,0.3);
+}
+
+
+.topicSummary {
+  margin: 20px 0;
+  padding: 15px;
+  background: #f5f9ff;
+  border-radius: 15px;
+}
+
+.topicItem {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px;
+  border-bottom: 1px solid #e0e0e0;
+}
+
+.topicItem:last-child {
+  border-bottom: none;
+}
+
+.topicName {
+  font-weight: 600;
+  color: #0d47a1;
+  flex: 2;
+}
+
+.topicBefore, .topicAfter, .topicChange {
+  flex: 1;
+  text-align: center;
+}
+
+.topicBefore {
+  color: #546e7a;
+}
+
+.topicAfter {
+  color: #2e7d32;
+  font-weight: 600;
+}
+
+.topicChange.positive {
+  color: #2e7d32;
+}
+
+.topicChange.negative {
+  color: #c62828;
+}
+
+.sessionStats {
+  display: flex;
+  justify-content: space-around;
+  margin: 20px 0;
+  padding: 20px;
+  background: #e8f5e9;
+  border-radius: 15px;
+}
+
+.statBox {
+  text-align: center;
+}
+
+.statBox .statLabel {
+  font-size: 14px;
+  color: #546e7a;
+  margin-bottom: 5px;
+}
+
+.statBox .statValue {
+  font-size: 28px;
+  font-weight: bold;
+  color: #0d47a1;
+}
+
+.statBox .statValue.correct {
+  color: #2e7d32;
+}
+
+.statBox .statValue.incorrect {
+  color: #c62828;
+}
+
+.modalButtons {
+  display: flex;
+  gap: 10px;
+  margin-top: 20px;
+}
+
+.modalButton {
+  flex: 1;
+  padding: 12px;
+  border-radius: 50px;
+  text-align: center;
+  cursor: pointer;
+  font-weight: bold;
+  transition: background 0.2s;
+  border: none;
+  font-size: 16px;
+}
+
+.modalButton.primary {
+  background: #1976d2;
+  color: white;
+}
+
+.modalButton.primary:hover {
+  background: #1565c0;
+}
+
+.modalButton.secondary {
+  background: #e0e0e0;
+  color: #263238;
+}
+
+.modalButton.secondary:hover {
+  background: #bdbdbd;
+}
+
+.topicHeader {
+  display: flex;
+  justify-content: space-between;
+  padding: 8px 12px;
+  background: #bbdefb;
+  border-radius: 10px 10px 0 0;
+  font-weight: bold;
+  color: #0d47a1;
+}
+
+.topicHeader span {
+  flex: 1;
+  text-align: center;
+}
+
+.topicHeader span:first-child {
+  flex: 2;
+  text-align: left;
+}
     
   </style>
   
@@ -210,7 +371,50 @@ display: block;
 </div>  <!-- end of card-area -->
 
 </div>
+<!-- End Session Modal -->
+<div class="modal" id="endSessionModal">
+  <div class="modalContent">
+    
+    
+    <div class="topicSummary">
+      <div class="topicHeader">
+        <span>Topic</span>
+        <span>Before</span>
+        <span>After</span>
+        <span>Change</span>
+      </div>
+      <div id="topicList"></div>
+    </div>
+    
+    <div class="sessionStats">
+      <div class="statBox">
+        <div class="statLabel">Correct</div>
+        <div class="statValue correct" id="modalCorrect">0</div>
+      </div>
+      <div class="statBox">
+        <div class="statLabel">Incorrect</div>
+        <div class="statValue incorrect" id="modalIncorrect">0</div>
+      </div>
+      <div class="statBox">
+        <div class="statLabel">Accuracy</div>
+        <div class="statValue" id="modalAccuracy">0%</div>
+      </div>
+    </div>
+    
+    <div class="modalButtons">
+      <button class="modalButton primary" id="newSessionBtn">New Session</button>
+      <button class="modalButton secondary" id="closeModalBtn">Close</button>
+    </div>
+  </div>
+</div>
   <script>
+    const endSessionModal = document.getElementById('endSessionModal');
+    const topicList = document.getElementById('topicList');
+    const modalCorrect = document.getElementById('modalCorrect');
+    const modalIncorrect = document.getElementById('modalIncorrect');
+    const modalAccuracy = document.getElementById('modalAccuracy');
+    const newSessionBtn = document.getElementById('newSessionBtn');
+    const closeModalBtn = document.getElementById('closeModalBtn');
     
     //Correct and Incorrect answer Variables
     let correctCount = 0
@@ -338,17 +542,7 @@ checkAnswer.addEventListener('click', async function() {
   // Mark question as answered
   askedQuestionIds.push(currentQuestion.question_id);
   
-  // Move to next question index
-  currentQuestionIndex++;
-  console.log(' Next question index:', currentQuestionIndex);
-  if (currentQuestionIndex < sessionQuestions.length) {
-  displayQuestion();
-  } 
-  else {
-  console.log('loading new session');
-  await loadNewSession();
-  }
-});
+
 
             //Fetch the Questionns needed for the session
     async function fetchQuestion() {
@@ -592,7 +786,27 @@ if (sessionQuestions && sessionQuestions.length > 0) {
 }
 }
 });
+//End Session button click handler
+endSession.addEventListener('click', async function() {
+  //Dummy Data
+  topicList.innerHTML = '<div class="topicItem"><div class="topicName">Test Topic</div><div class="topicBefore">50%</div><div class="topicAfter">75%</div><div class="topicChange positive">+25%</div></div>';
+  
+  modalCorrect.textContent = correctCount;
+  modalIncorrect.textContent = incorrectCount;
+  modalAccuracy.textContent = '75%';
+  
+  // Show modal
+  endSessionModal.style.display = 'flex';
+});
+
+
+
+// Close modal button
+closeModalBtn.addEventListener('click', function() {
+  endSessionModal.style.display = 'none';
+});
         });
+  
       
       
 

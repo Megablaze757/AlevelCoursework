@@ -176,167 +176,6 @@ color: #c62828;
 border: 2px solid #ef5350;
 display: block;
 }
-    /* Modal styles */
-.modal {
-  display: none;
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background-color: rgba(0,0,0,0.5);
-  justify-content: center;
-  align-items: center;
-  z-index: 1000;
-}
-
-.modalContent {
-  background: white;
-  padding: 30px;
-  border-radius: 20px;
-  max-width: 600px;
-  width: 90%;
-  max-height: 80vh;
-  overflow-y: auto;
-  box-shadow: 0 5px 30px rgba(0,0,0,0.3);
-}
-
-
-.topicSummary {
-  margin: 20px 0;
-  padding: 15px;
-  background: #f5f9ff;
-  border-radius: 15px;
-}
-
-.topicItem {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 12px;
-  border-bottom: 1px solid #e0e0e0;
-}
-
-.topicItem:last-child {
-  border-bottom: none;
-}
-
-.topicName {
-  font-weight: 600;
-  color: #0d47a1;
-  flex: 2;
-}
-
-.topicBefore, .topicAfter, .topicChange {
-  flex: 1;
-  text-align: center;
-}
-
-.topicBefore {
-  color: #546e7a;
-}
-
-.topicAfter {
-  color: #2e7d32;
-  font-weight: 600;
-}
-
-.topicChange.positive {
-  color: #2e7d32;
-}
-
-.topicChange.negative {
-  color: #c62828;
-}
-
-.sessionStats {
-  display: flex;
-  justify-content: space-around;
-  margin: 20px 0;
-  padding: 20px;
-  background: #e8f5e9;
-  border-radius: 15px;
-}
-
-.statBox {
-  text-align: center;
-}
-
-.statBox .statLabel {
-  font-size: 14px;
-  color: #546e7a;
-  margin-bottom: 5px;
-}
-
-.statBox .statValue {
-  font-size: 28px;
-  font-weight: bold;
-  color: #0d47a1;
-}
-
-.statBox .statValue.correct {
-  color: #2e7d32;
-}
-
-.statBox .statValue.incorrect {
-  color: #c62828;
-}
-
-.modalButtons {
-  display: flex;
-  gap: 10px;
-  margin-top: 20px;
-}
-
-.modalButton {
-  flex: 1;
-  padding: 12px;
-  border-radius: 50px;
-  text-align: center;
-  cursor: pointer;
-  font-weight: bold;
-  transition: background 0.2s;
-  border: none;
-  font-size: 16px;
-}
-
-.modalButton.primary {
-  background: #1976d2;
-  color: white;
-}
-
-.modalButton.primary:hover {
-  background: #1565c0;
-}
-
-.modalButton.secondary {
-  background: #e0e0e0;
-  color: #263238;
-}
-
-.modalButton.secondary:hover {
-  background: #bdbdbd;
-}
-
-.topicHeader {
-  display: flex;
-  justify-content: space-between;
-  padding: 8px 12px;
-  background: #bbdefb;
-  border-radius: 10px 10px 0 0;
-  font-weight: bold;
-  color: #0d47a1;
-}
-
-.topicHeader span {
-  flex: 1;
-  text-align: center;
-}
-
-.topicHeader span:first-child {
-  flex: 2;
-  text-align: left;
-}
     
   </style>
   
@@ -347,8 +186,8 @@ display: block;
 <!-- Left Column: To have the number correct and incorrect -->
 <div class="scorePanel">
   <div class='numCorrectContainer'>
-    <div class='numCorrect' id='numCorrect'></div>           
-    <div class='numIncorrect' id='numIncorrect'></div>     
+    <div class='numCorrect' id='numCorrect'>0</div>           
+    <div class='numIncorrect' id='numIncorrect'>0</div>     
   </div>
 </div>
 
@@ -357,12 +196,11 @@ display: block;
   
   <!-- Question container -->
   <div class='questionContainer'>
-    <div class='question' id='questionHolder'></div>
-    <input type='text' class='answerBox' id='answerBox'>        
+    <div class='question' id='questionHolder'>Click Next Question to start</div>
+    <input type='text' class='answerBox' id='answerBox' placeholder="Enter your answer">        
     <div class='checkAnswer' id='checkAnswer'>Check answer</div>
-  <div class='feedback' id='feedback'></div>
-  <button class='nextQuestionBtn' id='nextQuestionBtn'>Next Question</button>
-    
+    <div class='feedback' id='feedback'></div>
+    <button class='nextQuestionBtn' id='nextQuestionBtn'>Next Question</button>
   </div>
   
   <!-- End Session button Below the card on the bottom right -->
@@ -371,133 +209,106 @@ display: block;
 </div>  <!-- end of card-area -->
 
 </div>
-<!-- End Session Modal -->
-<div class="modal" id="endSessionModal">
-  <div class="modalContent">
-    
-    
-    <div class="topicSummary">
-      <div class="topicHeader">
-        <span>Topic</span>
-        <span>Before</span>
-        <span>After</span>
-        <span>Change</span>
-      </div>
-      <div id="topicList"></div>
-    </div>
-    
-    <div class="sessionStats">
-      <div class="statBox">
-        <div class="statLabel">Correct</div>
-        <div class="statValue correct" id="modalCorrect">0</div>
-      </div>
-      <div class="statBox">
-        <div class="statLabel">Incorrect</div>
-        <div class="statValue incorrect" id="modalIncorrect">0</div>
-      </div>
-      <div class="statBox">
-        <div class="statLabel">Accuracy</div>
-        <div class="statValue" id="modalAccuracy">0%</div>
-      </div>
-    </div>
-    
-    <div class="modalButtons">
-      <button class="modalButton primary" id="newSessionBtn">New Session</button>
-      <button class="modalButton secondary" id="closeModalBtn">Close</button>
-    </div>
-  </div>
-</div>
-  <script>
-    const endSessionModal = document.getElementById('endSessionModal');
-    const topicList = document.getElementById('topicList');
-    const modalCorrect = document.getElementById('modalCorrect');
-    const modalIncorrect = document.getElementById('modalIncorrect');
-    const modalAccuracy = document.getElementById('modalAccuracy');
-    const newSessionBtn = document.getElementById('newSessionBtn');
-    const closeModalBtn = document.getElementById('closeModalBtn');
-    
-    //Correct and Incorrect answer Variables
-    let correctCount = 0
-    let incorrectCount = 0
 
-    //Current Batch of questions
-    let sessionQuestions = [];
-    //Question we are on
-    let currentQuestionIndex = 0;
-    //Questions Asked
-    let askedQuestionIds = [];
-    //Amount of that topic correct
-    let topicCorrect = [];
-    //Total answered
-    let topicTotal =[];
+<script>
     
-    let question_id = 1;
-    let student_id = 'StudentTest';
-    //Get the Answer elements
-    const checkAnswer = document.getElementById('checkAnswer');
-    const answerBox = document.getElementById('answerBox');
+//Correct and Incorrect answer Variables
+let correctCount = 0
+let incorrectCount = 0
 
-    const nextQuestion = document.getElementById('nextQuestionBtn');
-    let orderedTopicsList = [];
-    let currentTopicIndex = 0;
-    let currentTopicId = null;
+//Current Batch of questions
+let sessionQuestions = [];
+//Question we are on
+let currentQuestionIndex = 0;
+//Questions Asked
+let askedQuestionIds = [];
     
-let questions = [];
-  
-      // The supabase url
+let student_id = 'StudentTest';
+
+//Get DOM elements
+const checkAnswer = document.getElementById('checkAnswer');
+const answerBox = document.getElementById('answerBox');
+const numCorrect = document.getElementById('numCorrect');
+const numIncorrect = document.getElementById('numIncorrect');
+const feedback = document.getElementById('feedback');
+const questionHolder = document.getElementById('questionHolder');
+const nextQuestion = document.getElementById('nextQuestionBtn');
+const endSession = document.getElementById('endSession');
+
+let orderedTopicsList = [];
+let currentTopicIndex = 0;
+let currentTopicId = null;
+
+// Store initial topic accuracies
+let initialTopicAccuracies = {};
+
+// The supabase url
 const supabase_url = 'https://pxjndwrkafegopsolnde.supabase.co'
-// Supabase key
-const supabase_key = 'sb_publishable_eOUJ3K3GNczOncszRwYhyA_A1QAw72F'
 // Initialize supabase client
 const supabaseClient = supabase.createClient(
-'https://pxjndwrkafegopsolnde.supabase.co',
-'sb_publishable_eOUJ3K3GNczOncszRwYhyA_A1QAw72F'
+  'https://pxjndwrkafegopsolnde.supabase.co',
+  'sb_publishable_eOUJ3K3GNczOncszRwYhyA_A1QAw72F'
 );
-            //Update topic performance function
-    async function updateTopicPerformance(topicId, studentId, wasCorrect) {
-      // Get current performance
-      const {data: currentPerformance, error} = await supabaseClient
-        .from('topic_performance')
-        .select('*')
-        .eq('student_id', studentId)
-        .eq('topic_id', topicId);
-      //If the record exists update it
-      if (currentPerformance && currentPerformance.length > 0) {
-        const updatedPerformance = currentPerformance[0];
 
-        //Calculate the new values
-        const newAttempted = updatedPerformance.questions_attempted +1;
-        const newCorrect = updatedPerformance.questions_correct + (wasCorrect ? 1 : 0);
-        const newAccuracy = (newCorrect / newAttempted) * 100
-        
-        //Update the record with the new data
-        const{error} = await supabaseClient 
-        .from('topic_performance')
-        .update({
-            questions_attempted: newAttempted,
-            questions_correct: newCorrect,
-            accuracy_percent: Math.round(newAccuracy)
-        })
-        .eq('perfomance_id', updatedPerformance.perfomance_id);
-        
-      }
-      //If the record doesnt exist create a new one
-      else {
-        const {error} = await supabaseClient
-          .from('topic_performance')
-          .insert([{
-            student_id: studentId,
-            topic_id: topicId,
-            questions_attempted: 1,
-            questions_correct: wasCorrect ? 1 : 0,
-            accuracy_percent: wasCorrect ? 100 : 0
-          }])
-      }
-      
-    }
-    //Add a click handler
-    //Function to check answer on click
-    // Check answer button
+// Get initial topic accuracies on load
+async function getInitialAccuracies() {
+  const { data: performances } = await supabaseClient
+    .from('topic_performance')
+    .select('topic_id, accuracy_percent')
+    .eq('student_id', student_id);
+  
+  if (performances) {
+    performances.forEach(p => {
+      initialTopicAccuracies[p.topic_id] = p.accuracy_percent || 0;
+    });
+  }
+  console.log('Initial accuracies:', initialTopicAccuracies);
+}
+getInitialAccuracies();
+
+//Update topic performance function
+async function updateTopicPerformance(topicId, studentId, wasCorrect) {
+  // Get current performance
+  const {data: currentPerformance, error} = await supabaseClient
+    .from('topic_performance')
+    .select('*')
+    .eq('student_id', studentId)
+    .eq('topic_id', topicId);
+    
+  //If the record exists update it
+  if (currentPerformance && currentPerformance.length > 0) {
+    const updatedPerformance = currentPerformance[0];
+
+    //Calculate the new values
+    const newAttempted = updatedPerformance.questions_attempted + 1;
+    const newCorrect = updatedPerformance.questions_correct + (wasCorrect ? 1 : 0);
+    const newAccuracy = (newCorrect / newAttempted) * 100
+    
+    //Update the record with the new data
+    await supabaseClient 
+      .from('topic_performance')
+      .update({
+        questions_attempted: newAttempted,
+        questions_correct: newCorrect,
+        accuracy_percent: Math.round(newAccuracy)
+      })
+      .eq('perfomance_id', updatedPerformance.perfomance_id);
+  }
+  //If the record doesnt exist create a new one
+  else {
+    await supabaseClient
+      .from('topic_performance')
+      .insert([{
+        student_id: studentId,
+        topic_id: topicId,
+        questions_attempted: 1,
+        questions_correct: wasCorrect ? 1 : 0,
+        accuracy_percent: wasCorrect ? 100 : 0
+      }]);
+  }
+}
+
+// Check answer button
 checkAnswer.addEventListener('click', async function() {
   // Check if there's a question to answer
   if (sessionQuestions.length === 0) {
@@ -542,275 +353,228 @@ checkAnswer.addEventListener('click', async function() {
   // Mark question as answered
   askedQuestionIds.push(currentQuestion.question_id);
   
-
-
-            //Fetch the Questionns needed for the session
-    async function fetchQuestion() {
-      
-      const { data, error } = await supabaseClient
-               //Sql query to fetch questions
-        
-               .from('questions')
-               .select('*')
-
-      
-      questions = data;      
-      
-        
-      }
-    
-// Get the strengths of the user
-async function getStrengths () {
-    const{data: strengths, error} = await supabaseClient
-        .from('strengths')
-        .select('*')
-        .eq('student_id', 'StudentTest')
-console.log(strengths);
-}
-
-//Get the weaknesses of the user
-async function getWeaknesses () {
-      const{data: weaknesses, error} = await supabaseClient
-        .from('weaknesses')
-        .select('topic_id')
-        .eq('student_id', 'StudentTest')
-console.log(weaknesses);
-}
-//Order the topics
-async function orderTopics () {
-const weaknesses = await getWeaknesses()
-let {data: orderedTopics, error} = await supabaseClient
-.from('topic_performance')
-.select('topic_id, accuracy_percent')
-.eq('student_id', 'StudentTest')
-
-// Bubble sort for array of objects
-let len = orderedTopics.length;
-for (let i = 0; i < len - 1; i++) {
-for (let j = 0; j < len - 1 - i; j++) {
-  // Use .accuracy_percent instead of [1]
-  if (orderedTopics[j].accuracy_percent > orderedTopics[j + 1].accuracy_percent) {
-    let temp = orderedTopics[j];
-    orderedTopics[j] = orderedTopics[j + 1];
-    orderedTopics[j + 1] = temp;
+  // Clear answer box
+  answerBox.value = '';
+  
+  // Move to next question index
+  currentQuestionIndex++;
+  
+  if (currentQuestionIndex < sessionQuestions.length) {
+    displayQuestion();
+  } else {
+    console.log('loading new session');
+    await loadNewSession();
   }
-}
-}
+});
 
-console.log(orderedTopics);
-return orderedTopics;
-}
+// End Session button click handler
+endSession.addEventListener('click', async function() {
+  // Get all topics
+  const { data: topics } = await supabaseClient
+    .from('topics')
+    .select('topic_id, topic_name');
+  
+  // Get current performance from database
+  const { data: performances } = await supabaseClient
+    .from('topic_performance')
+    .select('topic_id, accuracy_percent')
+    .eq('student_id', student_id);
+  
+  let summary = "=== SESSION SUMMARY ===\n";
+  summary += "Topic Accuracy Changes:\n\n";
+  
+  // Create a map of current accuracies
+  let currentAccuracies = {};
+  if (performances) {
+    performances.forEach(p => {
+      currentAccuracies[p.topic_id] = p.accuracy_percent || 0;
+    });
+  }
+  
+  // Show accuracy change for each topic
+  for (let topic of topics) {
+    const topicId = topic.topic_id;
+    const initial = initialTopicAccuracies[topicId] || 0;
+    const current = currentAccuracies[topicId] || 0;
+    const change = current - initial;
+    const changeSymbol = change >= 0 ? '+' : '';
+    
+    summary += `${topic.topic_name}:\n`;
+    summary += `  Before: ${initial}%\n`;
+    summary += `  After:  ${current}%\n`;
+    summary += `  Change: ${changeSymbol}${change}%\n\n`;
+  }
+  
+  summary += `Session Correct: ${correctCount}\n`;
+  summary += `Session Incorrect: ${incorrectCount}\n`;
+  summary += `Session Accuracy: ${Math.round((correctCount/(correctCount+incorrectCount || 1))*100)}%`;
+  
+  console.log(summary);
+  alert(summary);
+});
+
 //Get the preffered learning style
 async function getStyle(){
-//Query learning style
-const{data:learningStyle , error} = await supabaseClient
- .from('adaptive_settings')
- .select('preferred_style')
- .eq('student_id', 'StudentTest')
-console.log(learningStyle)
-return learningStyle;
+  const {data:learningStyle , error} = await supabaseClient
+    .from('adaptive_settings')
+    .select('preferred_style')
+    .eq('student_id', 'StudentTest');
+  return learningStyle;
 }
-    
+
+//Order the topics
+async function orderTopics () {
+  let {data: orderedTopics, error} = await supabaseClient
+    .from('topic_performance')
+    .select('topic_id, accuracy_percent')
+    .eq('student_id', 'StudentTest');
+  
+  if (!orderedTopics) return [];
+  
+  // Sort by accuracy (lowest first)
+  orderedTopics.sort((a, b) => a.accuracy_percent - b.accuracy_percent);
+  
+  return orderedTopics;
+}
+
 // Function to get the questions
 async function getQuestion(topicId) {
-console.log('Getting questions for topic:', topicId);
-
-// Get the style
-let style = await getStyle();
-let preferredStyle = style && style.length > 0 ? style[0].preferred_style : 'mixed';
-
-//Get the current accuracy
-const {data:accuracy} = await supabaseClient
-.from('topic_performance')
-.select('accuracy_percent')
-.eq('student_id', 'StudentTest')
-.eq('topic_id', topicId);
-
-//set difficulty based on accuracy 
-let accuracyValue = 50; // Default
-let difficultyValue = 3; // Default medium
-
-if (accuracy && accuracy.length > 0) {
-accuracyValue = accuracy[0].accuracy_percent;
-
-// Convert accuracy to difficulty level 1-5
-if (accuracyValue < 40) {
-  difficultyValue = 1; // Easy
-}
-else if (accuracyValue >= 40 && accuracyValue < 60) {
-  difficultyValue = 2; // Medium-Easy
-}
-else if (accuracyValue >= 60 && accuracyValue < 70) {
-  difficultyValue = 3; // Medium
-}
-else if (accuracyValue >= 70 && accuracyValue < 80) {
-  difficultyValue = 4; // Medium-Hard
-}
-else if (accuracyValue >= 80) {
-  difficultyValue = 5; // Hard
-}
-}
-
-console.log('Trying difficulty:', difficultyValue);
-
-// First try: Get questions with specific difficulty
-let { data: questions, error } = await supabaseClient
-.from('questions')
-.select('*')
-.eq('question_type', preferredStyle)
-.eq('topic_id', topicId)
-.eq('difficulty', difficultyValue);
-
-// If no questions found, try all difficulties for this topic
-if (!questions || questions.length === 0) {
-console.log('No questions at difficulty', difficultyValue, 'trying all difficulties');
-
-const { data: allQuestions } = await supabaseClient
-  .from('questions')
-  .select('*')
-  .eq('question_type', preferredStyle)
-  .eq('topic_id', topicId);
-
-questions = allQuestions;
-}
-
-// Filter out questions that have already been answered
-if (questions && questions.length > 0) {
-const unansweredQuestions = questions.filter(q => !askedQuestionIds.includes(q.question_id));
-console.log('Total questions found:', questions.length);
-console.log('Already answered IDs:', askedQuestionIds);
-console.log('Unanswered questions:', unansweredQuestions.length);
-return unansweredQuestions;
-}
-
-return [];
+  // Get the style
+  let style = await getStyle();
+  let preferredStyle = style && style.length > 0 ? style[0].preferred_style : 'mixed';
+  
+  //Get the current accuracy
+  const {data:accuracy} = await supabaseClient
+    .from('topic_performance')
+    .select('accuracy_percent')
+    .eq('student_id', 'StudentTest')
+    .eq('topic_id', topicId);
+  
+  //set difficulty based on accuracy 
+  let difficultyValue = 3; // Default medium
+  
+  if (accuracy && accuracy.length > 0) {
+    const accuracyValue = accuracy[0].accuracy_percent;
+    
+    // Convert accuracy to difficulty level 1-5
+    if (accuracyValue < 40) difficultyValue = 1;
+    else if (accuracyValue >= 40 && accuracyValue < 60) difficultyValue = 2;
+    else if (accuracyValue >= 60 && accuracyValue < 70) difficultyValue = 3;
+    else if (accuracyValue >= 70 && accuracyValue < 80) difficultyValue = 4;
+    else if (accuracyValue >= 80) difficultyValue = 5;
+  }
+  
+  // First try: Get questions with specific difficulty
+  let { data: questions } = await supabaseClient
+    .from('questions')
+    .select('*')
+    .eq('question_type', preferredStyle)
+    .eq('topic_id', topicId)
+    .eq('difficulty', difficultyValue);
+  
+  // If no questions found, try all difficulties for this topic
+  if (!questions || questions.length === 0) {
+    const { data: allQuestions } = await supabaseClient
+      .from('questions')
+      .select('*')
+      .eq('question_type', preferredStyle)
+      .eq('topic_id', topicId);
+    
+    questions = allQuestions;
+  }
+  
+  // Filter out questions that have already been answered
+  if (questions && questions.length > 0) {
+    const unansweredQuestions = questions.filter(q => !askedQuestionIds.includes(q.question_id));
+    return unansweredQuestions;
+  }
+  
+  return [];
 }
 
 // Load new session
 async function loadNewSession() {
-orderedTopicsList = await orderTopics();
-if (!orderedTopicsList || orderedTopicsList.length === 0) return;
-
-// Try each topic until we find one with questions
-for (let i = 0; i < orderedTopicsList.length; i++) {
-currentTopicIndex = i;
-currentTopicId = orderedTopicsList[i].topic_id;
-console.log('Trying topic:', currentTopicId);
-
-sessionQuestions = await getQuestion(currentTopicId);
-
-if (sessionQuestions.length > 0) {
-  console.log('Found questions for topic:', currentTopicId);
-  currentQuestionIndex = 0;
-  displayQuestion();
-  return;
-}
-}
-
-// If we get here, no topics have questions
-questionHolder.innerHTML = 'No questions available for any topic';
-}
-
+  orderedTopicsList = await orderTopics();
+  if (!orderedTopicsList || orderedTopicsList.length === 0) return;
+  
+  // Try each topic until we find one with questions
+  for (let i = 0; i < orderedTopicsList.length; i++) {
+    currentTopicIndex = i;
+    currentTopicId = orderedTopicsList[i].topic_id;
     
+    sessionQuestions = await getQuestion(currentTopicId);
+    
+    if (sessionQuestions.length > 0) {
+      currentQuestionIndex = 0;
+      displayQuestion();
+      return;
+    }
+  }
+  
+  // If we get here, no topics have questions
+  questionHolder.innerHTML = 'No questions available for any topic';
+}
 
 // Display question
 function displayQuestion() {
-console.log('displayQuestion - sessionQuestions:', sessionQuestions);
-console.log('displayQuestion - currentQuestionIndex:', currentQuestionIndex);
-
-if (sessionQuestions && sessionQuestions.length > 0 && currentQuestionIndex < sessionQuestions.length) {
-const currentQuestion = sessionQuestions[currentQuestionIndex];
-console.log('Current question:', currentQuestion);
-questionHolder.innerHTML = currentQuestion.question_text;
-} else {
-console.log('No question to display');
-questionHolder.innerHTML = 'No questions available';
-}
-}
-      document.addEventListener('DOMContentLoaded', async function () {
-        
-        
-// Next question event listener
-nextQuestion.addEventListener('click', async function() {
-console.log('Next question clicked');
-
-// First time - load session
-if (sessionQuestions.length === 0) {
-console.log('First time - loading session');
-orderedTopicsList = await orderTopics();
-
-// Try each topic until we find one with questions
-for (let i = 0; i < orderedTopicsList.length; i++) {
-  currentTopicIndex = i;
-  currentTopicId = orderedTopicsList[i].topic_id;
-  console.log('Trying topic:', currentTopicId);
-  
-  sessionQuestions = await getQuestion(currentTopicId);
-  
-  if (sessionQuestions && sessionQuestions.length > 0) {
-    console.log('Found questions for topic:', currentTopicId);
-    currentQuestionIndex = 0;
-    displayQuestion();
-    return;
+  if (sessionQuestions && sessionQuestions.length > 0 && currentQuestionIndex < sessionQuestions.length) {
+    const currentQuestion = sessionQuestions[currentQuestionIndex];
+    questionHolder.innerHTML = currentQuestion.question_text;
+    // Clear feedback when showing new question
+    feedback.style.display = 'none';
+  } else {
+    questionHolder.innerHTML = 'No questions available';
   }
 }
 
-// If we get here, no topics have questions
-questionHolder.innerHTML = 'No questions available for any topic';
-return;
-}
-
-// Check if we have a question at current index
-if (currentQuestionIndex < sessionQuestions.length) {
-console.log('Displaying question at index:', currentQuestionIndex);
-displayQuestion();
-} else {
-console.log('No more questions for this topic, moving to next topic');
-
-// Move to next topic
-currentTopicIndex++;
-if (currentTopicIndex >= orderedTopicsList.length) {
-  currentTopicIndex = 0;
-}
-
-currentTopicId = orderedTopicsList[currentTopicIndex].topic_id;
-
-// Load questions for new topic
-sessionQuestions = await getQuestion(currentTopicId);
-currentQuestionIndex = 0;
-
-if (sessionQuestions && sessionQuestions.length > 0) {
-  displayQuestion();
-} else {
-  questionHolder.innerHTML = 'No questions for this topic';
-}
-}
-});
-//End Session button click handler
-endSession.addEventListener('click', async function() {
-  //Dummy Data
-  topicList.innerHTML = '<div class="topicItem"><div class="topicName">Test Topic</div><div class="topicBefore">50%</div><div class="topicAfter">75%</div><div class="topicChange positive">+25%</div></div>';
-  
-  modalCorrect.textContent = correctCount;
-  modalIncorrect.textContent = incorrectCount;
-  modalAccuracy.textContent = '75%';
-  
-  // Show modal
-  endSessionModal.style.display = 'flex';
-});
-
-
-
-// Close modal button
-closeModalBtn.addEventListener('click', function() {
-  endSessionModal.style.display = 'none';
-});
-        });
-  
+// Next question event listener
+nextQuestion.addEventListener('click', async function() {
+  // First time - load session
+  if (sessionQuestions.length === 0) {
+    orderedTopicsList = await orderTopics();
+    
+    // Try each topic until we find one with questions
+    for (let i = 0; i < orderedTopicsList.length; i++) {
+      currentTopicIndex = i;
+      currentTopicId = orderedTopicsList[i].topic_id;
       
+      sessionQuestions = await getQuestion(currentTopicId);
       
+      if (sessionQuestions && sessionQuestions.length > 0) {
+        currentQuestionIndex = 0;
+        displayQuestion();
+        return;
+      }
+    }
+    
+    questionHolder.innerHTML = 'No questions available for any topic';
+    return;
+  }
+  
+  // Check if we have a question at current index
+  if (currentQuestionIndex < sessionQuestions.length) {
+    displayQuestion();
+  } else {
+    // Move to next topic
+    currentTopicIndex++;
+    if (currentTopicIndex >= orderedTopicsList.length) {
+      currentTopicIndex = 0;
+    }
+    
+    currentTopicId = orderedTopicsList[currentTopicIndex].topic_id;
+    
+    // Load questions for new topic
+    sessionQuestions = await getQuestion(currentTopicId);
+    currentQuestionIndex = 0;
+    
+    if (sessionQuestions && sessionQuestions.length > 0) {
+      displayQuestion();
+    } else {
+      questionHolder.innerHTML = 'No questions for this topic';
+    }
+  }
+});
 
-console.log('Selected Topic:', sessionStorage.getItem('selectedTopic'));
 </script>
 </body>
 </html>

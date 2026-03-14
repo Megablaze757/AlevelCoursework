@@ -416,17 +416,24 @@ display: block;
     const newSessionBtn = document.getElementById('newSessionBtn');
     const closeModalBtn = document.getElementById('closeModalBtn');
     
+    //Correct and Incorrect answer Variables
     let correctCount = 0
     let incorrectCount = 0
 
+    //Current Batch of questions
     let sessionQuestions = [];
+    //Question we are on
     let currentQuestionIndex = 0;
+    //Questions Asked
     let askedQuestionIds = [];
+    //Amount of that topic correct
     let topicCorrect = [];
+    //Total answered
     let topicTotal =[];
     
     let question_id = 1;
     let student_id = 'StudentTest';
+    //Get the Answer elements
     const checkAnswer = document.getElementById('checkAnswer');
     const answerBox = document.getElementById('answerBox');
     const numCorrect = document.getElementById('numCorrect');
@@ -438,17 +445,28 @@ display: block;
     let currentTopicIndex = 0;
     let currentTopicId = null;
 
+    //Store Intial accuracies
     let initialTopicAccuracies = {};
+    
+    //Get the topic from session storage 
+    let selectedTopicName = sessionStorage.getItem('selectedTopic');
+    let selectedTopicId = null;
+    console.log('Selected topic from session:', selectedTopicName);
     
 let questions = [];
   
+      // The supabase url
 const supabase_url = 'https://pxjndwrkafegopsolnde.supabase.co'
+// Supabase key
 const supabase_key = 'sb_publishable_eOUJ3K3GNczOncszRwYhyA_A1QAw72F'
+// Initialize supabase client
 const supabaseClient = supabase.createClient(
 'https://pxjndwrkafegopsolnde.supabase.co',
 'sb_publishable_eOUJ3K3GNczOncszRwYhyA_A1QAw72F'
 );
 
+
+    //Get initial accuracies
     async function getInitialAccuracies() {
       const { data: performances } = await supabaseClient
         .from('topic_performance')
@@ -464,19 +482,24 @@ const supabaseClient = supabase.createClient(
         
     }
 
+    //Update topic performance function
     async function updateTopicPerformance(topicId, studentId, wasCorrect) {
+      // Get current performance
       const { data: currentPerformance, error } = await supabaseClient
         .from('topic_performance')
         .select('*')
         .eq('student_id', studentId)
         .eq('topic_id', topicId);
+      //If the record exists update it
       if (currentPerformance && currentPerformance.length > 0) {
         const updatedPerformance = currentPerformance[0];
 
+        //Calculate the new values
         const newAttempted = updatedPerformance.questions_attempted +1;
         const newCorrect = updatedPerformance.questions_correct + (wasCorrect ? 1 : 0);
         const newAccuracy = (newCorrect / newAttempted) * 100
         
+        //Update the record with the new data
         const { error } = await supabaseClient 
         .from('topic_performance')
         .update({
@@ -487,6 +510,7 @@ const supabaseClient = supabase.createClient(
         .eq('perfomance_id', updatedPerformance.perfomance_id);
         
       }
+      //If the record doesnt exist create a new one
       else {
         const { error } = await supabaseClient
           .from('topic_performance')
@@ -704,12 +728,49 @@ document.addEventListener('DOMContentLoaded', async function () {
 await getInitialAccuracies();
 await fetchQuestion();
 
+//Get topic ID from the selected topic name
+if (selectedTopicName) {
+  const { data: topic } = await supabaseClient
+    .from('topics')
+    .select('topic_id')
+    .eq('topic_name', selectedTopicName)
+    .single();
+  
+  if (topic) {
+    selectedTopicId = topic.topic_id;
+    console.log('Selected topic ID:', selectedTopicId);
+    questionHolder.innerHTML = `Topic: ${selectedTopicName}. Click Next Question to start`;
+  } else {
+    questionHolder.innerHTML = 'Click Next Question to start';
+  }
+} else {
+  questionHolder.innerHTML = 'Click Next Question to start';
+}
+
 nextQuestion.addEventListener('click', async function() {
 console.log('Next question clicked');
 
 if (sessionQuestions.length === 0) {
 console.log('First time - loading session');
-orderedTopicsList = await orderTopics();
+
+  //Check if a topic was selected
+  if (selectedTopicId) {
+    console.log('Using selected topic:', selectedTopicId);
+    sessionQuestions = await getQuestion(selectedTopicId);
+    
+    if (sessionQuestions && sessionQuestions.length > 0) {
+      currentQuestionIndex = 0;
+      displayQuestion();
+      answerBox.value = '';
+      feedback.style.display = 'none';
+      return;
+    } else {
+      questionHolder.innerHTML = 'No questions available for this topic';
+      return;
+    }
+  } else {
+    //No topic selected - use adaptive ordering
+    orderedTopicsList = await orderTopics();
 
 for (let i = 0; i < orderedTopicsList.length; i++) {
   currentTopicIndex = i;
@@ -730,6 +791,7 @@ for (let i = 0; i < orderedTopicsList.length; i++) {
 
 questionHolder.innerHTML = 'No questions available for any topic';
 return;
+  }
 }
 
 currentQuestionIndex++;
@@ -742,7 +804,22 @@ feedback.style.display = 'none';
 } else {
 console.log('No more questions for this topic, moving to next topic');
 
-currentTopicIndex++;
+  //If a topic is selected, stay on that topic
+  if (selectedTopicId) {
+    //Try to get more questions for the same topic
+    sessionQuestions = await getQuestion(selectedTopicId);
+    currentQuestionIndex = 0;
+    
+    if (sessionQuestions && sessionQuestions.length > 0) {
+      displayQuestion();
+      answerBox.value = '';
+      feedback.style.display = 'none';
+    } else {
+      questionHolder.innerHTML = 'No more questions for this topic';
+    }
+  } else {
+    //Adaptive mode - move to next topic
+    currentTopicIndex++;
 if (currentTopicIndex >= orderedTopicsList.length) {
   currentTopicIndex = 0;
 }
@@ -759,19 +836,23 @@ if (sessionQuestions && sessionQuestions.length > 0) {
 } else {
   questionHolder.innerHTML = 'No questions for this topic';
 }
+  }
 }
 });
 
 endSession.addEventListener('click', async function() {
+  // Get all topics
   const { data: topics } = await supabaseClient
     .from('topics')
     .select('topic_id, topic_name');
   
+  // Get current performance
   const { data: performances } = await supabaseClient
     .from('topic_performance')
     .select('topic_id, accuracy_percent')
     .eq('student_id', student_id);
   
+  // Create an object of accuracies
   let currentAccuracies = {};
   if (performances) {
     performances.forEach(p => {
@@ -779,6 +860,7 @@ endSession.addEventListener('click', async function() {
     });
   }
   
+  // Build topic list HTML
   let topicHTML = '';
   for (let topic of topics) {
     const topicId = topic.topic_id;
@@ -800,6 +882,7 @@ endSession.addEventListener('click', async function() {
   
   topicList.innerHTML = topicHTML;
   
+  // Update session stats
   const totalQuestions = correctCount + incorrectCount;
   const accuracy = totalQuestions > 0 ? Math.round((correctCount/totalQuestions)*100) : 0;
   
@@ -807,14 +890,18 @@ endSession.addEventListener('click', async function() {
   modalIncorrect.textContent = incorrectCount;
   modalAccuracy.textContent = accuracy + '%';
   
+  // Show modal
   endSessionModal.style.display = 'flex';
 });
 
+// Close modal button
 closeModalBtn.addEventListener('click', function() {
   endSessionModal.style.display = 'none';
 });
 
+// New Session button
 newSessionBtn.addEventListener('click', function() {
+  // Reset session
   correctCount = 0;
   incorrectCount = 0;
   numCorrect.textContent = correctCount;
@@ -828,8 +915,15 @@ newSessionBtn.addEventListener('click', function() {
   answerBox.value = '';
   questionHolder.innerHTML = 'Click Next Question to start';
   
+  // Hide modal
   endSessionModal.style.display = 'none';
   
+  // Clear selected topic from session storage
+  sessionStorage.removeItem('selectedTopic');
+  selectedTopicName = null;
+  selectedTopicId = null;
+  
+  // Update initial accuracies for new session
   getInitialAccuracies();
 });
 

@@ -447,6 +447,11 @@ display: block;
 
     //Store Intial accuracies
     let initialTopicAccuracies = {};
+    //Get the topic from session storage 
+    let selectedTopicName = sessionStorage.getItem('selectedTopic');
+    let selectedTopicId = null;
+    console.log('Selected topic', selectedTopicName);
+
     
 let questions = [];
   

@@ -802,41 +802,8 @@ displayQuestion();
 answerBox.value = '';
 feedback.style.display = 'none';
 } else {
-console.log('No more questions for this topic, moving to next topic');
-
-  //If a topic is selected, stay on that topic
-  if (selectedTopicId) {
-    //Try to get more questions for the same topic
-    sessionQuestions = await getQuestion(selectedTopicId);
-    currentQuestionIndex = 0;
-    
-    if (sessionQuestions && sessionQuestions.length > 0) {
-      displayQuestion();
-      answerBox.value = '';
-      feedback.style.display = 'none';
-    } else {
-      questionHolder.innerHTML = 'No more questions for this topic';
-    }
-  } else {
-    //Adaptive mode - move to next topic
-    currentTopicIndex++;
-if (currentTopicIndex >= orderedTopicsList.length) {
-  currentTopicIndex = 0;
-}
-
-currentTopicId = orderedTopicsList[currentTopicIndex].topic_id;
-
-sessionQuestions = await getQuestion(currentTopicId);
-currentQuestionIndex = 0;
-
-if (sessionQuestions && sessionQuestions.length > 0) {
-  displayQuestion();
-  answerBox.value = '';
-  feedback.style.display = 'none';
-} else {
-  questionHolder.innerHTML = 'No questions for this topic';
-}
-  }
+console.log('No more questions for this topic');
+questionHolder.innerHTML = 'No more questions for this topic';
 }
 });
 

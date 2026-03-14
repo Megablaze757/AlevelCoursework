@@ -448,11 +448,6 @@ display: block;
     //Store Intial accuracies
     let initialTopicAccuracies = {};
     
-    //Get the topic from session storage 
-    let selectedTopicName = sessionStorage.getItem('selectedTopic');
-    let selectedTopicId = null;
-    console.log('Selected topic from session:', selectedTopicName);
-    
 let questions = [];
   
       // The supabase url
@@ -728,49 +723,12 @@ document.addEventListener('DOMContentLoaded', async function () {
 await getInitialAccuracies();
 await fetchQuestion();
 
-//Get topic ID from the selected topic name
-if (selectedTopicName) {
-  const { data: topic } = await supabaseClient
-    .from('topics')
-    .select('topic_id')
-    .eq('topic_name', selectedTopicName)
-    .single();
-  
-  if (topic) {
-    selectedTopicId = topic.topic_id;
-    console.log('Selected topic ID:', selectedTopicId);
-    questionHolder.innerHTML = `Topic: ${selectedTopicName}. Click Next Question to start`;
-  } else {
-    questionHolder.innerHTML = 'Click Next Question to start';
-  }
-} else {
-  questionHolder.innerHTML = 'Click Next Question to start';
-}
-
 nextQuestion.addEventListener('click', async function() {
 console.log('Next question clicked');
 
 if (sessionQuestions.length === 0) {
 console.log('First time - loading session');
-
-  //Check if a topic was selected
-  if (selectedTopicId) {
-    console.log('Using selected topic:', selectedTopicId);
-    sessionQuestions = await getQuestion(selectedTopicId);
-    
-    if (sessionQuestions && sessionQuestions.length > 0) {
-      currentQuestionIndex = 0;
-      displayQuestion();
-      answerBox.value = '';
-      feedback.style.display = 'none';
-      return;
-    } else {
-      questionHolder.innerHTML = 'No questions available for this topic';
-      return;
-    }
-  } else {
-    //No topic selected - use adaptive ordering
-    orderedTopicsList = await orderTopics();
+orderedTopicsList = await orderTopics();
 
 for (let i = 0; i < orderedTopicsList.length; i++) {
   currentTopicIndex = i;
@@ -791,7 +749,6 @@ for (let i = 0; i < orderedTopicsList.length; i++) {
 
 questionHolder.innerHTML = 'No questions available for any topic';
 return;
-  }
 }
 
 currentQuestionIndex++;
@@ -802,8 +759,25 @@ displayQuestion();
 answerBox.value = '';
 feedback.style.display = 'none';
 } else {
-console.log('No more questions for this topic');
-questionHolder.innerHTML = 'No more questions for this topic';
+console.log('No more questions for this topic, moving to next topic');
+
+currentTopicIndex++;
+if (currentTopicIndex >= orderedTopicsList.length) {
+  currentTopicIndex = 0;
+}
+
+currentTopicId = orderedTopicsList[currentTopicIndex].topic_id;
+
+sessionQuestions = await getQuestion(currentTopicId);
+currentQuestionIndex = 0;
+
+if (sessionQuestions && sessionQuestions.length > 0) {
+  displayQuestion();
+  answerBox.value = '';
+  feedback.style.display = 'none';
+} else {
+  questionHolder.innerHTML = 'No questions for this topic';
+}
 }
 });
 
@@ -884,11 +858,6 @@ newSessionBtn.addEventListener('click', function() {
   
   // Hide modal
   endSessionModal.style.display = 'none';
-  
-  // Clear selected topic from session storage
-  sessionStorage.removeItem('selectedTopic');
-  selectedTopicName = null;
-  selectedTopicId = null;
   
   // Update initial accuracies for new session
   getInitialAccuracies();

@@ -506,11 +506,11 @@ const supabaseClient = supabase.createClient(
         if (accuracy > 80) {
           await supabaseClient
             .from('strengths')
-            .insert([{ student_id: student_id, topic_id: topicId }]);
+            .insert({ student_id: student_id, topic_id: topicId });
         } else if (accuracy < 50) {
           await supabaseClient
             .from('weaknesses')
-            .insert([{ student_id: student_id, topic_id: topicId }]);
+            .insert({ student_id: student_id, topic_id: topicId });
         }
       }
     }
@@ -548,7 +548,7 @@ const supabaseClient = supabase.createClient(
           if (!existingStrength || existingStrength.length === 0) {
             await supabaseClient
               .from('strengths')
-              .insert([{ student_id: studentId, topic_id: topicId }]);
+              .insert({ student_id: studentId, topic_id: topicId });
           }
           
           await supabaseClient
@@ -567,7 +567,7 @@ const supabaseClient = supabase.createClient(
           if (!existingWeakness || existingWeakness.length === 0) {
             await supabaseClient
               .from('weaknesses')
-              .insert([{ student_id: studentId, topic_id: topicId }]);
+              .insert({ student_id: studentId, topic_id: topicId });
           }
           
           await supabaseClient
@@ -612,7 +612,7 @@ const supabaseClient = supabase.createClient(
           if (!existingStrength || existingStrength.length === 0) {
             await supabaseClient
               .from('strengths')
-              .insert([{ student_id: studentId, topic_id: topicId }]);
+              .insert({ student_id: studentId, topic_id: topicId });
           }
         } 
         else if (newAccuracy < 50) {
@@ -625,7 +625,7 @@ const supabaseClient = supabase.createClient(
           if (!existingWeakness || existingWeakness.length === 0) {
             await supabaseClient
               .from('weaknesses')
-              .insert([{ student_id: studentId, topic_id: topicId }]);
+              .insert({ student_id: studentId, topic_id: topicId });
           }
         }
       }

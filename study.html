@@ -724,10 +724,20 @@ questionHolder.innerHTML = 'No questions available';
 }
       
 document.addEventListener('DOMContentLoaded', async function () {
+  
         
 await getInitialAccuracies();
 await fetchQuestion();
-
+// IF theres a topic name then we find the id for the topic
+if (selectedTopicName) {
+  //supabase query to get the selected topic
+  const {data: topic } = await supabaseClient
+    .from('topics')
+    .select('topic_id')
+    .eq('topic_name', selectedTopicName
+console.log(topic)  
+  
+}
 nextQuestion.addEventListener('click', async function() {
 console.log('Next question clicked');
 
@@ -785,6 +795,7 @@ if (sessionQuestions && sessionQuestions.length > 0) {
 }
 }
 });
+
 
 endSession.addEventListener('click', async function() {
   // Get all topics

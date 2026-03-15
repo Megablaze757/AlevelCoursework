@@ -752,7 +752,6 @@ const supabaseClient = supabase.createClient(
         
         await updateTopicPerformance(topicId, student_id, true);
       } else {
-        console.log(currentQuestionAttempts);
         if (currentQuestionAttempts === 2) {
           feedback.textContent = `Incorrect. The correct answer is ${currentQuestion.correct_answer}`;
           feedback.className = 'feedback incorrect';
@@ -914,7 +913,7 @@ const supabaseClient = supabase.createClient(
     }
       
     document.addEventListener('DOMContentLoaded', async function () {
-      nextQuestion.classList.add('hidden');
+      // Next button starts visible - NOT hidden
       
       await getInitialAccuracies();
       await fetchQuestion();
@@ -934,7 +933,7 @@ const supabaseClient = supabase.createClient(
       }
 
       nextQuestion.addEventListener('click', async function() {
-        //Hidden every time theres a new question
+        // Hide the next button until answer is checked
         nextQuestion.classList.add('hidden');
         
         currentQuestionAttempts = 0;

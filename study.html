@@ -734,7 +734,7 @@ if (selectedTopicName) {
   const {data: topic } = await supabaseClient
     .from('topics')
     .select('topic_id')
-    .eq('topic_name', selectedTopicName
+    .eq('topic_name', selectedTopicName)
 console.log(topic)  
   
 }

@@ -736,7 +736,7 @@ if (selectedTopicName) {
     .select('topic_id')
     .eq('topic_name', selectedTopicName)
 console.log(topic)
-selectedTopicId = topic.topic_id;
+selectedTopicId = topic[0].topic_id;
   
 }
 nextQuestion.addEventListener('click', async function() {

@@ -404,6 +404,7 @@ display: block;
     <div class="modalButtons">
       <button class="modalButton primary" id="newSessionBtn">New Session</button>
       <button class="modalButton secondary" id="closeModalBtn">Close</button>
+      <button class="modalButton secondary" id="homeBtn">Go Back to Home</button>
     </div>
   </div>
 </div>
@@ -415,6 +416,7 @@ display: block;
     const modalAccuracy = document.getElementById('modalAccuracy');
     const newSessionBtn = document.getElementById('newSessionBtn');
     const closeModalBtn = document.getElementById('closeModalBtn');
+    const homeBtn = document.getElementById('homeBtn');
     
     //Correct and Incorrect answer Variables
     let correctCount = 0
@@ -736,7 +738,13 @@ if (selectedTopicName) {
     .select('topic_id')
     .eq('topic_name', selectedTopicName)
 console.log(topic)
-selectedTopicId = topic[0].topic_id;
+  // FIX: Check if topic exists before accessing topic[0]
+  if (topic && topic.length > 0) {
+    selectedTopicId = topic[0].topic_id;
+  } else {
+    console.log('Topic not found:', selectedTopicName);
+    selectedTopicId = null;
+  }
   
 }
 nextQuestion.addEventListener('click', async function() {
@@ -889,6 +897,11 @@ newSessionBtn.addEventListener('click', function() {
   
   // Update initial accuracies for new session
   getInitialAccuracies();
+});
+
+// Home button
+homeBtn.addEventListener('click', function() {
+  window.location.href = 'main.html';
 });
 
 });

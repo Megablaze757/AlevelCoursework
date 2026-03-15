@@ -742,76 +742,69 @@ selectedTopicId = topic.topic_id;
 nextQuestion.addEventListener('click', async function() {
 console.log('Next question clicked');
 //if its the first time loading the questions
-if(sessionsQuestion.length === 0){
+if(sessionQuestions.length === 0){
   if (selectedTopicId) {
     sessionQuestions = await getQuestion(selectedTopicId);
-    // if we have questions then start the index at -
+    // if we have questions then start the index at 0
     if (sessionQuestions && sessionQuestions.length > 0){
-      currentQuestionsIndex = 0;
-      displauQuestion();
-      
-    // If theres no questions left then show the user
-    else {
+      currentQuestionIndex = 0;
+      displayQuestion();
+    } else {
+      // If theres no questions left then show the user
       questionHolder.innerHTML = 'No questions available';
     }
-    
-  
-  }
+  } else {
     //If theres no topic selected run the adaptive questions algorithm
-  else {
-  orderedTopicsList = await orderTopics();
+    orderedTopicsList = await orderTopics();
 
-  for (let i = 0; i < orderedTopicsList.length; i++) {
-    currentTopicIndex = i;
-    currentTopicId = orderedTopicsList[i].topic_id;
-    console.log('Trying topic:', currentTopicId);
-    
+    for (let i = 0; i < orderedTopicsList.length; i++) {
+      currentTopicIndex = i;
+      currentTopicId = orderedTopicsList[i].topic_id;
+      console.log('Trying topic:', currentTopicId);
+      
+      sessionQuestions = await getQuestion(currentTopicId);
+      
+      if (sessionQuestions && sessionQuestions.length > 0) {
+        console.log('Found questions for topic:', currentTopicId);
+        currentQuestionIndex = 0;
+        displayQuestion();
+        answerBox.value = '';
+        feedback.style.display = 'none';
+        return;
+      }
+    }
+    questionHolder.innerHTML = 'No questions available for any topic';
+    return;
+  }
+} else {
+  currentQuestionIndex++;
+
+  if (currentQuestionIndex < sessionQuestions.length) {
+    console.log('Displaying next question at index:', currentQuestionIndex);
+    displayQuestion();
+    answerBox.value = '';
+    feedback.style.display = 'none';
+  } else {
+    console.log('No more questions for this topic, moving to next topic');
+
+    currentTopicIndex++;
+    if (currentTopicIndex >= orderedTopicsList.length) {
+      currentTopicIndex = 0;
+    }
+
+    currentTopicId = orderedTopicsList[currentTopicIndex].topic_id;
+
     sessionQuestions = await getQuestion(currentTopicId);
-    
+    currentQuestionIndex = 0;
+
     if (sessionQuestions && sessionQuestions.length > 0) {
-      console.log('Found questions for topic:', currentTopicId);
-      currentQuestionIndex = 0;
       displayQuestion();
       answerBox.value = '';
       feedback.style.display = 'none';
-      return;
-    }
+    } else {
+      questionHolder.innerHTML = 'No questions for this topic';
     }
   }
-}
-}
-
-questionHolder.innerHTML = 'No questions available for any topic';
-return;
-}
-
-currentQuestionIndex++;
-
-if (currentQuestionIndex < sessionQuestions.length) {
-console.log('Displaying next question at index:', currentQuestionIndex);
-displayQuestion();
-answerBox.value = '';
-feedback.style.display = 'none';
-} else {
-console.log('No more questions for this topic, moving to next topic');
-
-currentTopicIndex++;
-if (currentTopicIndex >= orderedTopicsList.length) {
-  currentTopicIndex = 0;
-}
-
-currentTopicId = orderedTopicsList[currentTopicIndex].topic_id;
-
-sessionQuestions = await getQuestion(currentTopicId);
-currentQuestionIndex = 0;
-
-if (sessionQuestions && sessionQuestions.length > 0) {
-  displayQuestion();
-  answerBox.value = '';
-  feedback.style.display = 'none';
-} else {
-  questionHolder.innerHTML = 'No questions for this topic';
-}
 }
 });
 

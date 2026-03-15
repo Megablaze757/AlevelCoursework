@@ -756,20 +756,20 @@ const supabaseClient = supabase.createClient(
         
         await updateTopicPerformance(topicId, student_id, true);
       } else {
-        console.log(currentQuestionAttempt)
-        if (currentQuestionsAttempt === 3); {
-          feedback.textContent = `Incorrect answer is ${currentQuestion.correct_answer}`;
-          nextQuestion.classList.remove('hidden')
-        }
-        
-        else {  
-          feedback.textContent = `Incorrect`;
-          currentQuestionAttempt++;
-          feedback.className = 'feedback incorrect';
-          incorrectCount++;
-          numIncorrect.textContent = incorrectCount;
-          await updateTopicPerformance(topicId, student_id, false);
-        }
+              console.log(currentQuestionAttempt)
+              if (currentQuestionsAttempt === 3); {
+                feedback.textContent = `Incorrect answer is ${currentQuestion.correct_answer}`;
+                nextQuestion.classList.remove('hidden')
+              }
+              
+              else {  
+                feedback.textContent = `Incorrect`;
+                currentQuestionAttempt++;
+                feedback.className = 'feedback incorrect';
+                incorrectCount++;
+                numIncorrect.textContent = incorrectCount;
+                await updateTopicPerformance(topicId, student_id, false);
+              }
       }
       
       feedback.style.display = 'block';

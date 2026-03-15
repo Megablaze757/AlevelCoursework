@@ -375,16 +375,16 @@ display: block;
 <div class="modal" id="endSessionModal">
   <div class="modalContent">
     <!-- Strengths shown at the end of the session -->
-    <div id='strengthsDiv'>
-       Strengths
-      <div id='strengthsList'></div>
-    </div>
-    <!-- Weaknesses shown at the end of the session -->
-    <div id='weaknessesDiv'>
-       Weaknesses
+    <div id='strengthsDiv' style="margin: 10px 0; padding: 10px; background: #e8f5e9; border-radius: 10px;">
+      <strong style="color: #2e7d32;">Current Strengths:</strong>
       <div id='strengthsList'></div>
     </div>
 
+    <!-- Weaknesses shown at the end of the session -->
+    <div id='weaknessesDiv' style="margin: 10px 0; padding: 10px; background: #ffebee; border-radius: 10px;">
+      <strong style="color: #c62828;">Current Weaknesses:</strong>
+      <div id='weaknessesList'></div>
+    </div>
     
     <div class="topicSummary">
       <div class="topicHeader">
@@ -503,11 +503,6 @@ const supabaseClient = supabase.createClient(
         .eq('student_id', studentId)
         .eq('topic_id', topicId);
 
-
-
-      
-
-      
       //If the record exists update it
       if (currentPerformance && currentPerformance.length > 0) {
         const updatedPerformance = currentPerformance[0];
@@ -529,68 +524,65 @@ const supabaseClient = supabase.createClient(
        
         //Check if it should be a strength
         if (newAccuracy > 80) {
-         //check if already a strength
-        const {data: existing} = await supabaseClient
-          .from('strengths')
-          .select('*')
-          .eq('student_id', studentId)
-          .eq('topic_id', topicId)
-         if (!existing || existing.length === 0) {
+          //check if already a strength
+          const {data: existing} = await supabaseClient
+            .from('strengths')
+            .select('*')
+            .eq('student_id', studentId)
+            .eq('topic_id', topicId);
+            
+          if (!existing || existing.length === 0) {
             // Insert into strengths
             await supabaseClient
               .from('strengths')
               .insert([{ student_id: studentId, topic_id: topicId }]);
-            //Remove from strengths if it was there
+          }
+          //Remove from weaknesses if it was there
+          await supabaseClient
+            .from('weaknesses')
+            .delete()
+            .eq('student_id', studentId)
+            .eq('topic_id', topicId);
+        } 
+        else if (newAccuracy < 50) {
+          // Check if already in weaknesses
+          const { data: existing } = await supabaseClient
+            .from('weaknesses')
+            .select('*')
+            .eq('student_id', studentId)
+            .eq('topic_id', topicId);
+          
+          if (!existing || existing.length === 0) {
+            // Insert into weaknesses
             await supabaseClient
               .from('weaknesses')
-              .delete()
-              .eq('student_id', studentId)
-              .eq('topic_id', topicId)
-                  }
-            else if (newAccuracy < 50) {
-                // Check if already in weaknesses
-                const { data: existing } = await supabaseClient
-                .from('weaknesses')
-                .select('*')
-                .eq('student_id', studentId)
-                .eq('topic_id', topicId);
-              
-                if (!existing || existing.length === 0) {
-                  // Insert into weaknesses
-                  await supabaseClient
-                    .from('weaknesses')
-                    .insert([{ student_id: studentId, topic_id: topicId }]);
-  }
-  
-                    // Remove from strengths 
-                    await supabaseClient
-                      .from('strengths')
-                      .delete()
-                      .eq('student_id', studentId)
-                      .eq('topic_id', topicId);
-                        
-                    
-              }
-              else {
-                  //If its not a strength or weakness remove from both
-                  await supabaseClient
-                    .from('strengths')
-                    .delete()
-                    .eq('student_id', studentId)
-                    .eq('topic_id', topicId);
-                  
-                  await supabaseClient
-                    .from('weaknesses')
-                    .delete()
-                    .eq('student_id', studentId)
-                    .eq('topic_id', topicId);
-    }
-
+              .insert([{ student_id: studentId, topic_id: topicId }]);
+          }
+          // Remove from strengths 
+          await supabaseClient
+            .from('strengths')
+            .delete()
+            .eq('student_id', studentId)
+            .eq('topic_id', topicId);
+        }
+        else {
+          //If its not a strength or weakness remove from both
+          await supabaseClient
+            .from('strengths')
+            .delete()
+            .eq('student_id', studentId)
+            .eq('topic_id', topicId);
           
-       } 
+          await supabaseClient
+            .from('weaknesses')
+            .delete()
+            .eq('student_id', studentId)
+            .eq('topic_id', topicId);
+        }
       }
       //If the record doesnt exist create a new one
       else {
+        const newAccuracy = wasCorrect ? 100 : 0;
         const { error } = await supabaseClient
           .from('topic_performance')
           .insert([{
@@ -598,10 +590,22 @@ const supabaseClient = supabase.createClient(
             topic_id: topicId,
             questions_attempted: 1,
             questions_correct: wasCorrect ? 1 : 0,
-            accuracy_percent: wasCorrect ? 100 : 0
-          }])
+            accuracy_percent: newAccuracy
+          }]);
+        
+        // Check if it should be a strength or weakness
+        if (newAccuracy > 80) {
+          // Insert into strengths
+          await supabaseClient
+            .from('strengths')
+            .insert([{ student_id: studentId, topic_id: topicId }]);
+        } else if (newAccuracy < 50) {
+          // Insert into weaknesses
+          await supabaseClient
+            .from('weaknesses')
+            .insert([{ student_id: studentId, topic_id: topicId }]);
+        }
       }
-      
     }
 
 checkAnswer.addEventListener('click', async function() {
@@ -905,16 +909,18 @@ endSession.addEventListener('click', async function() {
     .from('topic_performance')
     .select('topic_id, accuracy_percent')
     .eq('student_id', student_id);
+  
   //Get strengths
   const { data: strengths } = await supabaseClient
-  .from('strengths')
-  .select('topic_id')
-  .eq('student_id', student_id);
-//Get weaknesses
-const { data: weaknesses } = await supabaseClient
-  .from('weaknesses')
-  .select('topic_id')
-  .eq('student_id', student_id)
+    .from('strengths')
+    .select('topic_id')
+    .eq('student_id', student_id);
+  
+  //Get weaknesses
+  const { data: weaknesses } = await supabaseClient
+    .from('weaknesses')
+    .select('topic_id')
+    .eq('student_id', student_id);
   
   // Create an object of accuracies
   let currentAccuracies = {};
@@ -923,31 +929,37 @@ const { data: weaknesses } = await supabaseClient
       currentAccuracies[p.topic_id] = p.accuracy_percent || 0;
     });
   }
-    // Display strengths
-  const strengthsList = document.getElementById('currentStrengthsList');
-  if (strengths && strengths.length > 0) {
-    strengthsList.innerHTML = '';
-    for (let s of strengths) {
-      const topic = topics.find(t => t.topic_id === s.topic_id);
-      const accuracy = accuracyLookup[s.topic_id] || 0;
-      if (topic) strengthsList.innerHTML += `<div> ${topic.topic_name} (${accuracy}%)</div>`;
+  
+  // Display strengths
+  const strengthsList = document.getElementById('strengthsList');
+  if (strengthsList) {
+    if (strengths && strengths.length > 0) {
+      strengthsList.innerHTML = '';
+      for (let s of strengths) {
+        const topic = topics.find(t => t.topic_id === s.topic_id);
+        const accuracy = currentAccuracies[s.topic_id] || 0;
+        if (topic) strengthsList.innerHTML += `<div>${topic.topic_name} (${accuracy}%)</div>`;
+      }
+    } else {
+      strengthsList.innerHTML = '<div>No strengths yet</div>';
     }
-  } else {
-    strengthsList.innerHTML = '<div>No strengths yet</div>';
   }
   
   // Display weaknesses
-  const weaknessesList = document.getElementById('currentWeaknessesList');
-  if (weaknesses && weaknesses.length > 0) {
-    weaknessesList.innerHTML = '';
-    for (let w of weaknesses) {
-      const topic = topics.find(t => t.topic_id === w.topic_id);
-      const accuracy = accuracyLookup[w.topic_id] || 0;
-      if (topic) weaknessesList.innerHTML += `<div> ${topic.topic_name} (${accuracy}%)</div>`;
+  const weaknessesList = document.getElementById('weaknessesList');
+  if (weaknessesList) {
+    if (weaknesses && weaknesses.length > 0) {
+      weaknessesList.innerHTML = '';
+      for (let w of weaknesses) {
+        const topic = topics.find(t => t.topic_id === w.topic_id);
+        const accuracy = currentAccuracies[w.topic_id] || 0;
+        if (topic) weaknessesList.innerHTML += `<div>${topic.topic_name} (${accuracy}%)</div>`;
+      }
+    } else {
+      weaknessesList.innerHTML = '<div>No weaknesses yet</div>';
     }
-  } else {
-    weaknessesList.innerHTML = '<div>No weaknesses yet</div>';
   }
+  
   // Build topic list HTML
   let topicHTML = '';
   for (let topic of topics) {

@@ -6,25 +6,20 @@
     <title>Analytics Dashboard</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
-        /* reset all styles to default */
+        /* minimal CSS - only what's absolutely necessary */
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
         }
-
         body {
             font-family: Arial, sans-serif;
-            background-color: #f5f5f5;
         }
-
-        /* Nav Bar Styles from main.html */
+        /* navbar from main.html */
         .navbar {
             background-color: #023e8A;
             padding: 1rem 2rem;
-            width: 100%;
         }
-
         .navContainer {
             max-width: 1200px;
             margin: 0 auto;
@@ -32,8 +27,7 @@
             justify-content: space-between;
             align-items: center;
         }
-
-        /* Switch menu styles from main.html */
+        /* pill menu */
         .switchMenu {
             position: relative;
             display: flex;
@@ -43,19 +37,15 @@
             width: 240px;
             cursor: pointer;
         }
-
         .switchOption {
             flex: 1;
             text-align: center;
             padding: 10px 20px;
             color: white;
-            font-size: 15px;
-            font-weight: 500;
             z-index: 1;
             position: relative;
             cursor: pointer;
         }
-
         .switchSlider {
             position: absolute;
             top: 5px;
@@ -67,18 +57,14 @@
             transition: transform 0.3s ease;
             pointer-events: none;
         }
-
         .switchMenu.option2 .switchSlider {
             transform: translateX(calc(100% + 0px));
         }
-
         .backLink {
             color: white;
             text-decoration: none;
-            font-size: 14px;
         }
-
-        /* Main container for 3 columns */
+        /* 3 column layout */
         .dashboardContainer {
             display: flex;
             max-width: 1400px;
@@ -86,142 +72,53 @@
             padding: 0 20px;
             gap: 20px;
         }
-
-        /* Left Column - Topics List */
-        .leftColumn {
+        /* column widths */
+        .leftColumn, .rightColumn {
             width: 250px;
-            background: white;
-            border: 1px solid #ccc;
-            padding: 15px;
         }
-
-        .leftColumn h3 {
-            margin-bottom: 15px;
-            padding-bottom: 5px;
-            border-bottom: 1px solid #ccc;
-        }
-
-        .topicsList {
-            display: flex;
-            flex-direction: column;
-            gap: 5px;
-        }
-
-        .topicItem {
-            padding: 10px;
-            border: 1px solid #ccc;
-            background-color: #f8f8f8;
-            cursor: pointer;
-            font-size: 14px;
-        }
-
-        .topicItem:hover {
-            background-color: #e0e0e0;
-        }
-
-        .topicItem.allTopics {
-            background-color: #e0e0e0;
-            font-weight: bold;
-        }
-
-        /* Middle Column - Stats */
         .middleColumn {
             flex: 1;
+        }
+        /* box styles - minimal borders */
+        .leftColumn, .middleColumn, .rightColumn {
             background: white;
             border: 1px solid #ccc;
-            padding: 20px;
-        }
-
-        .statsHeader {
-            margin-bottom: 20px;
-            padding-bottom: 5px;
-            border-bottom: 1px solid #ccc;
-        }
-
-        .statsCard {
-            border: 1px solid #ccc;
             padding: 15px;
-            background-color: #f8f8f8;
         }
-
+        .topicItem, .strengthItem, .weaknessItem, .statsCard {
+            border: 1px solid #ccc;
+            padding: 10px;
+            margin-bottom: 5px;
+            background: #f8f8f8;
+            cursor: pointer;
+        }
+        .topicItem.allTopics {
+            background: #e0e0e0;
+            font-weight: bold;
+        }
         .statRow {
             display: flex;
             justify-content: space-between;
-            align-items: center;
             padding: 10px 0;
             border-bottom: 1px solid #ccc;
         }
-
         .statRow:last-child {
             border-bottom: none;
         }
-
-        .statLabel {
-            font-weight: bold;
-        }
-
-        .statValue {
-            font-size: 18px;
-        }
-
         .statValue.large {
             font-size: 32px;
         }
-
-        /* Right Column - Strengths & Weaknesses */
-        .rightColumn {
-            width: 250px;
-            background: white;
-            border: 1px solid #ccc;
-            padding: 15px;
-        }
-
-        .strengthsSection {
-            margin-bottom: 25px;
-        }
-
-        .strengthsSection h3 {
-            margin-bottom: 10px;
-            padding-bottom: 5px;
-            border-bottom: 1px solid #ccc;
-        }
-
-        .weaknessesSection h3 {
-            margin-bottom: 10px;
-            padding-bottom: 5px;
-            border-bottom: 1px solid #ccc;
-        }
-
-        .strengthItem, .weaknessItem {
-            padding: 10px;
-            margin-bottom: 5px;
-            border: 1px solid #ccc;
-            background-color: #f8f8f8;
-            cursor: pointer;
-            font-size: 13px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .strengthItem:hover, .weaknessItem:hover {
-            background-color: #e0e0e0;
-        }
-
-        .itemAccuracy {
-            font-weight: bold;
-            padding: 2px 6px;
-            border: 1px solid #ccc;
-            background: white;
-        }
-
         .noData {
             padding: 10px;
             text-align: center;
-            font-size: 13px;
             color: #666;
             border: 1px solid #ccc;
-            background-color: #f8f8f8;
+            background: #f8f8f8;
+        }
+        h3 {
+            margin-bottom: 15px;
+            padding-bottom: 5px;
+            border-bottom: 1px solid #ccc;
         }
     </style>
 </head>
@@ -251,25 +148,25 @@
 
         <!-- MIDDLE COLUMN - Stats -->
         <div class="middleColumn">
-            <h2 class="statsHeader" id="statsHeader">Overall Performance</h2>
+            <h2 style="border-bottom: 1px solid #ccc; padding-bottom: 5px;" id="statsHeader">Overall Performance</h2>
             
-            <!-- Overall Stats (visible by default) -->
+            <!-- Overall Stats -->
             <div id="overallStats">
                 <div class="statsCard">
                     <div class="statRow">
-                        <span class="statLabel">Total Accuracy:</span>
+                        <span>Total Accuracy:</span>
                         <span class="statValue large" id="overallAccuracy">0%</span>
                     </div>
                     <div class="statRow">
-                        <span class="statLabel">Total Questions:</span>
+                        <span>Total Questions:</span>
                         <span class="statValue" id="totalQuestions">0</span>
                     </div>
                     <div class="statRow">
-                        <span class="statLabel">Correct Answers:</span>
+                        <span>Correct Answers:</span>
                         <span class="statValue" id="totalCorrect">0</span>
                     </div>
                     <div class="statRow">
-                        <span class="statLabel">Incorrect Answers:</span>
+                        <span>Incorrect Answers:</span>
                         <span class="statValue" id="totalIncorrect">0</span>
                     </div>
                 </div>
@@ -279,19 +176,19 @@
             <div id="topicStats" style="display: none;">
                 <div class="statsCard">
                     <div class="statRow">
-                        <span class="statLabel">Topic Accuracy:</span>
+                        <span>Topic Accuracy:</span>
                         <span class="statValue large" id="topicAccuracy">0%</span>
                     </div>
                     <div class="statRow">
-                        <span class="statLabel">Questions Attempted:</span>
+                        <span>Questions Attempted:</span>
                         <span class="statValue" id="topicAttempted">0</span>
                     </div>
                     <div class="statRow">
-                        <span class="statLabel">Correct:</span>
+                        <span>Correct:</span>
                         <span class="statValue" id="topicCorrect">0</span>
                     </div>
                     <div class="statRow">
-                        <span class="statLabel">Incorrect:</span>
+                        <span>Incorrect:</span>
                         <span class="statValue" id="topicIncorrect">0</span>
                     </div>
                 </div>
@@ -300,14 +197,14 @@
 
         <!-- RIGHT COLUMN - Strengths & Weaknesses -->
         <div class="rightColumn">
-            <div class="strengthsSection">
+            <div>
                 <h3>STRENGTHS</h3>
                 <div id="strengthsList">
                     <div class="noData">Loading strengths...</div>
                 </div>
             </div>
             
-            <div class="weaknessesSection">
+            <div style="margin-top: 25px;">
                 <h3>WEAKNESSES</h3>
                 <div id="weaknessesList">
                     <div class="noData">Loading weaknesses...</div>
@@ -338,73 +235,50 @@
         });
 
         async function loadData() {
-            console.log('Loading data for student:', student_id);
-            
             // Get all topics
-            const { data: topics, error: topicsError } = await supabaseClient
+            const { data: topics } = await supabaseClient
                 .from('topics')
                 .select('*');
             
-            if (topicsError) console.error('Topics error:', topicsError);
-            console.log('Topics loaded:', topics);
-            
             // Get performance data for this student
-            const { data: performances, error: perfError } = await supabaseClient
+            const { data: performances } = await supabaseClient
                 .from('topic_performance')
                 .select('*')
                 .eq('student_id', student_id);
 
-            if (perfError) console.error('Performance error:', perfError);
-            console.log('Performances loaded:', performances);
-
             // Get strengths
-            const { data: strengths, error: strengthError } = await supabaseClient
+            const { data: strengths } = await supabaseClient
                 .from('strengths')
                 .select('topic_id')
                 .eq('student_id', student_id);
 
-            if (strengthError) console.error('Strengths error:', strengthError);
-            console.log('Strengths loaded:', strengths);
-
             // Get weaknesses
-            const { data: weaknesses, error: weaknessError } = await supabaseClient
+            const { data: weaknesses } = await supabaseClient
                 .from('weaknesses')
                 .select('topic_id')
                 .eq('student_id', student_id);
-
-            if (weaknessError) console.error('Weaknesses error:', weaknessError);
-            console.log('Weaknesses loaded:', weaknesses);
 
             allTopics = topics || [];
             allPerformances = performances || [];
             strengthsList = strengths || [];
             weaknessesList = weaknesses || [];
 
-            // Display topics in left column
+            // Display everything
             displayTopicsList(allTopics);
-            
-            // Calculate and display overall stats
             calculateOverallStats(allPerformances);
-            
-            // Display strengths and weaknesses
             displayStrengthsWeaknesses();
         }
 
         function displayTopicsList(topics) {
             const topicsDiv = document.getElementById('topicsList');
             
-            // Keep the "All Topics" button that's already in HTML
-            // Add each topic below it
             topics.forEach(topic => {
                 const topicDiv = document.createElement('div');
                 topicDiv.className = 'topicItem';
                 topicDiv.textContent = topic.topic_name;
-                
-                // Show topic stats when clicked
                 topicDiv.onclick = function() {
                     showTopicStats(topic);
                 };
-                
                 topicsDiv.appendChild(topicDiv);
             });
         }
@@ -423,23 +297,14 @@
                 ? Math.round((totalCorrect / totalQuestions) * 100) 
                 : 0;
             
-            // Update the display
             document.getElementById('overallAccuracy').textContent = overallAccuracy + '%';
             document.getElementById('totalQuestions').textContent = totalQuestions;
             document.getElementById('totalCorrect').textContent = totalCorrect;
             document.getElementById('totalIncorrect').textContent = totalIncorrect;
-            
-            console.log('Overall stats calculated:', {
-                accuracy: overallAccuracy,
-                totalQuestions,
-                totalCorrect,
-                totalIncorrect
-            });
         }
 
         function setupAllTopicsButton() {
-            const allTopicsBtn = document.getElementById('allTopicsBtn');
-            allTopicsBtn.onclick = function() {
+            document.getElementById('allTopicsBtn').onclick = function() {
                 showOverallStats();
             };
         }
@@ -451,9 +316,6 @@
         }
 
         function showTopicStats(topic) {
-            console.log('Showing stats for topic:', topic);
-            
-            // Find performance for this topic
             const performance = allPerformances.find(p => p.topic_id === topic.topic_id) || {
                 questions_attempted: 0,
                 questions_correct: 0,
@@ -465,14 +327,12 @@
             const incorrect = attempted - correct;
             const accuracy = performance.accuracy_percent || 0;
             
-            // Update header and stats
             document.getElementById('statsHeader').textContent = topic.topic_name;
             document.getElementById('topicAccuracy').textContent = Math.round(accuracy) + '%';
             document.getElementById('topicAttempted').textContent = attempted;
             document.getElementById('topicCorrect').textContent = correct;
             document.getElementById('topicIncorrect').textContent = incorrect;
             
-            // Show topic stats, hide overall stats
             document.getElementById('overallStats').style.display = 'none';
             document.getElementById('topicStats').style.display = 'block';
         }
@@ -481,14 +341,10 @@
             const strengthsDiv = document.getElementById('strengthsList');
             const weaknessesDiv = document.getElementById('weaknessesList');
             
-            // Create maps for quick lookup
-            const strengthMap = new Map();
-            strengthsList.forEach(s => strengthMap.set(s.topic_id, true));
+            const strengthMap = new Map(strengthsList.map(s => [s.topic_id, true]));
+            const weaknessMap = new Map(weaknessesList.map(w => [w.topic_id, true]));
             
-            const weaknessMap = new Map();
-            weaknessesList.forEach(w => weaknessMap.set(w.topic_id, true));
-            
-            // Clear and populate strengths
+            // Strengths
             strengthsDiv.innerHTML = '';
             let hasStrengths = false;
             
@@ -499,16 +355,11 @@
                     const accuracy = perf ? perf.accuracy_percent : 0;
                     
                     const item = document.createElement('div');
-                    item.className = 'strengthItem';
-                    item.innerHTML = `
-                        <span>${topic.topic_name}</span>
-                        <span class="itemAccuracy">${Math.round(accuracy)}%</span>
-                    `;
-                    
+                    item.className = 'topicItem';
+                    item.innerHTML = `${topic.topic_name} <span style="float:right;">${Math.round(accuracy)}%</span>`;
                     item.onclick = function() {
                         showTopicStats(topic);
                     };
-                    
                     strengthsDiv.appendChild(item);
                 }
             });
@@ -517,7 +368,7 @@
                 strengthsDiv.innerHTML = '<div class="noData">No strengths yet</div>';
             }
             
-            // Clear and populate weaknesses
+            // Weaknesses
             weaknessesDiv.innerHTML = '';
             let hasWeaknesses = false;
             
@@ -528,16 +379,11 @@
                     const accuracy = perf ? perf.accuracy_percent : 0;
                     
                     const item = document.createElement('div');
-                    item.className = 'weaknessItem';
-                    item.innerHTML = `
-                        <span>${topic.topic_name}</span>
-                        <span class="itemAccuracy">${Math.round(accuracy)}%</span>
-                    `;
-                    
+                    item.className = 'topicItem';
+                    item.innerHTML = `${topic.topic_name} <span style="float:right;">${Math.round(accuracy)}%</span>`;
                     item.onclick = function() {
                         showTopicStats(topic);
                     };
-                    
                     weaknessesDiv.appendChild(item);
                 }
             });
@@ -550,36 +396,25 @@
         function setupNavbar() {
             const switchMenu = document.querySelector('.switchMenu');
             const switchOptions = document.querySelectorAll('.switchOption');
-            
-            console.log('Setting up navbar, switchMenu:', switchMenu);
-            console.log('switchOptions:', switchOptions);
 
             switchOptions.forEach(option => {
                 option.addEventListener('click', function() {
                     const selectedOption = this.dataset.option;
-                    console.log('Option clicked:', selectedOption);
                     
-                    // Remove active class from all options
                     switchOptions.forEach(opt => opt.classList.remove('active'));
-                    
-                    // Add active class to the selected option
                     this.classList.add('active');
                     
-                    // Move the slider
                     if (selectedOption === 'option2') {
                         switchMenu.classList.add('option2');
-                        // Already on analytics page, do nothing
                     } else {
                         switchMenu.classList.remove('option2');
-                        // Go to study page
-                        console.log('Redirecting to main.html');
-                        window.location.href = 'main.html';
+                        // Go to study.html when Study Now is clicked
+                        window.location.href = 'study.html';
                     }
                 });
             });
             
-            // Make sure the correct option is active
-            // View Analytics should be active on this page
+            // Make sure View Analytics is active
             switchMenu.classList.add('option2');
         }
     </script>

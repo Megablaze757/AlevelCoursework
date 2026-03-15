@@ -545,7 +545,7 @@ const supabaseClient = supabase.createClient(
               .from('weaknesses')
               .delete()
               .eq('student_id', studentId)
-              .eq('topic_id', top
+              .eq('topic_id', topicId)
                   }
             else if (newAccuracy < 50) {
                 // Check if already in weaknesses

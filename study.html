@@ -481,6 +481,32 @@ const supabaseClient = supabase.createClient(
       console.log('Initial accuracies:', initialTopicAccuracies);
     }
 
+    async function getNextStrengthId() {
+      const { data: strengths } = await supabaseClient
+        .from('strengths')
+        .select('strength_id')
+        .order('strength_id', { ascending: false })
+        .limit(1);
+      
+      if (strengths && strengths.length > 0) {
+        return strengths[0].strength_id + 1;
+      }
+      return 1;
+    }
+
+    async function getNextWeaknessId() {
+      const { data: weaknesses } = await supabaseClient
+        .from('weaknesses')
+        .select('weakness_id')
+        .order('weakness_id', { ascending: false })
+        .limit(1);
+      
+      if (weaknesses && weaknesses.length > 0) {
+        return weaknesses[0].weakness_id + 1;
+      }
+      return 1;
+    }
+
     async function loadInitialStrengthsWeaknesses() {
       const { data: performances } = await supabaseClient
         .from('topic_performance')
@@ -504,13 +530,23 @@ const supabaseClient = supabase.createClient(
         const topicId = p.topic_id;
         
         if (accuracy > 80) {
+          const nextId = await getNextStrengthId();
           await supabaseClient
             .from('strengths')
-            .insert({ student_id: student_id, topic_id: topicId });
+            .insert({ 
+              strength_id: nextId,
+              student_id: student_id, 
+              topic_id: topicId 
+            });
         } else if (accuracy < 50) {
+          const nextId = await getNextWeaknessId();
           await supabaseClient
             .from('weaknesses')
-            .insert({ student_id: student_id, topic_id: topicId });
+            .insert({ 
+              weakness_id: nextId,
+              student_id: student_id, 
+              topic_id: topicId 
+            });
         }
       }
     }
@@ -546,9 +582,14 @@ const supabaseClient = supabase.createClient(
             .eq('topic_id', topicId);
             
           if (!existingStrength || existingStrength.length === 0) {
+            const nextId = await getNextStrengthId();
             await supabaseClient
               .from('strengths')
-              .insert({ student_id: studentId, topic_id: topicId });
+              .insert({ 
+                strength_id: nextId,
+                student_id: studentId, 
+                topic_id: topicId 
+              });
           }
           
           await supabaseClient
@@ -565,9 +606,14 @@ const supabaseClient = supabase.createClient(
             .eq('topic_id', topicId);
           
           if (!existingWeakness || existingWeakness.length === 0) {
+            const nextId = await getNextWeaknessId();
             await supabaseClient
               .from('weaknesses')
-              .insert({ student_id: studentId, topic_id: topicId });
+              .insert({ 
+                weakness_id: nextId,
+                student_id: studentId, 
+                topic_id: topicId 
+              });
           }
           
           await supabaseClient
@@ -610,9 +656,14 @@ const supabaseClient = supabase.createClient(
             .eq('topic_id', topicId);
             
           if (!existingStrength || existingStrength.length === 0) {
+            const nextId = await getNextStrengthId();
             await supabaseClient
               .from('strengths')
-              .insert({ student_id: studentId, topic_id: topicId });
+              .insert({ 
+                strength_id: nextId,
+                student_id: studentId, 
+                topic_id: topicId 
+              });
           }
         } 
         else if (newAccuracy < 50) {
@@ -623,9 +674,14 @@ const supabaseClient = supabase.createClient(
             .eq('topic_id', topicId);
           
           if (!existingWeakness || existingWeakness.length === 0) {
+            const nextId = await getNextWeaknessId();
             await supabaseClient
               .from('weaknesses')
-              .insert({ student_id: studentId, topic_id: topicId });
+              .insert({ 
+                weakness_id: nextId,
+                student_id: studentId, 
+                topic_id: topicId 
+              });
           }
         }
       }

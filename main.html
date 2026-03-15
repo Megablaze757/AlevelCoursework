@@ -135,10 +135,31 @@
         transition: all 0.2s ease;
         text-align: left;
       }
-        
-      
 
-      
+      /* Study Now Button Styles */
+      .studyNowContainer {
+        max-width: 1200px;
+        margin: 1rem auto;
+        padding: 0 1rem;
+        display: flex;
+        justify-content: flex-end;
+      }
+
+      .studyNowBtn {
+        background-color: #023e8A;
+        color: white;
+        padding: 12px 30px;
+        border: none;
+        border-radius: 40px;
+        font-size: 16px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: background-color 0.2s ease;
+      }
+
+      .studyNowBtn:hover {
+        background-color: #0353a4;
+      }
       
     </style>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -151,14 +172,14 @@
           <div class='switchOption active' data-option='option1'>Study Now</div>
           <div class='switchOption' data-option='option2'>View Analytics</div>
           <div class='switchSlider'></div>
-        
-        
         </div>
-        
       </div>
     </nav>
 
-
+    <!-- Study Now Button -->
+    <div class="studyNowContainer">
+      <button class="studyNowBtn" id="studyNowBtn">Study Now</button>
+    </div>
     
     <!-- Topic Header Container -->
     <div class='topicsHeader'>
@@ -175,7 +196,6 @@
       
       </div>
     </div>
-
 
     <script>
 
@@ -223,11 +243,6 @@ async function topicButtons() {
             // Store topic name in session storage
             sessionStorage.setItem('selectedTopic', topicName);
             
-
-          
-            
-
-            
             // Redirect to study.html after 1.5 seconds
             setTimeout(() => {
                 window.location.href = 'study.html';
@@ -235,6 +250,7 @@ async function topicButtons() {
         });
     });
 }
+
   // Function to display topics
   function displayTopics(topics) {
     const topicsGrid = document.getElementById('topicsList');
@@ -263,15 +279,18 @@ async function topicButtons() {
     row.setAttribute('data-topic-id', topic.topic_id || '');
     
     // Add click handler to the button
-    
     row.addEventListener('click', function() {
-        topicButtons();
+      const topicName = topic.topic_name || 'Unnamed Topic';
+      sessionStorage.setItem('selectedTopic', topicName);
+      setTimeout(() => {
+        window.location.href = 'study.html';
+      }, 1500);
     });
     
     // Build the HTML inside the row
     row.innerHTML = `
       <div style="flex: 1; text-align: left;">
-        <div class="topicName" id='topicName'>${topic.topic_name || 'Unnamed Topic'}</div>
+        <div class="topicName">${topic.topic_name || 'Unnamed Topic'}</div>
       </div>
       <div style="color: #64748b; font-size: 0.9rem;">▶</div>
     `;
@@ -279,21 +298,27 @@ async function topicButtons() {
     return row;
   }
 
-
   // Wait for the DOM to be fully loaded
   document.addEventListener('DOMContentLoaded', function() {
     console.log('DOM loaded, fetching topics...');
     fetchTopics();
 
-    
-
+    // Study Now button functionality
+    const studyNowBtn = document.getElementById('studyNowBtn');
+    if (studyNowBtn) {
+      studyNowBtn.addEventListener('click', function() {
+        // Set selectedTopic to null for adaptive learning
+        sessionStorage.setItem('selectedTopic', 'null');
+        
+        // Redirect to study.html
+        window.location.href = 'study.html';
+      });
+    }
     
     // Switch menu functionality
     const switchMenu = document.querySelector('.switchMenu');
     const switchOptions = document.querySelectorAll('.switchOption');
 
-    // Note: You need to add content-option1 and content-option2 divs to your HTML
-    // for this to work properly. For now, let's comment it out to avoid errors
     if (switchOptions.length > 0) {
       switchOptions.forEach(option => {
         option.addEventListener('click', function() {
@@ -315,7 +340,6 @@ async function topicButtons() {
       });
     }
   });
-
       
     </script>
   </body>

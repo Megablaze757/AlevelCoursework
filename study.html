@@ -484,11 +484,17 @@ const supabaseClient = supabase.createClient(
     }
 
     async function updateTopicPerformance(topicId, studentId, wasCorrect) {
+      console.log('--- Updating topic performance ---');
+      console.log('Topic ID:', topicId);
+      console.log('Was Correct:', wasCorrect);
+      
       const { data: currentPerformance, error } = await supabaseClient
         .from('topic_performance')
         .select('*')
         .eq('student_id', studentId)
         .eq('topic_id', topicId);
+
+      console.log('Current performance:', currentPerformance);
 
       if (currentPerformance && currentPerformance.length > 0) {
         const updatedPerformance = currentPerformance[0];
@@ -496,6 +502,8 @@ const supabaseClient = supabase.createClient(
         const newAttempted = updatedPerformance.questions_attempted + 1;
         const newCorrect = updatedPerformance.questions_correct + (wasCorrect ? 1 : 0);
         const newAccuracy = (newCorrect / newAttempted) * 100
+        
+        console.log('New accuracy:', newAccuracy);
         
         await supabaseClient 
           .from('topic_performance')
@@ -507,18 +515,23 @@ const supabaseClient = supabase.createClient(
           .eq('perfomance_id', updatedPerformance.perfomance_id);
        
         if (newAccuracy > 80) {
+          console.log('Accuracy > 80 - checking strengths');
           const { data: existingStrength } = await supabaseClient
             .from('strengths')
             .select('*')
             .eq('student_id', studentId)
             .eq('topic_id', topicId);
             
+          console.log('Existing strength:', existingStrength);
+            
           if (!existingStrength || existingStrength.length === 0) {
+            console.log('Inserting into strengths');
             await supabaseClient
               .from('strengths')
               .insert([{ student_id: studentId, topic_id: topicId }]);
           }
           
+          console.log('Removing from weaknesses');
           await supabaseClient
             .from('weaknesses')
             .delete()
@@ -526,18 +539,23 @@ const supabaseClient = supabase.createClient(
             .eq('topic_id', topicId);
         } 
         else if (newAccuracy < 50) {
+          console.log('Accuracy < 50 - checking weaknesses');
           const { data: existingWeakness } = await supabaseClient
             .from('weaknesses')
             .select('*')
             .eq('student_id', studentId)
             .eq('topic_id', topicId);
           
+          console.log('Existing weakness:', existingWeakness);
+          
           if (!existingWeakness || existingWeakness.length === 0) {
+            console.log('Inserting into weaknesses');
             await supabaseClient
               .from('weaknesses')
               .insert([{ student_id: studentId, topic_id: topicId }]);
           }
           
+          console.log('Removing from strengths');
           await supabaseClient
             .from('strengths')
             .delete()
@@ -545,6 +563,7 @@ const supabaseClient = supabase.createClient(
             .eq('topic_id', topicId);
         }
         else {
+          console.log('Accuracy between 50-80 - removing from both');
           await supabaseClient
             .from('strengths')
             .delete()
@@ -560,6 +579,8 @@ const supabaseClient = supabase.createClient(
       }
       else {
         const newAccuracy = wasCorrect ? 100 : 0;
+        console.log('New record - accuracy:', newAccuracy);
+        
         await supabaseClient
           .from('topic_performance')
           .insert([{
@@ -571,6 +592,7 @@ const supabaseClient = supabase.createClient(
           }]);
         
         if (newAccuracy > 80) {
+          console.log('New record - inserting into strengths');
           const { data: existingStrength } = await supabaseClient
             .from('strengths')
             .select('*')
@@ -584,6 +606,7 @@ const supabaseClient = supabase.createClient(
           }
         } 
         else if (newAccuracy < 50) {
+          console.log('New record - inserting into weaknesses');
           const { data: existingWeakness } = await supabaseClient
             .from('weaknesses')
             .select('*')
@@ -597,6 +620,7 @@ const supabaseClient = supabase.createClient(
           }
         }
       }
+      console.log('--- Update complete ---');
     }
 
 checkAnswer.addEventListener('click', async function() {
@@ -854,6 +878,26 @@ document.addEventListener('DOMContentLoaded', async function () {
   });
 
   endSession.addEventListener('click', async function() {
+    console.log('=== END SESSION DEBUG ===');
+    
+    const { data: allStrengths } = await supabaseClient
+      .from('strengths')
+      .select('*')
+      .eq('student_id', student_id);
+    console.log('All strengths in DB:', allStrengths);
+    
+    const { data: allWeaknesses } = await supabaseClient
+      .from('weaknesses')
+      .select('*')
+      .eq('student_id', student_id);
+    console.log('All weaknesses in DB:', allWeaknesses);
+    
+    const { data: allPerformances } = await supabaseClient
+      .from('topic_performance')
+      .select('*')
+      .eq('student_id', student_id);
+    console.log('All performances:', allPerformances);
+    
     const { data: topics } = await supabaseClient
       .from('topics')
       .select('topic_id, topic_name');
@@ -969,4 +1013,4 @@ document.addEventListener('DOMContentLoaded', async function () {
 });
 </script>
 </body>
-</html>w
+</html>

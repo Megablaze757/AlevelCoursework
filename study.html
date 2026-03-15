@@ -752,7 +752,7 @@ const supabaseClient = supabase.createClient(
         
         await updateTopicPerformance(topicId, student_id, true);
       } else {
-        if (currentQuestionAttempts === 2) {
+        if (currentQuestionAttempts === 3) {
           feedback.textContent = `Incorrect. The correct answer is ${currentQuestion.correct_answer}`;
           feedback.className = 'feedback incorrect';
           nextQuestion.classList.remove('hidden');
@@ -760,7 +760,7 @@ const supabaseClient = supabase.createClient(
           numIncorrect.textContent = incorrectCount;
           await updateTopicPerformance(topicId, student_id, false);
         } else {  
-          feedback.textContent = `Incorrect. Try again. Attempt ${currentQuestionAttempts + 1} of 3`;
+          feedback.textContent = `Incorrect`;
           feedback.className = 'feedback incorrect';
           currentQuestionAttempts++;
           incorrectCount++;

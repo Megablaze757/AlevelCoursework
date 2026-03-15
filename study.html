@@ -493,21 +493,21 @@ const supabaseClient = supabase.createClient(
       if (currentPerformance && currentPerformance.length > 0) {
         const updatedPerformance = currentPerformance[0];
 
-        const newAttempted = updatedPerformance.questions_attempted +1;
+        const newAttempted = updatedPerformance.questions_attempted + 1;
         const newCorrect = updatedPerformance.questions_correct + (wasCorrect ? 1 : 0);
         const newAccuracy = (newCorrect / newAttempted) * 100
         
-        const { error } = await supabaseClient 
-        .from('topic_performance')
-        .update({
+        await supabaseClient 
+          .from('topic_performance')
+          .update({
             questions_attempted: newAttempted,
             questions_correct: newCorrect,
             accuracy_percent: Math.round(newAccuracy)
-        })
-        .eq('perfomance_id', updatedPerformance.perfomance_id);
+          })
+          .eq('perfomance_id', updatedPerformance.perfomance_id);
        
         if (newAccuracy > 80) {
-          const {data: existingStrength} = await supabaseClient
+          const { data: existingStrength } = await supabaseClient
             .from('strengths')
             .select('*')
             .eq('student_id', studentId)
@@ -518,6 +518,7 @@ const supabaseClient = supabase.createClient(
               .from('strengths')
               .insert([{ student_id: studentId, topic_id: topicId }]);
           }
+          
           await supabaseClient
             .from('weaknesses')
             .delete()
@@ -536,6 +537,7 @@ const supabaseClient = supabase.createClient(
               .from('weaknesses')
               .insert([{ student_id: studentId, topic_id: topicId }]);
           }
+          
           await supabaseClient
             .from('strengths')
             .delete()
@@ -558,7 +560,7 @@ const supabaseClient = supabase.createClient(
       }
       else {
         const newAccuracy = wasCorrect ? 100 : 0;
-        const { error } = await supabaseClient
+        await supabaseClient
           .from('topic_performance')
           .insert([{
             student_id: studentId,
@@ -569,13 +571,30 @@ const supabaseClient = supabase.createClient(
           }]);
         
         if (newAccuracy > 80) {
-          await supabaseClient
+          const { data: existingStrength } = await supabaseClient
             .from('strengths')
-            .insert([{ student_id: studentId, topic_id: topicId }]);
-        } else if (newAccuracy < 50) {
-          await supabaseClient
+            .select('*')
+            .eq('student_id', studentId)
+            .eq('topic_id', topicId);
+            
+          if (!existingStrength || existingStrength.length === 0) {
+            await supabaseClient
+              .from('strengths')
+              .insert([{ student_id: studentId, topic_id: topicId }]);
+          }
+        } 
+        else if (newAccuracy < 50) {
+          const { data: existingWeakness } = await supabaseClient
             .from('weaknesses')
-            .insert([{ student_id: studentId, topic_id: topicId }]);
+            .select('*')
+            .eq('student_id', studentId)
+            .eq('topic_id', topicId);
+          
+          if (!existingWeakness || existingWeakness.length === 0) {
+            await supabaseClient
+              .from('weaknesses')
+              .insert([{ student_id: studentId, topic_id: topicId }]);
+          }
         }
       }
     }
@@ -630,8 +649,7 @@ async function getStrengths () {
         .from('strengths')
         .select('*')
         .eq('student_id', 'StudentTest')
-console.log(strengths);
-return strengths;
+  return strengths;
 }
 
 async function getWeaknesses () {
@@ -639,345 +657,316 @@ async function getWeaknesses () {
         .from('weaknesses')
         .select('topic_id')
         .eq('student_id', 'StudentTest')
-console.log(weaknesses);
-return weaknesses;
+  return weaknesses;
 }
 
 async function orderTopics () {
-const weaknesses = await getWeaknesses()
-let { data: orderedTopics, error } = await supabaseClient
-.from('topic_performance')
-.select('topic_id, accuracy_percent')
-.eq('student_id', 'StudentTest')
+  let { data: orderedTopics, error } = await supabaseClient
+    .from('topic_performance')
+    .select('topic_id, accuracy_percent')
+    .eq('student_id', 'StudentTest')
 
-if (!orderedTopics) return [];
+  if (!orderedTopics) return [];
 
-let len = orderedTopics.length;
-for (let i = 0; i < len - 1; i++) {
-for (let j = 0; j < len - 1 - i; j++) {
-  if (orderedTopics[j].accuracy_percent > orderedTopics[j + 1].accuracy_percent) {
-    let temp = orderedTopics[j];
-    orderedTopics[j] = orderedTopics[j + 1];
-    orderedTopics[j + 1] = temp;
+  let len = orderedTopics.length;
+  for (let i = 0; i < len - 1; i++) {
+    for (let j = 0; j < len - 1 - i; j++) {
+      if (orderedTopics[j].accuracy_percent > orderedTopics[j + 1].accuracy_percent) {
+        let temp = orderedTopics[j];
+        orderedTopics[j] = orderedTopics[j + 1];
+        orderedTopics[j + 1] = temp;
+      }
+    }
   }
-}
-}
-console.log(orderedTopics);
-return orderedTopics;
+  return orderedTopics;
 }
 
 async function getStyle(){
-const { data: learningStyle , error } = await supabaseClient
- .from('adaptive_settings')
- .select('preferred_style')
- .eq('student_id', 'StudentTest')
-console.log(learningStyle)
-return learningStyle;
+  const { data: learningStyle , error } = await supabaseClient
+    .from('adaptive_settings')
+    .select('preferred_style')
+    .eq('student_id', 'StudentTest')
+  return learningStyle;
 }
     
 async function getQuestion(topicId) {
-console.log('Getting questions for topic:', topicId);
+  let style = await getStyle();
+  let preferredStyle = style && style.length > 0 ? style[0].preferred_style : 'mixed';
 
-let style = await getStyle();
-let preferredStyle = style && style.length > 0 ? style[0].preferred_style : 'mixed';
+  const { data: accuracy } = await supabaseClient
+    .from('topic_performance')
+    .select('accuracy_percent')
+    .eq('student_id', 'StudentTest')
+    .eq('topic_id', topicId);
 
-const { data: accuracy } = await supabaseClient
-.from('topic_performance')
-.select('accuracy_percent')
-.eq('student_id', 'StudentTest')
-.eq('topic_id', topicId);
+  let accuracyValue = 50;
+  let difficultyValue = 3;
 
-let accuracyValue = 50;
-let difficultyValue = 3;
+  if (accuracy && accuracy.length > 0) {
+    accuracyValue = accuracy[0].accuracy_percent;
 
-if (accuracy && accuracy.length > 0) {
-accuracyValue = accuracy[0].accuracy_percent;
+    if (accuracyValue < 40) {
+      difficultyValue = 1;
+    }
+    else if (accuracyValue >= 40 && accuracyValue < 60) {
+      difficultyValue = 2;
+    }
+    else if (accuracyValue >= 60 && accuracyValue < 70) {
+      difficultyValue = 3;
+    }
+    else if (accuracyValue >= 70 && accuracyValue < 80) {
+      difficultyValue = 4;
+    }
+    else if (accuracyValue >= 80) {
+      difficultyValue = 5;
+    }
+  }
 
-if (accuracyValue < 40) {
-  difficultyValue = 1;
-}
-else if (accuracyValue >= 40 && accuracyValue < 60) {
-  difficultyValue = 2;
-}
-else if (accuracyValue >= 60 && accuracyValue < 70) {
-  difficultyValue = 3;
-}
-else if (accuracyValue >= 70 && accuracyValue < 80) {
-  difficultyValue = 4;
-}
-else if (accuracyValue >= 80) {
-  difficultyValue = 5;
-}
-}
+  let { data: questions, error } = await supabaseClient
+    .from('questions')
+    .select('*')
+    .eq('question_type', preferredStyle)
+    .eq('topic_id', topicId)
+    .eq('difficulty', difficultyValue);
 
-console.log('Trying difficulty:', difficultyValue);
+  if (!questions || questions.length === 0) {
+    const { data: allQuestions } = await supabaseClient
+      .from('questions')
+      .select('*')
+      .eq('question_type', preferredStyle)
+      .eq('topic_id', topicId);
 
-let { data: questions, error } = await supabaseClient
-.from('questions')
-.select('*')
-.eq('question_type', preferredStyle)
-.eq('topic_id', topicId)
-.eq('difficulty', difficultyValue);
+    questions = allQuestions;
+  }
 
-if (!questions || questions.length === 0) {
-console.log('No questions at difficulty', difficultyValue, 'trying all difficulties');
+  if (questions && questions.length > 0) {
+    const unansweredQuestions = questions.filter(q => !askedQuestionIds.includes(q.question_id));
+    return unansweredQuestions;
+  }
 
-const { data: allQuestions } = await supabaseClient
-  .from('questions')
-  .select('*')
-  .eq('question_type', preferredStyle)
-  .eq('topic_id', topicId);
-
-questions = allQuestions;
-}
-
-if (questions && questions.length > 0) {
-const unansweredQuestions = questions.filter(q => !askedQuestionIds.includes(q.question_id));
-console.log('Total questions found:', questions.length);
-console.log('Already answered IDs:', askedQuestionIds);
-console.log('Unanswered questions:', unansweredQuestions.length);
-return unansweredQuestions;
-}
-
-return [];
+  return [];
 }
 
 async function loadNewSession() {
-orderedTopicsList = await orderTopics();
-if (!orderedTopicsList || orderedTopicsList.length === 0) return;
+  orderedTopicsList = await orderTopics();
+  if (!orderedTopicsList || orderedTopicsList.length === 0) return;
 
-for (let i = 0; i < orderedTopicsList.length; i++) {
-currentTopicIndex = i;
-currentTopicId = orderedTopicsList[i].topic_id;
-console.log('Trying topic:', currentTopicId);
+  for (let i = 0; i < orderedTopicsList.length; i++) {
+    currentTopicIndex = i;
+    currentTopicId = orderedTopicsList[i].topic_id;
 
-sessionQuestions = await getQuestion(currentTopicId);
+    sessionQuestions = await getQuestion(currentTopicId);
 
-if (sessionQuestions.length > 0) {
-  console.log('Found questions for topic:', currentTopicId);
-  currentQuestionIndex = 0;
-  displayQuestion();
-  return;
-}
-}
+    if (sessionQuestions.length > 0) {
+      currentQuestionIndex = 0;
+      displayQuestion();
+      return;
+    }
+  }
 
-questionHolder.innerHTML = 'No questions available for any topic';
+  questionHolder.innerHTML = 'No questions available for any topic';
 }
 
 function displayQuestion() {
-console.log('displayQuestion - sessionQuestions:', sessionQuestions);
-console.log('displayQuestion - currentQuestionIndex:', currentQuestionIndex);
-
-if (sessionQuestions && sessionQuestions.length > 0 && currentQuestionIndex < sessionQuestions.length) {
-const currentQuestion = sessionQuestions[currentQuestionIndex];
-console.log('Current question:', currentQuestion);
-questionHolder.innerHTML = currentQuestion.question_text;
-} else {
-console.log('No question to display');
-questionHolder.innerHTML = 'No questions available';
-}
+  if (sessionQuestions && sessionQuestions.length > 0 && currentQuestionIndex < sessionQuestions.length) {
+    const currentQuestion = sessionQuestions[currentQuestionIndex];
+    questionHolder.innerHTML = currentQuestion.question_text;
+  } else {
+    questionHolder.innerHTML = 'No questions available';
+  }
 }
       
 document.addEventListener('DOMContentLoaded', async function () {
   
-        
-await getInitialAccuracies();
-await fetchQuestion();
+  await getInitialAccuracies();
+  await fetchQuestion();
 
-if (selectedTopicName) {
-  const {data: topic } = await supabaseClient
-    .from('topics')
-    .select('topic_id')
-    .eq('topic_name', selectedTopicName)
-console.log(topic)
-  if (topic && topic.length > 0) {
-    selectedTopicId = topic[0].topic_id;
-  } else {
-    console.log('Topic not found:', selectedTopicName);
-    selectedTopicId = null;
-  }
-  
-}
-nextQuestion.addEventListener('click', async function() {
-console.log('Next question clicked');
-if(sessionQuestions.length === 0){
-  if (selectedTopicId) {
-    sessionQuestions = await getQuestion(selectedTopicId);
-    if (sessionQuestions && sessionQuestions.length > 0){
-      currentQuestionIndex = 0;
-      displayQuestion();
+  if (selectedTopicName) {
+    const { data: topic } = await supabaseClient
+      .from('topics')
+      .select('topic_id')
+      .eq('topic_name', selectedTopicName)
+
+    if (topic && topic.length > 0) {
+      selectedTopicId = topic[0].topic_id;
     } else {
-      questionHolder.innerHTML = 'No questions available';
+      selectedTopicId = null;
     }
-  } else {
-    orderedTopicsList = await orderTopics();
+  }
 
-    for (let i = 0; i < orderedTopicsList.length; i++) {
-      currentTopicIndex = i;
-      currentTopicId = orderedTopicsList[i].topic_id;
-      console.log('Trying topic:', currentTopicId);
-      
-      sessionQuestions = await getQuestion(currentTopicId);
-      
-      if (sessionQuestions && sessionQuestions.length > 0) {
-        console.log('Found questions for topic:', currentTopicId);
-        currentQuestionIndex = 0;
+  nextQuestion.addEventListener('click', async function() {
+    if(sessionQuestions.length === 0){
+      if (selectedTopicId) {
+        sessionQuestions = await getQuestion(selectedTopicId);
+        if (sessionQuestions && sessionQuestions.length > 0){
+          currentQuestionIndex = 0;
+          displayQuestion();
+        } else {
+          questionHolder.innerHTML = 'No questions available';
+        }
+      } else {
+        orderedTopicsList = await orderTopics();
+
+        for (let i = 0; i < orderedTopicsList.length; i++) {
+          currentTopicIndex = i;
+          currentTopicId = orderedTopicsList[i].topic_id;
+          
+          sessionQuestions = await getQuestion(currentTopicId);
+          
+          if (sessionQuestions && sessionQuestions.length > 0) {
+            currentQuestionIndex = 0;
+            displayQuestion();
+            answerBox.value = '';
+            feedback.style.display = 'none';
+            return;
+          }
+        }
+        questionHolder.innerHTML = 'No questions available for any topic';
+        return;
+      }
+    } else {
+      currentQuestionIndex++;
+
+      if (currentQuestionIndex < sessionQuestions.length) {
         displayQuestion();
         answerBox.value = '';
         feedback.style.display = 'none';
-        return;
+      } else {
+        currentTopicIndex++;
+        if (currentTopicIndex >= orderedTopicsList.length) {
+          currentTopicIndex = 0;
+        }
+
+        currentTopicId = orderedTopicsList[currentTopicIndex].topic_id;
+
+        sessionQuestions = await getQuestion(currentTopicId);
+        currentQuestionIndex = 0;
+
+        if (sessionQuestions && sessionQuestions.length > 0) {
+          displayQuestion();
+          answerBox.value = '';
+          feedback.style.display = 'none';
+        } else {
+          questionHolder.innerHTML = 'No questions for this topic';
+        }
       }
     }
-    questionHolder.innerHTML = 'No questions available for any topic';
-    return;
-  }
-} else {
-  currentQuestionIndex++;
+  });
 
-  if (currentQuestionIndex < sessionQuestions.length) {
-    console.log('Displaying next question at index:', currentQuestionIndex);
-    displayQuestion();
-    answerBox.value = '';
-    feedback.style.display = 'none';
-  } else {
-    console.log('No more questions for this topic, moving to next topic');
-
-    currentTopicIndex++;
-    if (currentTopicIndex >= orderedTopicsList.length) {
-      currentTopicIndex = 0;
-    }
-
-    currentTopicId = orderedTopicsList[currentTopicIndex].topic_id;
-
-    sessionQuestions = await getQuestion(currentTopicId);
-    currentQuestionIndex = 0;
-
-    if (sessionQuestions && sessionQuestions.length > 0) {
-      displayQuestion();
-      answerBox.value = '';
-      feedback.style.display = 'none';
-    } else {
-      questionHolder.innerHTML = 'No questions for this topic';
-    }
-  }
-}
-});
-
-
-endSession.addEventListener('click', async function() {
-  const { data: topics } = await supabaseClient
-    .from('topics')
-    .select('topic_id, topic_name');
-  
-  const { data: performances } = await supabaseClient
-    .from('topic_performance')
-    .select('topic_id, accuracy_percent')
-    .eq('student_id', student_id);
-  
-  const { data: strengths } = await supabaseClient
-    .from('strengths')
-    .select('topic_id')
-    .eq('student_id', student_id);
-  
-  const { data: weaknesses } = await supabaseClient
-    .from('weaknesses')
-    .select('topic_id')
-    .eq('student_id', student_id);
-  
-  let currentAccuracies = {};
-  if (performances) {
-    performances.forEach(p => {
-      currentAccuracies[p.topic_id] = p.accuracy_percent || 0;
-    });
-  }
-  
-  const strengthsList = document.getElementById('strengthsList');
-  if (strengthsList) {
-    if (strengths && strengths.length > 0) {
-      strengthsList.innerHTML = '';
-      for (let s of strengths) {
-        const topic = topics.find(t => t.topic_id === s.topic_id);
-        const accuracy = currentAccuracies[s.topic_id] || 0;
-        if (topic) strengthsList.innerHTML += `<div>${topic.topic_name} (${accuracy}%)</div>`;
-      }
-    } else {
-      strengthsList.innerHTML = '<div>No strengths yet</div>';
-    }
-  }
-  
-  const weaknessesList = document.getElementById('weaknessesList');
-  if (weaknessesList) {
-    if (weaknesses && weaknesses.length > 0) {
-      weaknessesList.innerHTML = '';
-      for (let w of weaknesses) {
-        const topic = topics.find(t => t.topic_id === w.topic_id);
-        const accuracy = currentAccuracies[w.topic_id] || 0;
-        if (topic) weaknessesList.innerHTML += `<div>${topic.topic_name} (${accuracy}%)</div>`;
-      }
-    } else {
-      weaknessesList.innerHTML = '<div>No weaknesses yet</div>';
-    }
-  }
-  
-  let topicHTML = '';
-  for (let topic of topics) {
-    const topicId = topic.topic_id;
-    const initial = initialTopicAccuracies[topicId] || 0;
-    const current = currentAccuracies[topicId] || 0;
-    const change = current - initial;
-    const changeClass = change >= 0 ? 'positive' : 'negative';
-    const changeSymbol = change >= 0 ? '+' : '';
+  endSession.addEventListener('click', async function() {
+    const { data: topics } = await supabaseClient
+      .from('topics')
+      .select('topic_id, topic_name');
     
-    topicHTML += `
-      <div class="topicItem">
-        <div class="topicName">${topic.topic_name}</div>
-        <div class="topicBefore">${initial}%</div>
-        <div class="topicAfter">${current}%</div>
-        <div class="topicChange ${changeClass}">${changeSymbol}${change}%</div>
-      </div>
-    `;
-  }
-  
-  topicList.innerHTML = topicHTML;
-  
-  const totalQuestions = correctCount + incorrectCount;
-  const accuracy = totalQuestions > 0 ? Math.round((correctCount/totalQuestions)*100) : 0;
-  
-  modalCorrect.textContent = correctCount;
-  modalIncorrect.textContent = incorrectCount;
-  modalAccuracy.textContent = accuracy + '%';
-  
-  endSessionModal.style.display = 'flex';
-});
+    const { data: performances } = await supabaseClient
+      .from('topic_performance')
+      .select('topic_id, accuracy_percent')
+      .eq('student_id', student_id);
+    
+    const { data: strengths } = await supabaseClient
+      .from('strengths')
+      .select('topic_id')
+      .eq('student_id', student_id);
+    
+    const { data: weaknesses } = await supabaseClient
+      .from('weaknesses')
+      .select('topic_id')
+      .eq('student_id', student_id);
+    
+    let currentAccuracies = {};
+    if (performances) {
+      performances.forEach(p => {
+        currentAccuracies[p.topic_id] = p.accuracy_percent || 0;
+      });
+    }
+    
+    const strengthsList = document.getElementById('strengthsList');
+    if (strengthsList) {
+      if (strengths && strengths.length > 0) {
+        strengthsList.innerHTML = '';
+        for (let s of strengths) {
+          const topic = topics.find(t => t.topic_id === s.topic_id);
+          const accuracy = currentAccuracies[s.topic_id] || 0;
+          if (topic) strengthsList.innerHTML += `<div>${topic.topic_name} (${accuracy}%)</div>`;
+        }
+      } else {
+        strengthsList.innerHTML = '<div>No strengths yet</div>';
+      }
+    }
+    
+    const weaknessesList = document.getElementById('weaknessesList');
+    if (weaknessesList) {
+      if (weaknesses && weaknesses.length > 0) {
+        weaknessesList.innerHTML = '';
+        for (let w of weaknesses) {
+          const topic = topics.find(t => t.topic_id === w.topic_id);
+          const accuracy = currentAccuracies[w.topic_id] || 0;
+          if (topic) weaknessesList.innerHTML += `<div>${topic.topic_name} (${accuracy}%)</div>`;
+        }
+      } else {
+        weaknessesList.innerHTML = '<div>No weaknesses yet</div>';
+      }
+    }
+    
+    let topicHTML = '';
+    for (let topic of topics) {
+      const topicId = topic.topic_id;
+      const initial = initialTopicAccuracies[topicId] || 0;
+      const current = currentAccuracies[topicId] || 0;
+      const change = current - initial;
+      const changeClass = change >= 0 ? 'positive' : 'negative';
+      const changeSymbol = change >= 0 ? '+' : '';
+      
+      topicHTML += `
+        <div class="topicItem">
+          <div class="topicName">${topic.topic_name}</div>
+          <div class="topicBefore">${initial}%</div>
+          <div class="topicAfter">${current}%</div>
+          <div class="topicChange ${changeClass}">${changeSymbol}${change}%</div>
+        </div>
+      `;
+    }
+    
+    topicList.innerHTML = topicHTML;
+    
+    const totalQuestions = correctCount + incorrectCount;
+    const accuracy = totalQuestions > 0 ? Math.round((correctCount/totalQuestions)*100) : 0;
+    
+    modalCorrect.textContent = correctCount;
+    modalIncorrect.textContent = incorrectCount;
+    modalAccuracy.textContent = accuracy + '%';
+    
+    endSessionModal.style.display = 'flex';
+  });
 
-closeModalBtn.addEventListener('click', function() {
-  endSessionModal.style.display = 'none';
-});
+  closeModalBtn.addEventListener('click', function() {
+    endSessionModal.style.display = 'none';
+  });
 
-newSessionBtn.addEventListener('click', function() {
-  correctCount = 0;
-  incorrectCount = 0;
-  numCorrect.textContent = correctCount;
-  numIncorrect.textContent = incorrectCount;
-  
-  sessionQuestions = [];
-  currentQuestionIndex = 0;
-  askedQuestionIds = [];
-  
-  feedback.style.display = 'none';
-  answerBox.value = '';
-  questionHolder.innerHTML = 'Click Next Question to start';
-  
-  endSessionModal.style.display = 'none';
-  
-  getInitialAccuracies();
-});
+  newSessionBtn.addEventListener('click', function() {
+    correctCount = 0;
+    incorrectCount = 0;
+    numCorrect.textContent = correctCount;
+    numIncorrect.textContent = incorrectCount;
+    
+    sessionQuestions = [];
+    currentQuestionIndex = 0;
+    askedQuestionIds = [];
+    
+    feedback.style.display = 'none';
+    answerBox.value = '';
+    questionHolder.innerHTML = 'Click Next Question to start';
+    
+    endSessionModal.style.display = 'none';
+    
+    getInitialAccuracies();
+  });
 
-homeBtn.addEventListener('click', function() {
-  window.location.href = 'main.html';
-});
+  homeBtn.addEventListener('click', function() {
+    window.location.href = 'main.html';
+  });
 
 });
 </script>
 </body>
-</html>
+</html>w

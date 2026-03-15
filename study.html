@@ -337,6 +337,35 @@ display: block;
   flex: 2;
   text-align: left;
 }
+/* Next Question button */
+    .nextQuestionBtn {
+      background: #4caf50;
+      color: white;
+      padding: 15px 30px;
+      border-radius: 50px;
+      font-weight: bold;
+      font-size: 18px;
+      text-align: center;
+      cursor: pointer;
+      transition: background 0.2s;
+      display: inline-block;
+      min-width: 150px;
+      border: none;
+      margin-top: 15px;
+    }
+
+    .nextQuestionBtn:hover {
+      background: #388e3c;
+    }
+
+    .nextQuestionBtn:active {
+      transform: scale(0.98);
+    }
+
+    .nextQuestionBtn.hidden {
+      display: none;
+    }
+
     
   </style>
   
@@ -458,7 +487,11 @@ display: block;
 
     
 let questions = [];
-  
+
+//Variables to store number of attemps
+let currentQuestionAttempts = 0;
+
+    
 const supabase_url = 'https://pxjndwrkafegopsolnde.supabase.co'
 const supabase_key = 'sb_publishable_eOUJ3K3GNczOncszRwYhyA_A1QAw72F'
 
@@ -694,7 +727,13 @@ const supabaseClient = supabase.createClient(
         feedback.style.display = 'block';
         return;
       }
-      
+       //check if the current question is completed
+      if (currentQuestionResolved){
+          feedback.textContent = 'This question has been answered.';
+          feedback.className = 'feedback incorrect';
+          feedback.style.display = 'block';
+          return;
+      }
       const userAnswer = answerBox.value.trim().toLowerCase();
       if (!userAnswer) {
         feedback.textContent = 'Please enter an answer';
@@ -712,6 +751,9 @@ const supabaseClient = supabase.createClient(
         feedback.className = 'feedback correct';
         correctCount++;
         numCorrect.textContent = correctCount;
+        //If the questions correct allow them to move on
+        nextQuestion.classList.remove('hidden');
+        
         await updateTopicPerformance(topicId, student_id, true);
       } else {
         feedback.textContent = `Incorrect. The correct answer is: ${currentQuestion.correct_answer}`;
@@ -865,6 +907,7 @@ const supabaseClient = supabase.createClient(
     }
       
     document.addEventListener('DOMContentLoaded', async function () {
+      nextQuestion.classList.remove('hidden');
       
       await getInitialAccuracies();
       await fetchQuestion();
@@ -884,6 +927,11 @@ const supabaseClient = supabase.createClient(
       }
 
       nextQuestion.addEventListener('click', async function() {
+        //Hidden every time theres a new question
+        nextQuestion.classList.add('hidden');
+        
+        currentQuestionAttempts = 0;
+        currentQuestionResolved = false;
         if(sessionQuestions.length === 0){
           if (selectedTopicId) {
             sessionQuestions = await getQuestion(selectedTopicId);

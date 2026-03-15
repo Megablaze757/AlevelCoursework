@@ -735,31 +735,50 @@ if (selectedTopicName) {
     .from('topics')
     .select('topic_id')
     .eq('topic_name', selectedTopicName)
-console.log(topic)  
+console.log(topic)
+selectedTopicId = topic.topic_id;
   
 }
 nextQuestion.addEventListener('click', async function() {
 console.log('Next question clicked');
-
-if (sessionQuestions.length === 0) {
-console.log('First time - loading session');
-orderedTopicsList = await orderTopics();
-
-for (let i = 0; i < orderedTopicsList.length; i++) {
-  currentTopicIndex = i;
-  currentTopicId = orderedTopicsList[i].topic_id;
-  console.log('Trying topic:', currentTopicId);
+//if its the first time loading the questions
+if(sessionsQuestion.length === 0){
+  if (selectedTopicId) {
+    sessionQuestions = await getQuestion(selectedTopicId);
+    // if we have questions then start the index at -
+    if (sessionQuestions && sessionQuestions.length > 0){
+      currentQuestionsIndex = 0;
+      displauQuestion();
+      
+    // If theres no questions left then show the user
+    else {
+      questionHolder.innerHTML = 'No questions available';
+    }
+    
   
-  sessionQuestions = await getQuestion(currentTopicId);
-  
-  if (sessionQuestions && sessionQuestions.length > 0) {
-    console.log('Found questions for topic:', currentTopicId);
-    currentQuestionIndex = 0;
-    displayQuestion();
-    answerBox.value = '';
-    feedback.style.display = 'none';
-    return;
   }
+    //If theres no topic selected run the adaptive questions algorithm
+  else {
+  orderedTopicsList = await orderTopics();
+
+  for (let i = 0; i < orderedTopicsList.length; i++) {
+    currentTopicIndex = i;
+    currentTopicId = orderedTopicsList[i].topic_id;
+    console.log('Trying topic:', currentTopicId);
+    
+    sessionQuestions = await getQuestion(currentTopicId);
+    
+    if (sessionQuestions && sessionQuestions.length > 0) {
+      console.log('Found questions for topic:', currentTopicId);
+      currentQuestionIndex = 0;
+      displayQuestion();
+      answerBox.value = '';
+      feedback.style.display = 'none';
+      return;
+    }
+    }
+  }
+}
 }
 
 questionHolder.innerHTML = 'No questions available for any topic';

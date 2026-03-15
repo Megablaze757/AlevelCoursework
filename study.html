@@ -428,24 +428,18 @@ display: block;
     const closeModalBtn = document.getElementById('closeModalBtn');
     const homeBtn = document.getElementById('homeBtn');
     
-    //Correct and Incorrect answer Variables
     let correctCount = 0
     let incorrectCount = 0
 
-    //Current Batch of questions
     let sessionQuestions = [];
-    //Question we are on
     let currentQuestionIndex = 0;
-    //Questions Asked
     let askedQuestionIds = [];
-    //Amount of that topic correct
     let topicCorrect = [];
-    //Total answered
     let topicTotal =[];
     
     let question_id = 1;
     let student_id = 'StudentTest';
-    //Get the Answer elements
+
     const checkAnswer = document.getElementById('checkAnswer');
     const answerBox = document.getElementById('answerBox');
     const numCorrect = document.getElementById('numCorrect');
@@ -457,9 +451,7 @@ display: block;
     let currentTopicIndex = 0;
     let currentTopicId = null;
 
-    //Store Intial accuracies
     let initialTopicAccuracies = {};
-    //Get the topic from session storage 
     let selectedTopicName = sessionStorage.getItem('selectedTopic');
     let selectedTopicId = null;
     console.log('Selected topic', selectedTopicName);
@@ -467,18 +459,15 @@ display: block;
     
 let questions = [];
   
-      // The supabase url
 const supabase_url = 'https://pxjndwrkafegopsolnde.supabase.co'
-// Supabase key
 const supabase_key = 'sb_publishable_eOUJ3K3GNczOncszRwYhyA_A1QAw72F'
-// Initialize supabase client
+
 const supabaseClient = supabase.createClient(
 'https://pxjndwrkafegopsolnde.supabase.co',
 'sb_publishable_eOUJ3K3GNczOncszRwYhyA_A1QAw72F'
 );
 
 
-    //Get initial accuracies
     async function getInitialAccuracies() {
       const { data: performances } = await supabaseClient
         .from('topic_performance')
@@ -494,25 +483,20 @@ const supabaseClient = supabase.createClient(
         
     }
 
-    //Update topic performance function
     async function updateTopicPerformance(topicId, studentId, wasCorrect) {
-      // Get current performance
       const { data: currentPerformance, error } = await supabaseClient
         .from('topic_performance')
         .select('*')
         .eq('student_id', studentId)
         .eq('topic_id', topicId);
 
-      //If the record exists update it
       if (currentPerformance && currentPerformance.length > 0) {
         const updatedPerformance = currentPerformance[0];
 
-        //Calculate the new values
         const newAttempted = updatedPerformance.questions_attempted +1;
         const newCorrect = updatedPerformance.questions_correct + (wasCorrect ? 1 : 0);
         const newAccuracy = (newCorrect / newAttempted) * 100
         
-        //Update the record with the new data
         const { error } = await supabaseClient 
         .from('topic_performance')
         .update({
@@ -522,22 +506,18 @@ const supabaseClient = supabase.createClient(
         })
         .eq('perfomance_id', updatedPerformance.perfomance_id);
        
-        //Check if it should be a strength
         if (newAccuracy > 80) {
-          //check if already a strength
-          const {data: existing} = await supabaseClient
+          const {data: existingStrength} = await supabaseClient
             .from('strengths')
             .select('*')
             .eq('student_id', studentId)
             .eq('topic_id', topicId);
             
-          if (!existing || existing.length === 0) {
-            // Insert into strengths
+          if (!existingStrength || existingStrength.length === 0) {
             await supabaseClient
               .from('strengths')
               .insert([{ student_id: studentId, topic_id: topicId }]);
           }
-          //Remove from weaknesses if it was there
           await supabaseClient
             .from('weaknesses')
             .delete()
@@ -545,20 +525,17 @@ const supabaseClient = supabase.createClient(
             .eq('topic_id', topicId);
         } 
         else if (newAccuracy < 50) {
-          // Check if already in weaknesses
-          const { data: existing } = await supabaseClient
+          const { data: existingWeakness } = await supabaseClient
             .from('weaknesses')
             .select('*')
             .eq('student_id', studentId)
             .eq('topic_id', topicId);
           
-          if (!existing || existing.length === 0) {
-            // Insert into weaknesses
+          if (!existingWeakness || existingWeakness.length === 0) {
             await supabaseClient
               .from('weaknesses')
               .insert([{ student_id: studentId, topic_id: topicId }]);
           }
-          // Remove from strengths 
           await supabaseClient
             .from('strengths')
             .delete()
@@ -566,7 +543,6 @@ const supabaseClient = supabase.createClient(
             .eq('topic_id', topicId);
         }
         else {
-          //If its not a strength or weakness remove from both
           await supabaseClient
             .from('strengths')
             .delete()
@@ -580,7 +556,6 @@ const supabaseClient = supabase.createClient(
             .eq('topic_id', topicId);
         }
       }
-      //If the record doesnt exist create a new one
       else {
         const newAccuracy = wasCorrect ? 100 : 0;
         const { error } = await supabaseClient
@@ -593,14 +568,11 @@ const supabaseClient = supabase.createClient(
             accuracy_percent: newAccuracy
           }]);
         
-        // Check if it should be a strength or weakness
         if (newAccuracy > 80) {
-          // Insert into strengths
           await supabaseClient
             .from('strengths')
             .insert([{ student_id: studentId, topic_id: topicId }]);
         } else if (newAccuracy < 50) {
-          // Insert into weaknesses
           await supabaseClient
             .from('weaknesses')
             .insert([{ student_id: studentId, topic_id: topicId }]);
@@ -811,15 +783,13 @@ document.addEventListener('DOMContentLoaded', async function () {
         
 await getInitialAccuracies();
 await fetchQuestion();
-// IF theres a topic name then we find the id for the topic
+
 if (selectedTopicName) {
-  //supabase query to get the selected topic
   const {data: topic } = await supabaseClient
     .from('topics')
     .select('topic_id')
     .eq('topic_name', selectedTopicName)
 console.log(topic)
-  // FIX: Check if topic exists before accessing topic[0]
   if (topic && topic.length > 0) {
     selectedTopicId = topic[0].topic_id;
   } else {
@@ -830,20 +800,16 @@ console.log(topic)
 }
 nextQuestion.addEventListener('click', async function() {
 console.log('Next question clicked');
-//if its the first time loading the questions
 if(sessionQuestions.length === 0){
   if (selectedTopicId) {
     sessionQuestions = await getQuestion(selectedTopicId);
-    // if we have questions then start the index at 0
     if (sessionQuestions && sessionQuestions.length > 0){
       currentQuestionIndex = 0;
       displayQuestion();
     } else {
-      // If theres no questions left then show the user
       questionHolder.innerHTML = 'No questions available';
     }
   } else {
-    //If theres no topic selected run the adaptive questions algorithm
     orderedTopicsList = await orderTopics();
 
     for (let i = 0; i < orderedTopicsList.length; i++) {
@@ -899,30 +865,25 @@ if(sessionQuestions.length === 0){
 
 
 endSession.addEventListener('click', async function() {
-  // Get all topics
   const { data: topics } = await supabaseClient
     .from('topics')
     .select('topic_id, topic_name');
   
-  // Get current performance
   const { data: performances } = await supabaseClient
     .from('topic_performance')
     .select('topic_id, accuracy_percent')
     .eq('student_id', student_id);
   
-  //Get strengths
   const { data: strengths } = await supabaseClient
     .from('strengths')
     .select('topic_id')
     .eq('student_id', student_id);
   
-  //Get weaknesses
   const { data: weaknesses } = await supabaseClient
     .from('weaknesses')
     .select('topic_id')
     .eq('student_id', student_id);
   
-  // Create an object of accuracies
   let currentAccuracies = {};
   if (performances) {
     performances.forEach(p => {
@@ -930,7 +891,6 @@ endSession.addEventListener('click', async function() {
     });
   }
   
-  // Display strengths
   const strengthsList = document.getElementById('strengthsList');
   if (strengthsList) {
     if (strengths && strengths.length > 0) {
@@ -945,7 +905,6 @@ endSession.addEventListener('click', async function() {
     }
   }
   
-  // Display weaknesses
   const weaknessesList = document.getElementById('weaknessesList');
   if (weaknessesList) {
     if (weaknesses && weaknesses.length > 0) {
@@ -960,7 +919,6 @@ endSession.addEventListener('click', async function() {
     }
   }
   
-  // Build topic list HTML
   let topicHTML = '';
   for (let topic of topics) {
     const topicId = topic.topic_id;
@@ -982,7 +940,6 @@ endSession.addEventListener('click', async function() {
   
   topicList.innerHTML = topicHTML;
   
-  // Update session stats
   const totalQuestions = correctCount + incorrectCount;
   const accuracy = totalQuestions > 0 ? Math.round((correctCount/totalQuestions)*100) : 0;
   
@@ -990,18 +947,14 @@ endSession.addEventListener('click', async function() {
   modalIncorrect.textContent = incorrectCount;
   modalAccuracy.textContent = accuracy + '%';
   
-  // Show modal
   endSessionModal.style.display = 'flex';
 });
 
-// Close modal button
 closeModalBtn.addEventListener('click', function() {
   endSessionModal.style.display = 'none';
 });
 
-// New Session button
 newSessionBtn.addEventListener('click', function() {
-  // Reset session
   correctCount = 0;
   incorrectCount = 0;
   numCorrect.textContent = correctCount;
@@ -1015,14 +968,11 @@ newSessionBtn.addEventListener('click', function() {
   answerBox.value = '';
   questionHolder.innerHTML = 'Click Next Question to start';
   
-  // Hide modal
   endSessionModal.style.display = 'none';
   
-  // Update initial accuracies for new session
   getInitialAccuracies();
 });
 
-// Home button
 homeBtn.addEventListener('click', function() {
   window.location.href = 'main.html';
 });

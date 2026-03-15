@@ -476,6 +476,8 @@ display: block;
     const feedback = document.getElementById('feedback');
     const questionHolder = document.getElementById('questionHolder');
     const nextQuestion = document.getElementById('nextQuestionBtn');
+    const endSession = document.getElementById('endSession');
+    
     let orderedTopicsList = [];
     let currentTopicIndex = 0;
     let currentTopicId = null;
@@ -727,13 +729,7 @@ const supabaseClient = supabase.createClient(
         feedback.style.display = 'block';
         return;
       }
-       //check if the current question is completed
-      if (currentQuestionResolved){
-          feedback.textContent = 'This question has been answered.';
-          feedback.className = 'feedback incorrect';
-          feedback.style.display = 'block';
-          return;
-      }
+      
       const userAnswer = answerBox.value.trim().toLowerCase();
       if (!userAnswer) {
         feedback.textContent = 'Please enter an answer';
@@ -756,20 +752,22 @@ const supabaseClient = supabase.createClient(
         
         await updateTopicPerformance(topicId, student_id, true);
       } else {
-              console.log(currentQuestionAttempt)
-              if (currentQuestionsAttempt === 3); {
-                feedback.textContent = `Incorrect answer is ${currentQuestion.correct_answer}`;
-                nextQuestion.classList.remove('hidden')
-              }
-              
-              else {  
-                feedback.textContent = `Incorrect`;
-                currentQuestionAttempt++;
-                feedback.className = 'feedback incorrect';
-                incorrectCount++;
-                numIncorrect.textContent = incorrectCount;
-                await updateTopicPerformance(topicId, student_id, false);
-              }
+        console.log(currentQuestionAttempts);
+        if (currentQuestionAttempts === 2) {
+          feedback.textContent = `Incorrect. The correct answer is ${currentQuestion.correct_answer}`;
+          feedback.className = 'feedback incorrect';
+          nextQuestion.classList.remove('hidden');
+          incorrectCount++;
+          numIncorrect.textContent = incorrectCount;
+          await updateTopicPerformance(topicId, student_id, false);
+        } else {  
+          feedback.textContent = `Incorrect. Try again. Attempt ${currentQuestionAttempts + 1} of 3`;
+          feedback.className = 'feedback incorrect';
+          currentQuestionAttempts++;
+          incorrectCount++;
+          numIncorrect.textContent = incorrectCount;
+          await updateTopicPerformance(topicId, student_id, false);
+        }
       }
       
       feedback.style.display = 'block';
@@ -916,7 +914,7 @@ const supabaseClient = supabase.createClient(
     }
       
     document.addEventListener('DOMContentLoaded', async function () {
-      nextQuestion.classList.remove('hidden');
+      nextQuestion.classList.add('hidden');
       
       await getInitialAccuracies();
       await fetchQuestion();
@@ -940,7 +938,7 @@ const supabaseClient = supabase.createClient(
         nextQuestion.classList.add('hidden');
         
         currentQuestionAttempts = 0;
-        currentQuestionResolved = false;
+        
         if(sessionQuestions.length === 0){
           if (selectedTopicId) {
             sessionQuestions = await getQuestion(selectedTopicId);

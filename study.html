@@ -914,7 +914,7 @@ endSession.addEventListener('click', async function() {
 const { data: weaknesses } = await supabaseClient
   .from('weaknesses')
   .select('topic_id')
-  .eq('student_id', student_i
+  .eq('student_id', student_id)
   
   // Create an object of accuracies
   let currentAccuracies = {};

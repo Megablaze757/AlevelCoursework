@@ -71,6 +71,27 @@
             <div id='topicsList'></div>
         </div>
     </div>
+    <div class='styleContainer'>
+    <div class='styleBox'>
+        <h2>Select Your Learning Style</h2>
+        <div class='radioGroup'>
+            <div>
+                <input type='radio' id='styleFill' name='learningStyle' value='fill_blanks'>
+                <label for='styleFill'>Fill in the Blanks</label>
+            </div>
+            <div>
+                <input type='radio' id='styleMultiple' name='learningStyle' value='multiple_choice'>
+                <label for='styleMultiple'>Multiple Choice</label>
+            </div>
+            <div>
+                <input type='radio' id='styleExplanation' name='learningStyle' value='explanation'>
+                <label for='styleExplanation'>Long Explanation</label>
+            </div>
+        </div>
+        <button id='confirmStyleBtn' class='confirmButton'>Confirm Learning Style</button>
+        <div id='styleMessage' class='styleMessage'></div>
+    </div>
+    </div>
 
     <script>    
         const supabase_url = 'https://pxjndwrkafegopsolnde.supabase.co'

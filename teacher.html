@@ -7,63 +7,55 @@
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body>
-    <!-- Class Selection for Teachers -->
-    <div>
-        <label for="classSelect">Select Class:</label>
-        <select id="classSelect">
-            <option value="">Loading classes...</option>
-        </select>
-        <button id="loadClassBtn">View Class Analytics</button>
-        <div id="classMessage"></div>
-    </div>
-    
+ <!-- Class Selection for Teachers -->
+<div>
+    <label for="classSelect">Select Class:</label>
+    <select id="classSelect">
+        <option value="">Loading classes...</option>
+    </select>
+    <button id="loadClassBtn">View Class Analytics</button>
+    <div id="classMessage"></div>
+</div>
     <script>
         const supabaseClient = supabase.createClient(
             'https://pxjndwrkafegopsolnde.supabase.co',
             'sb_publishable_eOUJ3K3GNczOncszRwYhyA_A1QAw72F'
         );
-        let teacherId = 'TeacherTest'
+      let teacherId = 'TeacherTest'
 
-        async function loadClassesData() {
-            try {
-                // Get teacher's school from userinfo
-                const { data: teacherInfo, error: teacherError } = await supabaseClient
-                    .from('userinfo')
-                    .select('school')
-                    .eq('username', teacherId)
-                    .eq('user_type', 'teacher')
-                    .single();
-                
-                if (teacherError) throw teacherError;
+      async function loadClassesData(){
+        //  Get teacher's school from userinfo
+        const { data: teacherInfo, error: teacherError } = await supabaseClient
+          .from('userinfo')
+          .select('school')
+          .eq('username', teacherId)
+          .eq('user_type', 'teacher')
+          .single();
+        
+        // Get classes for that school
+        const { data: classes, error: classesError } = await supabaseClient
+          .from('classes')
+          .select('class_code, class_name')
+          .eq('school', teacherInfo.school)
+          .order('class_name')
+        // Populate the dropdown
+        const classSelect = document.getElementById('classSelect');
+        classSelect.innerHTML = '<option value="">Select a class...</option>';
 
-                // Get classes for that school
-                const { data: classes, error: classesError } = await supabaseClient
-                    .from('classes')
-                    .select('class_code, class_name')
-                    .eq('school', teacherInfo.school)
-                    .order('class_name');
-                
-              
-
-                // Populate the dropdown
-                const classSelect = document.getElementById('classSelect');
-                
-                if (classes && classes.length > 0) {
-                    classSelect.innerHTML = '<option value="">Select a class...</option>';
-                    classes.forEach(cls => {
-                        const option = document.createElement('option');
-                        option.value = cls.class_code;
-                        option.textContent = cls.class_name || `Class ${cls.class_code}`;
-                        classSelect.appendChild(option);
-                    });
-                } else {
-                    classSelect.innerHTML = '<option value="">No classes available for your school</option>';
-                }
-            }
+        if (classes && classes.length > 0) {
+            classes.forEach(cls => {
+                const option = document.createElement('option');
+                option.value = cls.class_code;
+                option.textContent = cls.class_name || `Class ${cls.class_code}`;
+                classSelect.appendChild(option);
+            });
+        } else {
+            classSelect.innerHTML = '<option value="">No classes available for your school</option>';
         }
+      } // <-- Added missing closing brace here
 
-        // Call the function when the page loads
-        document.addEventListener('DOMContentLoaded', loadClassesData);
+      // Call the function
+      loadClassesData();
     </script>
 </body>
 </html>

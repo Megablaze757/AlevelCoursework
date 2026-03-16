@@ -63,13 +63,14 @@
             totalQuestions += p.questions_attempted || 0;
             totalCorrect += p.questions_correct || 0;
 
-        //Calculate Incorrect and Accuracy.
-        const totalIncorrect = totalQuestions - totalCorrect;
-        const totalAccuracy = totalQuestions > 0 ? Math.round((totalCorrect/totalQuestions) * 100) : 0;
+
                                   
 
   
         });
+                //Calculate Incorrect and Accuracy.s
+        const totalIncorrect = totalQuestions - totalCorrect;
+        const totalAccuracy = totalQuestions > 0 ? Math.round((totalCorrect/totalQuestions) * 100) : 0;
         console.log('total Questions ', totalQuestions);
         console.log('total correct ', totalCorrect)
         console.log('total incorrect ', totalIncorrect)

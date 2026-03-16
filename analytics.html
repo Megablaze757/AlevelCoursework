@@ -18,13 +18,18 @@
             padding: 20px;
             background: white;
         }
+        .backButton {
+            margin-bottom: 10px;
+            padding: 5px 10px;
+            cursor: pointer;
+        }
     </style>
 </head>
 <body>    
-    <button href='/main'>Back to home</button>
     <!--Topic stats display -->
     <div class='statsContainer'>
         <div class='statsBox'>
+            <button class='backButton' id='backToHome' style='display:none;'>← Back to Overall</button>
             <h2 id="topicName">Overall Performance</h2>
             <div style="margin-top: 20px;">
                 <div>
@@ -104,10 +109,13 @@
             document.getElementById('totalQuestions').textContent = totalQuestions;
             document.getElementById('correct').textContent = totalCorrect;
             document.getElementById('incorrect').textContent = totalIncorrect;
+            document.getElementById('topicName').textContent = 'Overall Performance';
+            document.getElementById('backToHome').style.display = 'none';
         };
 
         async function loadStrengths() {
             const strengthsList = document.getElementById('strengthsList');
+            strengthsList.innerHTML = '';
             
             const{data: strengths, error} = await supabaseClient
                 .from('strengths')
@@ -124,6 +132,7 @@
         
         async function loadWeaknesses() {
             const weaknessesList = document.getElementById('weaknessesList');
+            weaknessesList.innerHTML = '';
             
             const{data: weaknesses, error} = await supabaseClient
                 .from('weaknesses')
@@ -140,6 +149,7 @@
         
         async function loadTopicStats(topicId, topicName){
             document.getElementById('topicName').textContent = topicName;
+            document.getElementById('backToHome').style.display = 'inline-block';
   
             const {data: topicPerf} = await supabaseClient
                 .from('topic_performance')
@@ -186,6 +196,10 @@
                 });
             });
         }
+        
+        document.getElementById('backToHome').addEventListener('click', function() {
+            loadOverallStats();
+        });
             
         document.addEventListener('DOMContentLoaded', function() {
             loadOverallStats(); 

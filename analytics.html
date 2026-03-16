@@ -63,12 +63,13 @@
 
         //Calculate Incorrect and Accuracy.
         const totalIncorrect = totalQuestion - totalCorrect;
-        const accuracy = totalQuestions > 0 ? Math.round((totalCorrect/totalQuestions) * 100)
+        const accuracy = totalQuestions > 0 ? Math.round((totalCorrect/totalQuestions) * 100) : 0;
+                                  
 
-        console.log('total Questions', totalQuestions);
-        console.log('total Questions', totalQuestions)
-        console.log('total Questions', totalQuestions)
-        console.log('total Questions', totalQuestions)
+        console.log('total Questions ', totalQuestions);
+        console.log('total correct ', totalCorrect)
+        console.log('total incorrect ', totalIncorrect)
+        console.log('total accuracy ', totalAccuracy)
             
         });
 

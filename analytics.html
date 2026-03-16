@@ -215,9 +215,16 @@
                 });
             });
         }
-        //load the current sty
+        
         async function updateCurrentStyle() {
             const selectedStyle = document.querySelector('input[name="learningStyle"]:checked');
+            if (!selectedStyle) {
+                document.getElementById('styleMessage').textContent = 'Please select a learning style';
+                return;
+            }
+            
+            const styleValue = selectedStyle.value;
+            
             // Check if record exists
             const { data: existing } = await supabaseClient
                 .from('adaptive_settings')
@@ -233,9 +240,27 @@
                         difficulty_adjustment: 0 
                     })
                     .eq('student_id', studentId);
-            
+                    
+                if (!error) {
+                    document.getElementById('styleMessage').textContent = 'Learning style updated successfully!';
+                }
+            } else {
+                // Insert new record
+                const { error } = await supabaseClient
+                    .from('adaptive_settings')
+                    .insert({ 
+                        student_id: studentId,
+                        preferred_style: styleValue,
+                        difficulty_adjustment: 0 
+                    });
+                    
+                if (!error) {
+                    document.getElementById('styleMessage').textContent = 'Learning style saved successfully!';
+                }
+            }
         }
-        document.getElementById('confirmStyleButton').addEventListener('click', updateCurrentStyle());
+        
+        document.getElementById('confirmStyleBtn').addEventListener('click', updateCurrentStyle);
         
         document.getElementById('backToHome').addEventListener('click', function() {
             window.location.href = 'main.html';

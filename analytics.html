@@ -76,15 +76,15 @@
         <h2>Select Your Learning Style</h2>
         <div class='radioGroup'>
             <div>
-                <input type='radio' id='styleFill' name='learningStyle' value='fill_blanks'>
+                <input type='radio' id='styleFill' name='learningStyle' value='fill in the blank'>
                 <label for='styleFill'>Fill in the Blanks</label>
             </div>
             <div>
-                <input type='radio' id='styleMultiple' name='learningStyle' value='multiple_choice'>
+                <input type='radio' id='styleMultiple' name='learningStyle' value='multiple choice'>
                 <label for='styleMultiple'>Multiple Choice</label>
             </div>
             <div>
-                <input type='radio' id='styleExplanation' name='learningStyle' value='explanation'>
+                <input type='radio' id='styleExplanation' name='learningStyle' value='long explanation'>
                 <label for='styleExplanation'>Long Explanation</label>
             </div>
         </div>
@@ -215,6 +215,27 @@
                 });
             });
         }
+        //load the current sty
+        async function updateCurrentStyle() {
+            const selectedStyle = document.querySelector('input[name="learningStyle"]:checked');
+            // Check if record exists
+            const { data: existing } = await supabaseClient
+                .from('adaptive_settings')
+                .select('student_id')
+                .eq('student_id', studentId);
+            
+            if (existing && existing.length > 0) {
+                // Update existing record
+                const { error } = await supabaseClient
+                    .from('adaptive_settings')
+                    .update({ 
+                        preferred_style: styleValue,
+                        difficulty_adjustment: 0 
+                    })
+                    .eq('student_id', studentId);
+            
+        }
+        document.getElementById('confirmStyleButton').addEventListener('click', updateCurrentStyle());
         
         document.getElementById('backToHome').addEventListener('click', function() {
             window.location.href = 'main.html';

@@ -46,9 +46,9 @@
 
     //Function to load overall stats
     async function loadOverallStats() {
-        const{data: perfomance} = await suSpabaseClient
-            .from('topic_performance');
-            .select(*);
+        const{data: perfomance} = await supabaseClient
+            .from('topic_performance')
+            .select('*')
             .eq('student_id', studentId);
         console.log(performance);
 

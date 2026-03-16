@@ -1,598 +1,346 @@
 <!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Analytics Dashboard</title>
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<html>
+  <head>
     <style>
-        /* reset all styles to default */
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+      
+      /* reset all styles to default */
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+      
+      /* Nav Bar Styles*/
+      
+      /* set Nav bar colour to blue and add some padding */
+      .navbar {
+        background-color: #023e8A;
+        padding: 1rem 2rem;
+        
+      }
+      
+      /* Make sure content won't stretch to wide and aligns all items to the center */ 
+      .navContainer {
+        max-width: 1200px;
+        margin: 0 auto;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
 
-        body {
-            font-family: Arial, sans-serif;
-            background-color: #f5f5f5;
-        }
+      /* Switch menu styles */
 
-        /* Nav Bar Styles from main.html */
-        .navbar {
-            background-color: #023e8A;
-            padding: 1rem 2rem;
-        }
+      /* Creates the pill shaped container on transparent background */
+      .switchMenu {
+        position: relative;
+        display: flex;
+        background-color: rgba(255,255,255,0.2);
+        border-radius: 40px;
+        padding: 5px;
+        width: 240px;
+        cursor: pointer;
+      
+      }
 
-        .navContainer {
-            max-width: 1200px;
-            margin: 0 auto;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
+      /* Styling of each option */
+      
 
-        /* Switch menu styles from main.html */
-        .switchMenu {
-            position: relative;
-            display: flex;
-            background-color: rgba(255,255,255,0.2);
-            border-radius: 40px;
-            padding: 5px;
-            width: 240px;
-            cursor: pointer;
-        }
+      .switchOption {
+        flex: 1;
+        text-align: center;
+        padding: 10px 20px;
+        color: white;
+        font-size: 15px;
+        font-weight: 500;
+        transition: color 0.3s ease;
+        z-index: 1;
+        position: relative;
+        cursor: pointer;
+      }
 
-        .switchOption {
-            flex: 1;
-            text-align: center;
-            padding: 10px 20px;
-            color: white;
-            font-size: 15px;
-            font-weight: 500;
-            transition: color 0.3s ease;
-            z-index: 1;
-            position: relative;
-            cursor: pointer;
-        }
+      /* Create the moving white slider */
 
-        .switchSlider {
-            position: absolute;
-            top: 5px;
-            left: 5px;
-            width: calc(50% - 5px);
-            height: calc(100% - 10px);
-            background-color: white;
-            border-radius: 30px;
-            transition: transform 0.3s ease;
-            pointer-events: none;
-        }
+      .switchSlider {
+        position: absolute;
+        top: 5px;
+        left: 5px;
+        width: calc(50% - 5px);
+        height: calc(100% - 10px);
+        background-color: white;
+        border-radius: 30px;
+        transition: transform 0.3s ease;
+        pointer-events: none;
+      }
+      /* Code to move the slider when option 2 is clicked */
 
-        .switchMenu.option2 .switchSlider {
-            transform: translateX(calc(100% + 0px));
-        }
+      .switchMenu.option2 .switchSlider {
+        transform: translateX(calc(100% + 0px));
+        
+      }
+      /* Topic Header CSS */
+        /* Create Header Container white and Correct size */
+      .topicsHeader {
+        background-color: white;
+        padding: 1rem 2rem;
+        margin: 1rem auto;
+        max-width: 1200px;
+        border-radius: 8px;
+      }
 
-        /* Main container for 3 columns */
-        .dashboardContainer {
-            display: flex;
-            max-width: 1400px;
-            margin: 20px auto;
-            padding: 0 20px;
-            gap: 20px;
-            min-height: calc(100vh - 100px);
-        }
+      /* Text for topic header Styles */
 
-        /* Left Column - Topics List */
-        .leftColumn {
-            width: 250px;
-            background: white;
-            border-radius: 8px;
-            padding: 15px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-        }
+      .topicsHeader h2 {
+        color: #1e293b;
+        font-size: 1.5rem;
+        font-weight: 600;
+        margin-bottom: 0.5rem;
+        
+      }
 
-        .leftColumn h3 {
-            color: #1e293b;
-            margin-bottom: 15px;
-            padding-bottom: 10px;
-            border-bottom: 2px solid #023e8A;
-        }
+      /* Underline */
 
-        .topicsList {
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
-        }
+      .headerUnderline {
+        height: 5px;
+        width: 100%;
+        background-color: #2563eb;
+        border-radius: 2px;
+      }
 
-        .topicItem {
-            padding: 12px;
-            background-color: #f8fafc;
-            border: 1px solid #e2e8f0;
-            border-radius: 6px;
-            cursor: pointer;
-            transition: all 0.2s;
-            font-size: 14px;
-        }
+      /* Topics Container */
+      .topicsContainer {
+        max-width: 1200px;
+        margin: 2rem auto;
+        padding: 0 1rem;
+      }
+      /* Container for the list of topics */
+      .topicsList {
+        display: flex;
+        flex-direction: column;
+        padding: 1rem;
+        gap: 0.75rem;
+      }
+    /* Create The rows for each topic */
+      .topicsRow {
+        display: flex;
+        align-items: center;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        width: 100%;
+        padding: 1rem 1.5rem;
+        background-color: #f8fafc;
+        border: 1px solid #e2e8f0;
+        border-radius: 8px;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        text-align: left;
+      }
 
-        .topicItem:hover {
-            background-color: #e6f0ff;
-            border-color: #023e8A;
-            transform: translateX(5px);
-        }
+      /* Study Now Button Styles */
+      .studyNowContainer {
+        max-width: 1200px;
+        margin: 1rem auto;
+        padding: 0 1rem;
+        display: flex;
+        justify-content: flex-end;
+      }
 
-        .topicItem.allTopics {
-            background-color: #023e8A;
-            color: white;
-            font-weight: bold;
-        }
+      .studyNowBtn {
+        background-color: #023e8A;
+        color: white;
+        padding: 12px 30px;
+        border: none;
+        border-radius: 40px;
+        font-size: 16px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: background-color 0.2s ease;
+      }
 
-        .topicItem.allTopics:hover {
-            background-color: #0353a4;
-        }
-
-        /* Middle Column - Stats */
-        .middleColumn {
-            flex: 1;
-            background: white;
-            border-radius: 8px;
-            padding: 20px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-        }
-
-        .statsHeader {
-            color: #1e293b;
-            margin-bottom: 20px;
-            padding-bottom: 10px;
-            border-bottom: 2px solid #023e8A;
-        }
-
-        .statsCard {
-            background-color: #f8fafc;
-            border: 1px solid #e2e8f0;
-            border-radius: 8px;
-            padding: 20px;
-        }
-
-        .statRow {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 12px 0;
-            border-bottom: 1px solid #e2e8f0;
-        }
-
-        .statRow:last-child {
-            border-bottom: none;
-        }
-
-        .statLabel {
-            font-weight: 600;
-            color: #475569;
-        }
-
-        .statValue {
-            font-size: 18px;
-            font-weight: bold;
-            color: #023e8A;
-        }
-
-        .statValue.large {
-            font-size: 32px;
-            color: #023e8A;
-        }
-
-        /* Right Column - Strengths & Weaknesses */
-        .rightColumn {
-            width: 250px;
-            background: white;
-            border-radius: 8px;
-            padding: 15px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-        }
-
-        .strengthsSection {
-            margin-bottom: 25px;
-        }
-
-        .strengthsSection h3 {
-            color: #059669;
-            margin-bottom: 12px;
-            padding-bottom: 8px;
-            border-bottom: 2px solid #059669;
-        }
-
-        .weaknessesSection h3 {
-            color: #dc2626;
-            margin-bottom: 12px;
-            padding-bottom: 8px;
-            border-bottom: 2px solid #dc2626;
-        }
-
-        .strengthItem, .weaknessItem {
-            padding: 10px;
-            margin-bottom: 8px;
-            border-radius: 6px;
-            font-size: 13px;
-            cursor: pointer;
-            transition: all 0.2s;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .strengthItem {
-            background-color: #ecfdf5;
-            border: 1px solid #a7f3d0;
-        }
-
-        .strengthItem:hover {
-            background-color: #d1fae5;
-            transform: translateX(-5px);
-        }
-
-        .weaknessItem {
-            background-color: #fef2f2;
-            border: 1px solid #fecaca;
-        }
-
-        .weaknessItem:hover {
-            background-color: #fee2e2;
-            transform: translateX(-5px);
-        }
-
-        .itemAccuracy {
-            font-weight: bold;
-            font-size: 12px;
-            padding: 2px 6px;
-            border-radius: 12px;
-            background: white;
-        }
-
-        .noData {
-            color: #94a3b8;
-            font-style: italic;
-            padding: 10px;
-            text-align: center;
-            font-size: 13px;
-        }
-
-        .backLink {
-            color: white;
-            text-decoration: none;
-            font-size: 14px;
-            opacity: 0.9;
-        }
-
-        .backLink:hover {
-            opacity: 1;
-            text-decoration: underline;
-        }
+      .studyNowBtn:hover {
+        background-color: #0353a4;
+      }
+      
     </style>
-</head>
-<body>
-    <!-- Navbar from main.html -->
-    <nav class="navbar">
-        <div class="navContainer">
-            <div class="switchMenu">
-                <div class="switchOption" data-option="option1">Study Now</div>
-                <div class="switchOption active" data-option="option2">View Analytics</div>
-                <div class="switchSlider"></div>
-            </div>
-            <a href="main.html" class="backLink">← Back to Topics</a>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  </head>
+  <body>
+
+    <nav class='navbar'>
+      <div class='navContainer'>
+        <div class='switchMenu'>
+          <div class='switchOption active' data-option='option1'>Study Now</div>
+          <div class='switchOption' data-option='option2'>View Analytics</div>
+          <div class='switchSlider'></div>
         </div>
+      </div>
     </nav>
 
-    <!-- Main 3-column dashboard -->
-    <div class="dashboardContainer">
-        <!-- LEFT COLUMN - Topics List -->
-        <div class="leftColumn">
-            <h3>Topics</h3>
-            <div class="topicsList" id="topicsList">
-                <div class="topicItem allTopics" id="allTopicsBtn">All Topics</div>
-                <!-- Other topics will be loaded here -->
-            </div>
-        </div>
-
-        <!-- MIDDLE COLUMN - Stats -->
-        <div class="middleColumn">
-            <h2 class="statsHeader" id="statsHeader">Overall Performance</h2>
-            
-            <!-- Overall Stats (visible by default) -->
-            <div id="overallStats">
-                <div class="statsCard">
-                    <div class="statRow">
-                        <span class="statLabel">Total Accuracy:</span>
-                        <span class="statValue large" id="overallAccuracy">0%</span>
-                    </div>
-                    <div class="statRow">
-                        <span class="statLabel">Total Questions:</span>
-                        <span class="statValue" id="totalQuestions">0</span>
-                    </div>
-                    <div class="statRow">
-                        <span class="statLabel">Correct Answers:</span>
-                        <span class="statValue" id="totalCorrect">0</span>
-                    </div>
-                    <div class="statRow">
-                        <span class="statLabel">Incorrect Answers:</span>
-                        <span class="statValue" id="totalIncorrect">0</span>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Topic Stats (hidden by default) -->
-            <div id="topicStats" style="display: none;">
-                <div class="statsCard">
-                    <div class="statRow">
-                        <span class="statLabel">Topic Accuracy:</span>
-                        <span class="statValue large" id="topicAccuracy">0%</span>
-                    </div>
-                    <div class="statRow">
-                        <span class="statLabel">Questions Attempted:</span>
-                        <span class="statValue" id="topicAttempted">0</span>
-                    </div>
-                    <div class="statRow">
-                        <span class="statLabel">Correct:</span>
-                        <span class="statValue" id="topicCorrect">0</span>
-                    </div>
-                    <div class="statRow">
-                        <span class="statLabel">Incorrect:</span>
-                        <span class="statValue" id="topicIncorrect">0</span>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- RIGHT COLUMN - Strengths & Weaknesses -->
-        <div class="rightColumn">
-            <div class="strengthsSection">
-                <h3>Strengths</h3>
-                <div id="strengthsList">
-                    <div class="noData">Loading strengths...</div>
-                </div>
-            </div>
-            
-            <div class="weaknessesSection">
-                <h3>Weaknesses</h3>
-                <div id="weaknessesList">
-                    <div class="noData">Loading weaknesses...</div>
-                </div>
-            </div>
-        </div>
+    <!-- Study Now Button -->
+    <div class="studyNowContainer">
+      <button class="studyNowBtn" id="studyNowBtn">Study Now</button>
+    </div>
+    
+    <!-- Topic Header Container -->
+    <div class='topicsHeader'>
+      <h2>
+        Topics
+      </h2>
+      <div class='headerUnderline'>
+        
+      </div>
+    </div>
+    <!-- Topics Container -->
+    <div class='topicsContainer'>
+      <div class='topicsList' id='topicsList'>
+      
+      </div>
     </div>
 
     <script>
-        // Supabase connection
-        const supabaseClient = supabase.createClient(
-            'https://pxjndwrkafegopsolnde.supabase.co',
-            'sb_publishable_eOUJ3K3GNczOncszRwYhyA_A1QAw72F'
-        );
 
-        const student_id = 'StudentTest';
-        let allTopics = [];
-        let allPerformances = [];
-        let strengthsList = [];
-        let weaknessesList = [];
+  // The supabase url
+  const supabase_url = 'https://pxjndwrkafegopsolnde.supabase.co'
+  // Supabase key
+  const supabase_key = 'sb_publishable_eOUJ3K3GNczOncszRwYhyA_A1QAw72F'
+  // Initialize supabase client
+  const supabaseClient = supabase.createClient(
+    'https://pxjndwrkafegopsolnde.supabase.co',
+    'sb_publishable_eOUJ3K3GNczOncszRwYhyA_A1QAw72F'
+  );
 
-        // Load everything when page opens
-        document.addEventListener('DOMContentLoaded', async function() {
-            await loadData();
-            setupNavbar();
-            setupAllTopicsButton();
+  // Fetch topics from the database
+  async function fetchTopics() {
+    try {
+      const { data: topics, error } = await supabaseClient
+        .from('topics')
+        .select('*')  // Select all columns to get topic_id and topic_name
+        
+      if (error) {
+        console.error('Error fetching topics:', error);
+        return;
+      }
+      
+      console.log('Fetched topics:', topics); // Debug: see what data comes back
+      displayTopics(topics);
+      
+    } catch (err) {
+      console.error('Error:', err);
+    }
+  }
+// Create a function to make the button on click go to study.html
+//Also store topicName in session storage to access questions on that topic
+
+async function topicButtons() {
+    // Get all topic rows
+    const topicRows = document.querySelectorAll('.topicsRow');
+    
+    topicRows.forEach(row => {
+        row.addEventListener('click', function() {
+            // Get topic name from the span with class 'topicName'
+            const topicName = this.querySelector('.topicName').textContent;
+            
+            // Store topic name in session storage
+            sessionStorage.setItem('selectedTopic', topicName);
+            
+            // Redirect to study.html after 1.5 seconds
+            setTimeout(() => {
+                window.location.href = 'study.html';
+            }, 1500);
         });
+    });
+}
 
-        async function loadData() {
-            // Get all topics
-            const { data: topics } = await supabaseClient
-                .from('topics')
-                .select('*');
-            
-            // Get performance data for this student
-            const { data: performances } = await supabaseClient
-                .from('topic_performance')
-                .select('*')
-                .eq('student_id', student_id);
+  // Function to display topics
+  function displayTopics(topics) {
+    const topicsGrid = document.getElementById('topicsList');
+    
+    // Clear any existing content
+    topicsGrid.innerHTML = '';
+    
+    // Check if topics exist
+    if (!topics || topics.length === 0) {
+      topicsGrid.innerHTML = '<div class="topicsRow">No topics found</div>';
+      return;
+    }
+    
+    // Loop through topics and create rows
+    topics.forEach(topic => {
+      const row = createTopicRow(topic);
+      topicsGrid.appendChild(row);
+    });
+  }
 
-            // Get strengths
-            const { data: strengths } = await supabaseClient
-                .from('strengths')
-                .select('topic_id')
-                .eq('student_id', student_id);
+  // Function to create the Row - MOVED OUTSIDE displayTopics
+  function createTopicRow(topic) {
+    // Create the Button
+    const row = document.createElement('button');
+    row.className = 'topicsRow';
+    row.setAttribute('data-topic-id', topic.topic_id || '');
+    
+    // Add click handler to the button
+    row.addEventListener('click', function() {
+      const topicName = topic.topic_name || 'Unnamed Topic';
+      sessionStorage.setItem('selectedTopic', topicName);
+      setTimeout(() => {
+        window.location.href = 'study.html';
+      }, 1500);
+    });
+    
+    // Build the HTML inside the row
+    row.innerHTML = `
+      <div style="flex: 1; text-align: left;">
+        <div class="topicName">${topic.topic_name || 'Unnamed Topic'}</div>
+      </div>
+      <div style="color: #64748b; font-size: 0.9rem;">▶</div>
+    `;
+    
+    return row;
+  }
 
-            // Get weaknesses
-            const { data: weaknesses } = await supabaseClient
-                .from('weaknesses')
-                .select('topic_id')
-                .eq('student_id', student_id);
+  // Wait for the DOM to be fully loaded
+  document.addEventListener('DOMContentLoaded', function() {
+    console.log('DOM loaded, fetching topics...');
+    fetchTopics();
 
-            allTopics = topics || [];
-            allPerformances = performances || [];
-            strengthsList = strengths || [];
-            weaknessesList = weaknesses || [];
+    // Study Now button functionality
+    const studyNowBtn = document.getElementById('studyNowBtn');
+    if (studyNowBtn) {
+      studyNowBtn.addEventListener('click', function() {
+        // Set selectedTopic to null for adaptive learning
+        sessionStorage.setItem('selectedTopic', 'null');
+        
+        // Redirect to study.html
+        window.location.href = 'study.html';
+      });
+    }
+    
+    // Switch menu functionality
+    const switchMenu = document.querySelector('.switchMenu');
+    const switchOptions = document.querySelectorAll('.switchOption');
 
-            // Display topics in left column
-            displayTopicsList(allTopics);
-            
-            // Calculate and display overall stats
-            calculateOverallStats(allPerformances);
-            
-            // Display strengths and weaknesses
-            displayStrengthsWeaknesses();
-        }
+    if (switchOptions.length > 0) {
+      switchOptions.forEach(option => {
+        option.addEventListener('click', function() {
+          const selectedOption = this.dataset.option;
+          
+          // Remove 'active' class from all options
+          switchOptions.forEach(opt => opt.classList.remove('active'));
 
-        function displayTopicsList(topics) {
-            const topicsDiv = document.getElementById('topicsList');
-            
-            // Keep the "All Topics" button that's already in HTML
-            // Add each topic below it
-            topics.forEach(topic => {
-                const topicDiv = document.createElement('div');
-                topicDiv.className = 'topicItem';
-                topicDiv.textContent = topic.topic_name;
-                
-                // Show topic stats when clicked
-                topicDiv.onclick = function() {
-                    showTopicStats(topic);
-                };
-                
-                topicsDiv.appendChild(topicDiv);
-            });
-        }
+          // Add active class to the selected option
+          this.classList.add('active');
 
-        function calculateOverallStats(performances) {
-            let totalQuestions = 0;
-            let totalCorrect = 0;
-            
-            performances.forEach(p => {
-                totalQuestions += p.questions_attempted || 0;
-                totalCorrect += p.questions_correct || 0;
-            });
-            
-            const totalIncorrect = totalQuestions - totalCorrect;
-            const overallAccuracy = totalQuestions > 0 
-                ? Math.round((totalCorrect / totalQuestions) * 100) 
-                : 0;
-            
-            // Update the display
-            document.getElementById('overallAccuracy').textContent = overallAccuracy + '%';
-            document.getElementById('totalQuestions').textContent = totalQuestions;
-            document.getElementById('totalCorrect').textContent = totalCorrect;
-            document.getElementById('totalIncorrect').textContent = totalIncorrect;
-        }
-
-        function setupAllTopicsButton() {
-            const allTopicsBtn = document.getElementById('allTopicsBtn');
-            allTopicsBtn.onclick = function() {
-                showOverallStats();
-            };
-        }
-
-        function showOverallStats() {
-            document.getElementById('statsHeader').textContent = 'Overall Performance';
-            document.getElementById('overallStats').style.display = 'block';
-            document.getElementById('topicStats').style.display = 'none';
-        }
-
-        function showTopicStats(topic) {
-            // Find performance for this topic
-            const performance = allPerformances.find(p => p.topic_id === topic.topic_id) || {
-                questions_attempted: 0,
-                questions_correct: 0,
-                accuracy_percent: 0
-            };
-            
-            const attempted = performance.questions_attempted || 0;
-            const correct = performance.questions_correct || 0;
-            const incorrect = attempted - correct;
-            const accuracy = performance.accuracy_percent || 0;
-            
-            // Update header and stats
-            document.getElementById('statsHeader').textContent = topic.topic_name;
-            document.getElementById('topicAccuracy').textContent = Math.round(accuracy) + '%';
-            document.getElementById('topicAttempted').textContent = attempted;
-            document.getElementById('topicCorrect').textContent = correct;
-            document.getElementById('topicIncorrect').textContent = incorrect;
-            
-            // Show topic stats, hide overall stats
-            document.getElementById('overallStats').style.display = 'none';
-            document.getElementById('topicStats').style.display = 'block';
-        }
-
-        function displayStrengthsWeaknesses() {
-            const strengthsDiv = document.getElementById('strengthsList');
-            const weaknessesDiv = document.getElementById('weaknessesList');
-            
-            // Create maps for quick lookup
-            const strengthMap = new Map();
-            strengthsList.forEach(s => strengthMap.set(s.topic_id, true));
-            
-            const weaknessMap = new Map();
-            weaknessesList.forEach(w => weaknessMap.set(w.topic_id, true));
-            
-            // Clear and populate strengths
-            strengthsDiv.innerHTML = '';
-            let hasStrengths = false;
-            
-            allTopics.forEach(topic => {
-                if (strengthMap.has(topic.topic_id)) {
-                    hasStrengths = true;
-                    const perf = allPerformances.find(p => p.topic_id === topic.topic_id);
-                    const accuracy = perf ? perf.accuracy_percent : 0;
-                    
-                    const item = document.createElement('div');
-                    item.className = 'strengthItem';
-                    item.innerHTML = `
-                        <span>${topic.topic_name}</span>
-                        <span class="itemAccuracy">${Math.round(accuracy)}%</span>
-                    `;
-                    
-                    item.onclick = function() {
-                        showTopicStats(topic);
-                    };
-                    
-                    strengthsDiv.appendChild(item);
-                }
-            });
-            
-            if (!hasStrengths) {
-                strengthsDiv.innerHTML = '<div class="noData">No strengths yet</div>';
-            }
-            
-            // Clear and populate weaknesses
-            weaknessesDiv.innerHTML = '';
-            let hasWeaknesses = false;
-            
-            allTopics.forEach(topic => {
-                if (weaknessMap.has(topic.topic_id)) {
-                    hasWeaknesses = true;
-                    const perf = allPerformances.find(p => p.topic_id === topic.topic_id);
-                    const accuracy = perf ? perf.accuracy_percent : 0;
-                    
-                    const item = document.createElement('div');
-                    item.className = 'weaknessItem';
-                    item.innerHTML = `
-                        <span>${topic.topic_name}</span>
-                        <span class="itemAccuracy">${Math.round(accuracy)}%</span>
-                    `;
-                    
-                    item.onclick = function() {
-                        showTopicStats(topic);
-                    };
-                    
-                    weaknessesDiv.appendChild(item);
-                }
-            });
-            
-            if (!hasWeaknesses) {
-                weaknessesDiv.innerHTML = '<div class="noData">No weaknesses</div>';
-            }
-        }
-
-        function setupNavbar() {
-            const switchMenu = document.querySelector('.switchMenu');
-            const switchOptions = document.querySelectorAll('.switchOption');
-
-            switchOptions.forEach(option => {
-                option.addEventListener('click', function() {
-                    const selectedOption = this.dataset.option;
-                    
-                    // Remove active class from all options
-                    switchOptions.forEach(opt => opt.classList.remove('active'));
-                    
-                    // Add active class to the selected option
-                    this.classList.add('active');
-                    
-                    // Move the slider
-                    if (selectedOption === 'option2') {
-                        switchMenu.classList.add('option2');
-                        // Already on analytics page, do nothing
-                    } else {
-                        switchMenu.classList.remove('option2');
-                        // Go to study page
-                        window.location.href = 'main.html';
-                    }
-                });
-            });
-        }
+          // Move the slider
+          if (selectedOption === 'option2') {
+            switchMenu.classList.add('option2');
+          } else {
+            switchMenu.classList.remove('option2');
+          }
+        });
+      });
+    }
+  });
+      
     </script>
-</body>
+  </body>
 </html>

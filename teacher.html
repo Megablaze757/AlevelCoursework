@@ -67,19 +67,19 @@
     async function loadStudents() {
         const classSelect = document.getElementById('classSelect');
         const selectedClass = classSelect.value;
-        const classMessage = document.getElementById('classMessage');
-        const studentSection = document.getElementById('studentSection');
 
         if (!selectedClass || selectedClass === '') {
-            classMessage.textContent = 'Select a class first';
-        return;
+            console.log('No class selected');
+            return;
+        }
+
         // Get all students in this class from the students table
-        const { data: students, error} = await supabaseClient
+        const { data: students, error } = await supabaseClient
             .from('students')
             .select('student_id')
             .eq('class_code', selectedClass);
+        
         console.log(students);
-    }
     }
     
   // Call the function

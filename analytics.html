@@ -50,6 +50,13 @@
         </div>
  </div>
  </div>
+     <div class='strengthsContainer'>
+         <div class='strenghtsBox'>
+             <h2>Strenghts</h2>
+             <div id='strengthsList'>
+         </div>
+         
+     </div>
  </body>
      <Script>
          
@@ -103,6 +110,23 @@
         document.getElementById('incorrect').textContent = totalIncorrect;
 
     };
+    //Function to get strengths and place it in the HTML
+    async function loadStrengths() {
+        //Query Strengths
+        const{data: strengths, error} = await supabaseClient
+            .from('strengths')
+            .select('topics(topic_name)')
+            .eq('student_id', studentId);
+        //Create divs for all the strengths
+        strengths.forEach ( s => {
+            const div = document.createElement('div');
+            div.className = 'strengthItem';
+            div.textContent = s.topics.topic_name;
+            strengthsList.appendChild(div);
+            
+            });
+        
+    }
         
     document.addEventListener('DOMContentLoaded', function() {
        loadOverallStats(); 

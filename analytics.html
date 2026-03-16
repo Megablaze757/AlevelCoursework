@@ -46,12 +46,12 @@
 
     //Function to load overall stats
     async function loadOverallStats() {
-        const{data: perfomance} = await supabaseClient
+        const{data: scores} = await supabaseClient
             .from('topic_performance')
             .select('*')
             .eq('student_id', studentId);
-        console.log(performance);
-        const performance = performance.data;
+        console.log(scores);
+        const performance = scores.data;
 
         //Variables to store totals
         let totalQuestions = 0;

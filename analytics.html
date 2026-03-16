@@ -62,7 +62,7 @@
             totalCorrect += p.questions_correct || 0;
 
         //Calculate Incorrect and Accuracy.
-        const totalIncorrect = totalQuestion - totalCorrect;
+        const totalIncorrect = totalQuestions - totalCorrect;
         const accuracy = totalQuestions > 0 ? Math.round((totalCorrect/totalQuestions) * 100) : 0;
                                   
 

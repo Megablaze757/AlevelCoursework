@@ -61,24 +61,20 @@
     </div>
     <div class='topicsContainer'>
         <div class='topicsBox'>
-            <h2> All topics</h2>
+            <h2>All topics</h2>
             <div id='topicsList'></div>
         </div>
     </div>
 
     <script>    
-        //The supabase url
         const supabase_url = 'https://pxjndwrkafegopsolnde.supabase.co'
-        //Supabase key
         const supabase_key = 'sb_publishable_eOUJ3K3GNczOncszRwYhyA_A1QAw72F'
-        //Initialize supabase client
         const supabaseClient = supabase.createClient(
             'https://pxjndwrkafegopsolnde.supabase.co',
             'sb_publishable_eOUJ3K3GNczOncszRwYhyA_A1QAw72F'
         );
         let studentId = 'StudentTest';
 
-        //Function to load overall stats
         async function loadOverallStats() {
             const{data: scores} = await supabaseClient
                 .from('topic_performance')
@@ -87,18 +83,15 @@
             console.log(scores);
             const performance = scores;
 
-            //Variables to store totals
             let totalQuestions = 0;
             let totalCorrect = 0;
             console.log(performance)
 
-            //Loop through each row
             performance.forEach( p => {
                 totalQuestions += p.questions_attempted || 0;
                 totalCorrect += p.questions_correct || 0;                
             });
             
-            //Calculate Incorrect and Accuracy.
             const totalIncorrect = totalQuestions - totalCorrect;
             const totalAccuracy = totalQuestions > 0 ? Math.round((totalCorrect/totalQuestions) * 100) : 0;
             console.log('total Questions ', totalQuestions);
@@ -106,24 +99,20 @@
             console.log('total incorrect ', totalIncorrect)
             console.log('total accuracy ', totalAccuracy)
 
-            //Update html of elements
             document.getElementById('accuracy').textContent = totalAccuracy + '%';
             document.getElementById('totalQuestions').textContent = totalQuestions;
             document.getElementById('correct').textContent = totalCorrect;
             document.getElementById('incorrect').textContent = totalIncorrect;
         };
 
-        //Function to get strengths and place it in the HTML
         async function loadStrengths() {
             const strengthsList = document.getElementById('strengthsList');
             
-            //Query Strengths
             const{data: strengths, error} = await supabaseClient
                 .from('strengths')
                 .select('topics(topic_name)')
                 .eq('student_id', studentId);
             
-            //Create divs for all the strengths
             strengths.forEach ( s => {
                 const div = document.createElement('div');
                 div.className = 'strengthItem';
@@ -132,17 +121,14 @@
             });
         }
         
-        //Function to get weaknesses and place it in the HTML
         async function loadWeaknesses() {
             const weaknessesList = document.getElementById('weaknessesList');
             
-            //Query weaknesses
             const{data: weaknesses, error} = await supabaseClient
                 .from('weaknesses')
                 .select('topics(topic_name)')
                 .eq('student_id', studentId);
             
-            //Create divs for all the weaknesses
             weaknesses.forEach ( w => {
                 const div = document.createElement('div');
                 div.className = 'weaknessItem';
@@ -150,17 +136,22 @@
                 weaknessesList.appendChild(div);
             });
         }
-        //function to load the topics as buttons
+        
         async function loadTopic(){
+            const topicsList = document.getElementById('topicsList');
+            
             const{data:topics, error} = await supabaseClient
                 .from('topics')
-                .select('topic_name');
-            //Create button for each topic
+                .select('topic_name, topic_id');
+            
+            topicsList.innerHTML = '';
+            
             topics.forEach(topic => {
                 const button = document.createElement('button');
                 button.className = 'topicButton';
                 button.textContent = topic.topic_name;
-                button.setAttribute('data-topic-id', topic.topic_name);
+                button.setAttribute('data-topic-id', topic.topic_id);
+                topicsList.appendChild(button);
             });
         }
             

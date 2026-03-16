@@ -156,32 +156,32 @@
                 button.addEventListener('click', function() {
                     //load and present the stats on the button click
                 
-                    
-         async loadTopicStats(topic.topic_id, topic.topic_name);
-                        const {data: topicPerf} = await supabaseClient
-                                .from('topic_performance')
-                                .select('*')
-                                .eq('student_id', studentId)
-                                .eq('topic_id', topicId);
-                    // Update stats display
-                    document.getElementById('accuracy').textContent = accuracy + '%';
-                    document.getElementById('totalQuestions').textContent = attempted;
-                    document.getElementById('correct').textContent = correct;
-                    document.getElementById('incorrect').textContent = incorrect;
-                    } else {
-                    // if theres no data for this topic
-                    document.getElementById('accuracy').textContent = '0%';
-                    document.getElementById('totalQuestions').textContent = '0';
-                    document.getElementById('correct').textContent = '0';
-                    document.getElementById('incorrect').textContent = '0';
-                    }
-                    )};
+
                 
             });
         }
         async function loadTopicStats(topicId, topicName){
             //Update header
-            document.getElementById('topicName').textContent = topicName
+            document.getElementById('topicName').textContent = topicName;
+  
+            const {data: topicPerf} = await supabaseClient
+                    .from('topic_performance')
+                    .select('*')
+                    .eq('student_id', studentId)
+                        .eq('topic_id', topicId);
+            // Update stats display
+            document.getElementById('accuracy').textContent = accuracy + '%';
+            document.getElementById('totalQuestions').textContent = attempted;
+            document.getElementById('correct').textContent = correct;
+            document.getElementById('incorrect').textContent = incorrect;
+            } else {
+            // if theres no data for this topic
+            document.getElementById('accuracy').textContent = '0%';
+            document.getElementById('totalQuestions').textContent = '0';
+            document.getElementById('correct').textContent = '0';
+            document.getElementById('incorrect').textContent = '0';
+        }
+                    )};
         }
             
         document.addEventListener('DOMContentLoaded', function() {

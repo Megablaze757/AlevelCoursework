@@ -29,7 +29,7 @@
           .from('userinfo')
           .select('school')
           .eq('username', teacherId)
-          .eq('user_type', 'teacher')
+          .eq('user_type', 'Teacher')
           .single();
         
         // Get classes for that school

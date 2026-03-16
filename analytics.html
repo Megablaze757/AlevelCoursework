@@ -149,7 +149,7 @@
             .select('topics(topic_name)')
             .eq('student_id', studentId);
         //Create divs for all the weaknesses
-        strengths.forEach ( w => {
+        strengths.forEach ( s => {
             const div = document.createElement('div');
             div.className = 'weaknessItem';
             div.textContent = s.topics.topic_name;

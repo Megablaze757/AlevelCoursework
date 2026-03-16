@@ -18,26 +18,9 @@
             padding: 20px;
             background: white;
         }
-        .strengthsContainer, .weaknessContainer {
-            margin-top: 20px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-        }
-        .strengthsBox, .weaknessesBox {
-            width: 600px;
-            border: 2px solid black;
-            padding: 20px;
-            background: white;
-        }
-        .strengthItem, .weaknessItem {
-            padding: 5px;
-            margin: 5px 0;
-            border-bottom: 1px solid #eee;
-        }
     </style>
 </head>
-<body>
+<body>    
     <!--Topic stats display -->
     <div class='statsContainer'>
         <div class='statsBox'>
@@ -46,15 +29,15 @@
                 <div>
                     Total Accuracy:
                     <span id="accuracy">0%</span>
-                </div>
+                </div>   
                 <div>
                     Total Questions
                     <span id="totalQuestions">0</span>
-                </div>
+                </div>   
                 <div>
                     Correct Answers
                     <span id="correct">0</span>
-                </div>
+                </div>   
                 <div>
                     Incorrect Answers
                     <span id="incorrect">0</span>
@@ -66,124 +49,107 @@
     <div class='strengthsContainer'>
         <div class='strengthsBox'>
             <h2>Strengths</h2>
-            <div id='strengthsList'></div>
-        </div>
+            <div id='strengthsList'></div> 
+        </div>    
     </div>
     
     <div class='weaknessContainer'>
         <div class='weaknessesBox'>
             <h2>Weaknesses</h2>
-            <div id='weaknessesList'></div>
-        </div>
+            <div id='weaknessesList'></div> 
+        </div>    
     </div>
 
-    <script>
-        // The supabase URL and key
-        const supabase_url = 'https://pxjndwrkafegopsolnde.supabase.co';
-        
-        // Initialize supabase client
+    <script>    
+        //The supabase url
+        const supabase_url = 'https://pxjndwrkafegopsolnde.supabase.co'
+        //Supabase key
+        const supabase_key = 'sb_publishable_eOUJ3K3GNczOncszRwYhyA_A1QAw72F'
+        //Initialize supabase client
         const supabaseClient = supabase.createClient(
-            supabase_url,
+            'https://pxjndwrkafegopsolnde.supabase.co',
             'sb_publishable_eOUJ3K3GNczOncszRwYhyA_A1QAw72F'
         );
-        
         let studentId = 'StudentTest';
 
-        // Function to load overall stats
+        //Function to load overall stats
         async function loadOverallStats() {
-            const { data: scores } = await supabaseClient
+            const{data: scores} = await supabaseClient
                 .from('topic_performance')
                 .select('*')
                 .eq('student_id', studentId);
-            
             console.log(scores);
             const performance = scores;
 
-            // Variables to store totals
+            //Variables to store totals
             let totalQuestions = 0;
             let totalCorrect = 0;
+            console.log(performance)
 
-            // Loop through each row
-            performance.forEach(p => {
+            //Loop through each row
+            performance.forEach( p => {
                 totalQuestions += p.questions_attempted || 0;
-                totalCorrect += p.questions_correct || 0;
+                totalCorrect += p.questions_correct || 0;                
             });
-
-            // Calculate Incorrect and Accuracy
-            const totalIncorrect = totalQuestions - totalCorrect;
-            const totalAccuracy = totalQuestions > 0 ? Math.round((totalCorrect / totalQuestions) * 100) : 0;
             
+            //Calculate Incorrect and Accuracy.
+            const totalIncorrect = totalQuestions - totalCorrect;
+            const totalAccuracy = totalQuestions > 0 ? Math.round((totalCorrect/totalQuestions) * 100) : 0;
             console.log('total Questions ', totalQuestions);
-            console.log('total correct ', totalCorrect);
-            console.log('total incorrect ', totalIncorrect);
-            console.log('total accuracy ', totalAccuracy);
+            console.log('total correct ', totalCorrect)
+            console.log('total incorrect ', totalIncorrect)
+            console.log('total accuracy ', totalAccuracy)
 
-            // Update html of elements
+            //Update html of elements
             document.getElementById('accuracy').textContent = totalAccuracy + '%';
             document.getElementById('totalQuestions').textContent = totalQuestions;
             document.getElementById('correct').textContent = totalCorrect;
             document.getElementById('incorrect').textContent = totalIncorrect;
-        }
+        };
 
-        // Function to get strengths and place it in the HTML
+        //Function to get strengths and place it in the HTML
         async function loadStrengths() {
             const strengthsList = document.getElementById('strengthsList');
             
-            // Clear existing content
-            strengthsList.innerHTML = '';
-            
-            // Query Strengths
-            const { data: strengths, error } = await supabaseClient
+            //Query Strengths
+            const{data: strengths, error} = await supabaseClient
                 .from('strengths')
                 .select('topics(topic_name)')
                 .eq('student_id', studentId);
             
-            if (error) {
-                console.error('Error loading strengths:', error);
-                return;
-            }
-            
-            // Create divs for all the strengths
-            strengths.forEach(s => {
+            //Create divs for all the strengths
+            strengths.forEach ( s => {
                 const div = document.createElement('div');
                 div.className = 'strengthItem';
                 div.textContent = s.topics.topic_name;
                 strengthsList.appendChild(div);
             });
         }
-
-        // Function to get weaknesses and place it in the HTML
+        
+        //Function to get weaknesses and place it in the HTML
         async function loadWeaknesses() {
             const weaknessesList = document.getElementById('weaknessesList');
             
-            // Clear existing content
-            weaknessesList.innerHTML = '';
-            
-            // Query weaknesses
-            const { data: weaknesses, error } = await supabaseClient
+            //Query weaknesses
+            const{data: weaknesses, error} = await supabaseClient
                 .from('weaknesses')
                 .select('topics(topic_name)')
                 .eq('student_id', studentId);
             
-            if (error) {
-                console.error('Error loading weaknesses:', error);
-                return;
-            }
-            
-            // Create divs for all the weaknesses
-            weaknesses.forEach(w => {
+            //Create divs for all the weaknesses
+            weaknesses.forEach ( w => {
                 const div = document.createElement('div');
                 div.className = 'weaknessItem';
                 div.textContent = w.topics.topic_name;
                 weaknessesList.appendChild(div);
             });
         }
-
+            
         document.addEventListener('DOMContentLoaded', function() {
-            loadOverallStats();
+            loadOverallStats(); 
             loadStrengths();
             loadWeaknesses();
         });
     </script>
-</body>
+</body> 
 </html>

@@ -43,7 +43,7 @@
                     .eq('school', teacherInfo.school)
                     .order('class_name');
                 
-                if (classesError) throw classesError;
+              
 
                 // Populate the dropdown
                 const classSelect = document.getElementById('classSelect');
@@ -59,9 +59,6 @@
                 } else {
                     classSelect.innerHTML = '<option value="">No classes available for your school</option>';
                 }
-            } catch (error) {
-                console.error('Error loading classes:', error);
-                document.getElementById('classMessage').textContent = 'Error loading classes: ' + error.message;
             }
         }
 

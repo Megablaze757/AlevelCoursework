@@ -59,6 +59,11 @@
             <div id='weaknessesList'></div> 
         </div>    
     </div>
+    <div class='topicsContainer'>
+        <div class='topicsBox'>
+            <h2> All topics</h2>
+        </div>
+    </div>
 
     <script>    
         //The supabase url
@@ -144,11 +149,25 @@
                 weaknessesList.appendChild(div);
             });
         }
+        //function to load the topics as buttons
+        async function loadTopic(){
+            const{data:topics, error} = await supabaseClient
+                .from('topics')
+                .select('topic_name');
+            //Create button for each topic
+            topics.forEach(topic => {
+                const button = document.createElement('button');
+                button.className = 'topicButton';
+                button.textContent = topic.topic_name;
+                button.setAttribute('data-topic-id', topic.topic_id);
+            });
+        }
             
         document.addEventListener('DOMContentLoaded', function() {
             loadOverallStats(); 
             loadStrengths();
             loadWeaknesses();
+            loadTopic();
         });
     </script>
 </body> 

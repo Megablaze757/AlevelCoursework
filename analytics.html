@@ -155,7 +155,9 @@
 
                 button.addEventListener('click', function() {
                     //load and present the stats on the button click
-                    loadTopicStats(topic.topic_id, topic.topic_name);
+                
+                    
+         async loadTopicStats(topic.topic_id, topic.topic_name);
                         const {data: topicPerf} = await supabaseClient
                                 .from('topic_performance')
                                 .select('*')

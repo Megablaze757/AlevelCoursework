@@ -52,6 +52,26 @@
             .eq('student_id', studentId);
         console.log(performance);
 
+        //Variables to store totals
+        let totalQuestions = 0;
+        let totalCorrect = 0;
+
+        //Loop through each row
+        performances.forEach( => {p
+            totalQuestions += p.questions_attempted || 0;
+            totalCorrect += p.questions_correct || 0;
+
+        //Calculate Incorrect and Accuracy.
+        const totalIncorrect = totalQuestion - totalCorrect;
+        const accuracy = totalQuestions > 0 ? Math.round((totalCorrect/totalQuestions) * 100)
+
+        console.log('total Questions', totalQuestions);
+        console.log('total Questions', totalQuestions)
+        console.log('total Questions', totalQuestions)
+        console.log('total Questions', totalQuestions)
+            
+        });
+
     };
         
     document.addEventListener('DOMContentLoaded', function() {

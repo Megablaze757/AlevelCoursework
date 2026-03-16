@@ -75,7 +75,12 @@
         console.log('total correct ', totalCorrect)
         console.log('total incorrect ', totalIncorrect)
         console.log('total accuracy ', totalAccuracy)
-            
+
+        //Update html of elements
+        document.getElementById('accuracy').textContent = totalAccuracy + '%';
+        document.getElementById('totalQuestions').textContent = totalQuestions;
+        document.getElementById('correct').textContent = totalCorrect;
+        document.getElementById('incorrect').textContent = totalIncorrect;
 
     };
         

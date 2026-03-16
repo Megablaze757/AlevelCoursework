@@ -15,6 +15,14 @@
     </select>
     <button id="loadClassBtn">View Class Analytics</button>
     <div id="classMessage"></div>
+    
+</div>
+
+<div id="studentSection" style="margin-top: 20px;">
+    <label for="studentSelect">Select Student:</label>
+    <select id="studentSelect">
+        <option value="">Select a class first...</option>
+    </select>
 </div>
     <script>
         const supabaseClient = supabase.createClient(
@@ -52,10 +60,30 @@
         } else {
             classSelect.innerHTML = '<option value="">No classes available for your school</option>';
         }
-      } // <-- Added missing closing brace here
+      } 
+    //Event listener for the class dropdown to trigger students being loaded
+    document.getElementById('loadClassBtn').addEventListener('click', loadStudents)
+    //Function to load the students based on the class
+    async function loadStudents() {
+        const classSelect = document.getElementById('classSelect');
+        const selectedClass = classSelect.value;
+        const classMessage = document.getElementById('classMessage');
+        const studentSection = document.getElementById('studentSection');
 
-      // Call the function
-      loadClassesData();
+        if (!selectedClass || selectedClass === '') {
+            classMessage.textContent = 'Select a class first';
+        return;
+        // Get all students in this class from the students table
+        const { data: students, error} = await supabaseClient
+            .from('students')
+            .select('student_id')
+            .eq('class_code', selectedClass);
+        console.log(students);
+    }
+    }
+    
+  // Call the function
+  loadClassesData();
     </script>
 </body>
 </html>

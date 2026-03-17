@@ -94,7 +94,9 @@
             .select('name')
             .eq('class', selectedClass);
             console.log(students);
-            }
+            
+        
+        
         const studentSelect = document.getElementById('studentSelect');
         classSelect.innerHTML = '<option value="">Select a student...</option>';
 
@@ -108,6 +110,7 @@
         } else {
             studentSelect.innerHTML = '<option value="">No students in the class</option>';
         }
+    }
     
   // Call the function
   loadClassesData();

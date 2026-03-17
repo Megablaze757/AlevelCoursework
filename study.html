@@ -457,6 +457,14 @@ display: block;
     const closeModalBtn = document.getElementById('closeModalBtn');
     const homeBtn = document.getElementById('homeBtn');
     
+
+    const username = sessionStorage.getItem('username');
+    if (!username) {
+        window.location.href = 'index.html';
+
+   
+    }
+    
     let correctCount = 0
     let incorrectCount = 0
 
@@ -467,7 +475,10 @@ display: block;
     let topicTotal =[];
     
     let question_id = 1;
-    let student_id = 'StudentTest';
+
+    let student_id = username;
+ 
+    console.log('Current student:', student_id);
 
     const checkAnswer = document.getElementById('checkAnswer');
     const answerBox = document.getElementById('answerBox');
@@ -761,7 +772,7 @@ const supabaseClient = supabase.createClient(
       feedback.textContent = `Incorrect. The correct answer is ${currentQuestion.correct_answer}`;
       feedback.className = 'feedback incorrect';
       
-      // SHOW next button after max attempts reached
+      // show next button after max attempts reached
       nextQuestion.classList.remove('hidden');
       
       await updateTopicPerformance(topicId, student_id, false);
@@ -791,7 +802,8 @@ const supabaseClient = supabase.createClient(
       const { data: strengths, error } = await supabaseClient
         .from('strengths')
         .select('*')
-        .eq('student_id', 'StudentTest')
+
+        .eq('student_id', student_id)
       return strengths;
     }
 
@@ -799,7 +811,8 @@ const supabaseClient = supabase.createClient(
       const { data: weaknesses, error } = await supabaseClient
         .from('weaknesses')
         .select('topic_id')
-        .eq('student_id', 'StudentTest')
+
+        .eq('student_id', student_id)
       return weaknesses;
     }
 
@@ -807,7 +820,8 @@ const supabaseClient = supabase.createClient(
       let { data: orderedTopics, error } = await supabaseClient
         .from('topic_performance')
         .select('topic_id, accuracy_percent')
-        .eq('student_id', 'StudentTest')
+
+        .eq('student_id', student_id)
 
       if (!orderedTopics) return [];
 
@@ -828,7 +842,8 @@ const supabaseClient = supabase.createClient(
       const { data: learningStyle , error } = await supabaseClient
         .from('adaptive_settings')
         .select('preferred_style')
-        .eq('student_id', 'StudentTest')
+
+        .eq('student_id', student_id)
       return learningStyle;
     }
     
@@ -839,7 +854,8 @@ const supabaseClient = supabase.createClient(
       const { data: accuracy } = await supabaseClient
         .from('topic_performance')
         .select('accuracy_percent')
-        .eq('student_id', 'StudentTest')
+
+        .eq('student_id', student_id)
         .eq('topic_id', topicId);
 
       let accuracyValue = 50;
@@ -921,7 +937,8 @@ const supabaseClient = supabase.createClient(
       
     document.addEventListener('DOMContentLoaded', async function () {
 
-      questionHolder.innerHTML = ' Click "Next Question" to start';
+  
+      questionHolder.innerHTML = 'Click "Next Question" to start';
       
       await getInitialAccuracies();
       await fetchQuestion();
@@ -941,10 +958,9 @@ const supabaseClient = supabase.createClient(
       }
 
     nextQuestion.addEventListener('click', async function() {
-
+  
     nextQuestion.classList.add('hidden');
     
-
     feedback.style.display = 'none';
     feedback.className = 'feedback';
     answerBox.value = '';
@@ -968,19 +984,19 @@ const supabaseClient = supabase.createClient(
             // Try to load more questions from the same topic
             let newQuestions = await getQuestion(selectedTopicId);
             if (newQuestions && newQuestions.length > 0) {
-    
+               
                 newQuestions = newQuestions.filter(q => !askedQuestionIds.includes(q.question_id));
                 if (newQuestions.length > 0) {
                     sessionQuestions = newQuestions;
                     currentQuestionIndex = 0;
                 } else {
-            
+                    
                     questionHolder.innerHTML = 'No more new questions in this topic';
                     nextQuestion.classList.remove('hidden');
                     return;
                 }
             } else {
-
+                //  Better error message with button visible
                 questionHolder.innerHTML = 'No more questions available';
                 nextQuestion.classList.remove('hidden'); 
                 return;
@@ -1019,9 +1035,10 @@ const supabaseClient = supabase.createClient(
     if (sessionQuestions && sessionQuestions.length > 0 && currentQuestionIndex < sessionQuestions.length) {
         displayQuestion();
     } else {
-
+        //  Better error message with button visible
         questionHolder.innerHTML = 'No questions available';
         nextQuestion.classList.remove('hidden'); 
+    }
 });
       endSession.addEventListener('click', async function() {
         const { data: topics } = await supabaseClient
@@ -1125,19 +1142,19 @@ const supabaseClient = supabase.createClient(
     currentQuestionIndex = 0;
     askedQuestionIds = [];
     
-
+    // Reset attempt counter
     currentQuestionAttempts = 0;
     
     // Clear feedback and answer
     feedback.style.display = 'none';
-
+    // Reset feedback class
     feedback.className = 'feedback';
     answerBox.value = '';
     
-
-    questionHolder.innerHTML = 'Click "Next Question" to start';
+    // Set welcome message
+    questionHolder.innerHTML = 'click "Next Question" to start';
     
-
+    //  Make sure Next Question button is visible
     nextQuestion.classList.remove('hidden');
     
     // Hide the modal

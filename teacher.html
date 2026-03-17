@@ -104,7 +104,7 @@
             students.forEach(s => {
                 const option = document.createElement('option');
                 option.value = s.name;
-                option.textContent = cs.name || `student ${s.name}`;
+                option.textContent = s.name || `student ${s.name}`;
                 classSelect.appendChild(option);
             });
         } else {

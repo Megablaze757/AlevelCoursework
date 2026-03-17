@@ -25,6 +25,31 @@
     </select>
     <button id="loadStudentsBtn">View Students Analytics</button>
 </div>
+        <!--Topic stats display -->
+    <div class='statsContainer'>
+        <div class='statsBox'>
+            <button class='backButton' id='backToHome'>← Back to Home</button>
+            <h2 id="topicName">Overall Performance</h2>
+            <div style="margin-top: 20px;">
+                <div>
+                    Total Accuracy:
+                    <span id="accuracy">0%</span>
+                </div>   
+                <div>
+                    Total Questions
+                    <span id="totalQuestions">0</span>
+                </div>   
+                <div>
+                    Correct Answers
+                    <span id="correct">0</span>
+                </div>   
+                <div>
+                    Incorrect Answers
+                    <span id="incorrect">0</span>
+                </div>
+            </div>
+        </div>
+    </div>
     <script>
         const supabaseClient = supabase.createClient(
             'https://pxjndwrkafegopsolnde.supabase.co',
@@ -137,6 +162,12 @@
             console.log('total correct ', totalCorrect)
             console.log('total incorrect ', totalIncorrect)
             console.log('total accuracy ', totalAccuracy)
+            
+            document.getElementById('accuracy').textContent = totalAccuracy + '%';
+            document.getElementById('totalQuestions').textContent = totalQuestions;
+            document.getElementById('correct').textContent = totalCorrect;
+            document.getElementById('incorrect').textContent = totalIncorrect;
+            document.getElementById('topicName').textContent = 'Overall Performance';
 
         }
         

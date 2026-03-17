@@ -39,18 +39,14 @@
           .eq('user_type', 'Teacher')
           .single();
         
-        console.log('Teacher info:', teacherInfo);
-        console.log('Teacher error:', teacherError);
-        
         if (teacherInfo) {
+            const cleanSchool = teacherInfo.school.replace(/\n/g, '').trim();
+            
             const { data: classes, error: classesError } = await supabaseClient
               .from('classes')
               .select('class_code, class_name')
-              .eq('school', teacherInfo.school.trim())
+              .eq('school', cleanSchool)
               .order('class_name');
-            
-            console.log('Classes:', classes);
-            console.log('Classes error:', classesError);
             
             const classSelect = document.getElementById('classSelect');
             classSelect.innerHTML = '<option value="">Select a class...</option>';
@@ -85,14 +81,13 @@
             .eq('user_type', 'Teacher')
             .single();
         
+        const cleanSchool = teacherInfo.school.replace(/\n/g, '').trim();
+        
         const { data: students, error } = await supabaseClient
             .from('students')
             .select('student_id')
-            .eq('school', teacherInfo.school.trim())
+            .eq('school', cleanSchool)
             .eq('class_code', parseInt(selectedClass));
-        
-        console.log('Students:', students);
-        console.log('Students error:', error);
         
         if (students && students.length > 0) {
             const studentIds = students.map(s => s.student_id);

@@ -32,7 +32,6 @@
       let teacherId = 'TeacherTest'
 
       async function loadClassesData(){
-        //  Get teacher's school from userinfo
         const { data: teacherInfo, error: teacherError } = await supabaseClient
           .from('userinfo')
           .select('school')
@@ -40,13 +39,12 @@
           .eq('user_type', 'Teacher')
           .single();
         
-        // Get classes for that school
         const { data: classes, error: classesError } = await supabaseClient
           .from('classes')
           .select('class_code, class_name')
           .eq('school', teacherInfo.school)
           .order('class_name')
-        // Populate the dropdown
+        
         const classSelect = document.getElementById('classSelect');
         classSelect.innerHTML = '<option value="">Select a class...</option>';
 
@@ -61,9 +59,9 @@
             classSelect.innerHTML = '<option value="">No classes available for your school</option>';
         }
       } 
-    //Event listener for the class dropdown to trigger students being loaded
+    
     document.getElementById('loadClassBtn').addEventListener('click', loadStudents)
-    //Function to load the students based on the class
+    
     async function loadStudents() {
         const classSelect = document.getElementById('classSelect');
         const selectedClass = classSelect.value;
@@ -72,7 +70,6 @@
             return;
         }
 
-        // Get teacher's school
         const { data: teacherInfo, error: teacherError } = await supabaseClient
             .from('userinfo')
             .select('school')
@@ -80,16 +77,16 @@
             .eq('user_type', 'Teacher')
             .single();
         
-        // Get students where school = teacher's school AND class = selected class name
         const { data: students, error } = await supabaseClient
             .from('students')
             .select('student_id, student_name')
             .eq('school', teacherInfo.school)
             .eq('class_code', selectedClass);
-                console.log(students);
-            }
+        
+        console.log(students);
+        console.log(error);
+    }
     
-  // Call the function
   loadClassesData();
     </script>
 </body>

@@ -29,7 +29,25 @@
             'https://pxjndwrkafegopsolnde.supabase.co',
             'sb_publishable_eOUJ3K3GNczOncszRwYhyA_A1QAw72F'
         );
-      let teacherId = 'TeacherTest'
+
+      async function checkData() {
+        const { data: schools, error: schoolError } = await supabaseClient
+          .from('schools')
+          .select('*');
+        console.log('All schools:', schools);
+        
+        const { data: classes, error: classesError } = await supabaseClient
+          .from('classes')
+          .select('*');
+        console.log('All classes:', classes);
+        
+        const { data: userinfo, error: userError } = await supabaseClient
+          .from('userinfo')
+          .select('*');
+        console.log('All userinfo:', userinfo);
+      }
+      
+      checkData();
 
       async function loadClassesData(){
         const { data: classes, error: classesError } = await supabaseClient

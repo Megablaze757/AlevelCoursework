@@ -332,9 +332,11 @@ async function topicButtons() {
 
           // Move the slider
           if (selectedOption === 'option2') {
-            switchMenu.classList.add('option2');
+            switchMenu.classList.add('option2')
+            window.location.href = 'analytics.html';
           } else {
             switchMenu.classList.remove('option2');
+          
           }
         });
       });

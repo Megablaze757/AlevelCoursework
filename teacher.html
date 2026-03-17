@@ -82,8 +82,8 @@
         
         // Get students where school = teacher's school AND class = selected class name
         const { data: students, error } = await supabaseClient
-            .from('students')
-            .select('student_id, student_name')
+            .from('userinfo')
+            .select('name')
             .eq('school', teacherInfo.school)
             .eq('class', selectedClass);
                 console.log(students);

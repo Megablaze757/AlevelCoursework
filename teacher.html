@@ -7,91 +7,78 @@
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body>
- <!-- Class Selection for Teachers -->
-<div>
-    <label for="classSelect">Select Class:</label>
-    <select id="classSelect">
-        <option value="">Loading classes...</option>
-    </select>
-    <button id="loadClassBtn">View Class Analytics</button>
-    <div id="classMessage"></div>
-    
-</div>
+    <div>
+        <label for="classSelect">Select Class:</label>
+        <select id="classSelect">
+            <option value="">Loading classes...</option>
+        </select>
+        <button id="loadClassBtn">View Class Analytics</button>
+        <div id="classMessage"></div>
+    </div>
 
-<div id="studentSection" style="margin-top: 20px;">
-    <label for="studentSelect">Select Student:</label>
-    <select id="studentSelect">
-        <option value="">Select a class first...</option>
-    </select>
-</div>
+    <div id="studentSection" style="margin-top: 20px;">
+        <label for="studentSelect">Select Student:</label>
+        <select id="studentSelect">
+            <option value="">Select a class first...</option>
+        </select>
+    </div>
+
     <script>
-        const supabaseClient = supabase.createClient(
+        const supabase = supabase.createClient(
             'https://pxjndwrkafegopsolnde.supabase.co',
             'sb_publishable_eOUJ3K3GNczOncszRwYhyA_A1QAw72F'
         );
-      let teacherId = 'TeacherTest'
 
-      async function loadClassesData(){
-        const { data: classes, error: classesError } = await supabaseClient
-          .from('classes')
-          .select('class_code, class_name')
-          .eq('school', 'test1\n')
-          .order('class_name');
-        
-        const classSelect = document.getElementById('classSelect');
-        classSelect.innerHTML = '<option value="">Select a class...</option>';
+        async function loadClasses() {
+            const { data: classes } = await supabase
+                .from('classes')
+                .select('class_code, class_name')
+                .eq('school', 'test1\n');
 
-        if (classes && classes.length > 0) {
+            const select = document.getElementById('classSelect');
+            select.innerHTML = '<option value="">Select a class...</option>';
+            
             classes.forEach(cls => {
                 const option = document.createElement('option');
                 option.value = cls.class_code;
-                option.textContent = cls.class_name || `Class ${cls.class_code}`;
-                classSelect.appendChild(option);
+                option.textContent = cls.class_name;
+                select.appendChild(option);
             });
-        } else {
-            classSelect.innerHTML = '<option value="">No classes available for your school</option>';
-        }
-      } 
-    
-    document.getElementById('loadClassBtn').addEventListener('click', loadStudents)
-    
-    async function loadStudents() {
-        const classSelect = document.getElementById('classSelect');
-        const selectedClass = classSelect.value;
-
-        if (!selectedClass || selectedClass === '') {
-            return;
         }
 
-        const { data: students, error } = await supabaseClient
-            .from('students')
-            .select('student_id')
-            .eq('school', 'test1\n')
-            .eq('class_code', parseInt(selectedClass));
-        
-        if (students && students.length > 0) {
-            const studentIds = students.map(s => s.student_id);
-            
-            const { data: userInfo, error: userError } = await supabaseClient
+        async function loadStudents() {
+            const classCode = document.getElementById('classSelect').value;
+            if (!classCode) return;
+
+            const { data: students } = await supabase
+                .from('students')
+                .select('student_id')
+                .eq('school', 'test1\n')
+                .eq('class_code', classCode);
+
+            if (!students.length) {
+                document.getElementById('studentSelect').innerHTML = '<option value="">No students</option>';
+                return;
+            }
+
+            const { data: users } = await supabase
                 .from('userinfo')
                 .select('username, name')
-                .in('username', studentIds);
+                .in('username', students.map(s => s.student_id));
+
+            const select = document.getElementById('studentSelect');
+            select.innerHTML = '<option value="">Select a student...</option>';
             
-            const studentSelect = document.getElementById('studentSelect');
-            studentSelect.innerHTML = '<option value="">Select a student...</option>';
-            
-            userInfo.forEach(user => {
+            users.forEach(user => {
                 const option = document.createElement('option');
                 option.value = user.username;
                 option.textContent = user.name || user.username;
-                studentSelect.appendChild(option);
+                select.appendChild(option);
             });
-        } else {
-            document.getElementById('studentSelect').innerHTML = '<option value="">No students in this class</option>';
         }
-    }
-    
-  loadClassesData();
+
+        document.getElementById('loadClassBtn').addEventListener('click', loadStudents);
+        loadClasses();
     </script>
 </body>
 </html>

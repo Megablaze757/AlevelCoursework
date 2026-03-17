@@ -300,11 +300,16 @@ async function topicButtons() {
 
   // Wait for the DOM to be fully loaded
   document.addEventListener('DOMContentLoaded', function() {
-    //If no username then go to 
+    // Add debug line to check what's in sessionStorage
+    console.log('Session storage username:', sessionStorage.getItem('username'));
+    
+    //If no username then go to login page
     if (!sessionStorage.getItem('username')) {
-    window.location.href = 'index.html';
-    return;
-}
+      console.log('No username found, redirecting to login.html');
+      window.location.href = 'login.html';  // CHANGED FROM index.html TO login.html
+      return;
+    }
+    
     console.log('DOM loaded, fetching topics...');
     fetchTopics();
 
@@ -337,11 +342,11 @@ async function topicButtons() {
 
           // Move the slider
           if (selectedOption === 'option2') {
-            switchMenu.classList.add('option2')
+            switchMenu.classList.add('option2');
             window.location.href = 'analytics.html';
           } else {
             switchMenu.classList.remove('option2');
-          
+            window.location.href = 'index.html'; // Add this line to go to main page when Study Now is clicked
           }
         });
       });

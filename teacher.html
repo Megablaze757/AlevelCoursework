@@ -40,10 +40,12 @@
           .single();
         
         if (teacherInfo) {
+            const schoolName = teacherInfo.school;
+            
             const { data: classes, error: classesError } = await supabaseClient
               .from('classes')
               .select('class_code, class_name')
-              .eq('school', 'test1\n')
+              .eq('school', schoolName)
               .order('class_name');
             
             const classSelect = document.getElementById('classSelect');
@@ -72,10 +74,19 @@
             return;
         }
 
+        const { data: teacherInfo, error: teacherError } = await supabaseClient
+            .from('userinfo')
+            .select('school')
+            .eq('username', teacherId)
+            .eq('user_type', 'Teacher')
+            .single();
+        
+        const schoolName = teacherInfo.school;
+        
         const { data: students, error } = await supabaseClient
             .from('students')
             .select('student_id')
-            .eq('school', 'test1\n')
+            .eq('school', schoolName)
             .eq('class_code', parseInt(selectedClass));
         
         if (students && students.length > 0) {

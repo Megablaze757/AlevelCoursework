@@ -723,55 +723,62 @@ const supabaseClient = supabase.createClient(
     }
 
     checkAnswer.addEventListener('click', async function() {
-      if (sessionQuestions.length === 0) {
-        feedback.textContent = 'Please click Next Question first';
-        feedback.className = 'feedback incorrect';
-        feedback.style.display = 'block';
-        return;
-      }
+  if (sessionQuestions.length === 0) {
+    feedback.textContent = 'Please click Next Question first';
+    feedback.className = 'feedback incorrect';
+    feedback.style.display = 'block';
+    return;
+  }
+  
+  const userAnswer = answerBox.value.trim().toLowerCase();
+  if (!userAnswer) {
+    feedback.textContent = 'Please enter an answer';
+    feedback.className = 'feedback incorrect';
+    feedback.style.display = 'block';
+    return;
+  }
+  
+  const currentQuestion = sessionQuestions[currentQuestionIndex];
+  const correctAnswer = currentQuestion.correct_answer.toLowerCase();
+  const topicId = currentQuestion.topic_id;
+  
+  if (userAnswer === correctAnswer) {
+    feedback.textContent = 'Correct!';
+    feedback.className = 'feedback correct';
+    correctCount++;
+    numCorrect.textContent = correctCount;
+    
+    //show next button after correct answer
+    nextQuestion.classList.remove('hidden');
+    
+    await updateTopicPerformance(topicId, student_id, true);
+  } else {
+    currentQuestionAttempts++;
+    incorrectCount++;
+    numIncorrect.textContent = incorrectCount;
+    
+    if (currentQuestionAttempts >= 2) {
+      feedback.textContent = `Incorrect. The correct answer is ${currentQuestion.correct_answer}`;
+      feedback.className = 'feedback incorrect';
       
-      const userAnswer = answerBox.value.trim().toLowerCase();
-      if (!userAnswer) {
-        feedback.textContent = 'Please enter an answer';
-        feedback.className = 'feedback incorrect';
-        feedback.style.display = 'block';
-        return;
-      }
+      // SHOW next button after max attempts reached
+      nextQuestion.classList.remove('hidden');
       
-      const currentQuestion = sessionQuestions[currentQuestionIndex];
-      const correctAnswer = currentQuestion.correct_answer.toLowerCase();
-      const topicId = currentQuestion.topic_id;
+      await updateTopicPerformance(topicId, student_id, false);
+    } else {  
+      feedback.textContent = `Incorrect. Try again (Attempt ${currentQuestionAttempts}/2)`;
+      feedback.className = 'feedback incorrect';
       
-      if (userAnswer === correctAnswer) {
-        feedback.textContent = 'Correct!';
-        feedback.className = 'feedback correct';
-        correctCount++;
-        numCorrect.textContent = correctCount;
-        //If the questions correct allow them to move on
-        nextQuestion.classList.remove('hidden');
-        
-        await updateTopicPerformance(topicId, student_id, true);
-      } else {
-        if (currentQuestionAttempts === 2) {
-          feedback.textContent = `Incorrect. The correct answer is ${currentQuestion.correct_answer}`;
-          feedback.className = 'feedback incorrect';
-          nextQuestion.classList.remove('hidden');
-          incorrectCount++;
-          numIncorrect.textContent = incorrectCount;
-          await updateTopicPerformance(topicId, student_id, false);
-        } else {  
-          feedback.textContent = `Incorrect`;
-          feedback.className = 'feedback incorrect';
-          currentQuestionAttempts++;
-          incorrectCount++;
-          numIncorrect.textContent = incorrectCount;
-          await updateTopicPerformance(topicId, student_id, false);
-        }
-      }
       
-      feedback.style.display = 'block';
-      askedQuestionIds.push(currentQuestion.question_id);
-    });
+      nextQuestion.classList.add('hidden');
+      
+      await updateTopicPerformance(topicId, student_id, false);
+    }
+  }
+  
+  feedback.style.display = 'block';
+  askedQuestionIds.push(currentQuestion.question_id);
+});
 
     async function fetchQuestion() {
       const { data, error } = await supabaseClient
@@ -933,70 +940,89 @@ const supabaseClient = supabase.createClient(
         }
       }
 
-      nextQuestion.addEventListener('click', async function() {
-        // Hide the next button until answer is checked
-        nextQuestion.classList.add('hidden');
-        
-        currentQuestionAttempts = 0;
-        
-        if(sessionQuestions.length === 0){
-          if (selectedTopicId) {
+    nextQuestion.addEventListener('click', async function() {
+
+    nextQuestion.classList.add('hidden');
+    
+
+    feedback.style.display = 'none';
+    feedback.className = 'feedback';
+    answerBox.value = '';
+    currentQuestionAttempts = 0;
+    
+    // Check if we have a selected topic
+    if (selectedTopicId) {
+        // If we don't have questions loaded yet, load them
+        if (sessionQuestions.length === 0) {
             sessionQuestions = await getQuestion(selectedTopicId);
-            if (sessionQuestions && sessionQuestions.length > 0){
-              currentQuestionIndex = 0;
-              displayQuestion();
-            } else {
-              questionHolder.innerHTML = 'No questions available';
-            }
-          } else {
-            orderedTopicsList = await orderTopics();
-
-            for (let i = 0; i < orderedTopicsList.length; i++) {
-              currentTopicIndex = i;
-              currentTopicId = orderedTopicsList[i].topic_id;
-              
-              sessionQuestions = await getQuestion(currentTopicId);
-              
-              if (sessionQuestions && sessionQuestions.length > 0) {
+            if (sessionQuestions && sessionQuestions.length > 0) {
                 currentQuestionIndex = 0;
-                displayQuestion();
-                answerBox.value = '';
-                feedback.style.display = 'none';
+            }
+        } 
+        // Move to next question in the current topic
+        else if (currentQuestionIndex < sessionQuestions.length - 1) {
+            currentQuestionIndex++;
+        } 
+        // No more questions in current set - try to load more
+        else {
+            // Try to load more questions from the same topic
+            let newQuestions = await getQuestion(selectedTopicId);
+            if (newQuestions && newQuestions.length > 0) {
+    
+                newQuestions = newQuestions.filter(q => !askedQuestionIds.includes(q.question_id));
+                if (newQuestions.length > 0) {
+                    sessionQuestions = newQuestions;
+                    currentQuestionIndex = 0;
+                } else {
+            
+                    questionHolder.innerHTML = 'No more new questions in this topic';
+                    nextQuestion.classList.remove('hidden');
+                    return;
+                }
+            } else {
+
+                questionHolder.innerHTML = 'No more questions available';
+                nextQuestion.classList.remove('hidden'); 
                 return;
-              }
             }
-            questionHolder.innerHTML = 'No questions available for any topic';
-            return;
-          }
+        }
+    } else {
+        // No specific topic selected - use adaptive algorithm
+        if (sessionQuestions.length === 0) {
+            // Load first topic
+            orderedTopicsList = await orderTopics();
+            if (orderedTopicsList && orderedTopicsList.length > 0) {
+                currentTopicIndex = 0;
+                currentTopicId = orderedTopicsList[0].topic_id;
+                sessionQuestions = await getQuestion(currentTopicId);
+                currentQuestionIndex = 0;
+            }
+        } else if (currentQuestionIndex < sessionQuestions.length - 1) {
+            // Move to next question in current topic
+            currentQuestionIndex++;
         } else {
-          currentQuestionIndex++;
-
-          if (currentQuestionIndex < sessionQuestions.length) {
-            displayQuestion();
-            answerBox.value = '';
-            feedback.style.display = 'none';
-          } else {
+            // Move to next topic
             currentTopicIndex++;
+            
+            // Loop back to start if we've gone through all topics
             if (currentTopicIndex >= orderedTopicsList.length) {
-              currentTopicIndex = 0;
+                currentTopicIndex = 0;
             }
-
+            
             currentTopicId = orderedTopicsList[currentTopicIndex].topic_id;
-
             sessionQuestions = await getQuestion(currentTopicId);
             currentQuestionIndex = 0;
-
-            if (sessionQuestions && sessionQuestions.length > 0) {
-              displayQuestion();
-              answerBox.value = '';
-              feedback.style.display = 'none';
-            } else {
-              questionHolder.innerHTML = 'No questions for this topic';
-            }
-          }
         }
-      });
+    }
+    
+    // Display the question if we have one
+    if (sessionQuestions && sessionQuestions.length > 0 && currentQuestionIndex < sessionQuestions.length) {
+        displayQuestion();
+    } else {
 
+        questionHolder.innerHTML = 'No questions available';
+        nextQuestion.classList.remove('hidden'); 
+});
       endSession.addEventListener('click', async function() {
         const { data: topics } = await supabaseClient
           .from('topics')
@@ -1087,28 +1113,39 @@ const supabaseClient = supabase.createClient(
         endSessionModal.style.display = 'none';
       });
 
-      newSessionBtn.addEventListener('click', function() {
-        correctCount = 0;
-        incorrectCount = 0;
-        numCorrect.textContent = correctCount;
-        numIncorrect.textContent = incorrectCount;
-        
-        sessionQuestions = [];
-        currentQuestionIndex = 0;
-        askedQuestionIds = [];
-        
-        feedback.style.display = 'none';
-        answerBox.value = '';
-        questionHolder.innerHTML = 'Click Next Question to start';
-        
-        endSessionModal.style.display = 'none';
-        
-        getInitialAccuracies();
-      });
+     newSessionBtn.addEventListener('click', function() {
+    // Reset counters
+    correctCount = 0;
+    incorrectCount = 0;
+    numCorrect.textContent = correctCount;
+    numIncorrect.textContent = incorrectCount;
+    
+    // Reset session state
+    sessionQuestions = [];
+    currentQuestionIndex = 0;
+    askedQuestionIds = [];
+    
 
-      homeBtn.addEventListener('click', function() {
-        window.location.href = 'main.html';
-      });
+    currentQuestionAttempts = 0;
+    
+    // Clear feedback and answer
+    feedback.style.display = 'none';
+
+    feedback.className = 'feedback';
+    answerBox.value = '';
+    
+
+    questionHolder.innerHTML = 'Click "Next Question" to start';
+    
+
+    nextQuestion.classList.remove('hidden');
+    
+    // Hide the modal
+    endSessionModal.style.display = 'none';
+    
+    // Reload initial accuracies
+    getInitialAccuracies();
+});
 
     });
   </script>

@@ -5,107 +5,128 @@
   <title>Revision App</title>
   <link rel="stylesheet" href="styleslogin.css">
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-
 </head>
 
 <body>
-  
-
-
-  <div>
+  <!-- Main container for the login form -->
+  <div class="container">
+    <!-- Login form -->
     <form class='user-forms'>
+      <h2>Login to Revision App</h2>
+      
+      <!-- Username input field -->
       <label for='Username'>Username</label><br>
       <input type='text' id='Username' username=username><br>
+      
+      <!-- Password input field -->
       <label for='Password'>Password</label><br>
       <input type='text' id='Password' password=password><br>
 
-      <button type="button" id='btnSubmit'>Submit</button>
+      <!-- Submit button for login -->
+      <button type="button" id='btnSubmit' class="submit-btn">Submit</button>
+      
+      <!-- Status message display area -->
       <div id='statusMessage' class='status-message'></div>
 
-      <div>
-      <button type="button" id='btnSignup'>Sign Up</button>
-        </div>
-
+      <!-- Sign up button container -->
+      <div class="signup-container">
+        <button type="button" id='btnSignup' class="signup-btn">Sign Up</button>
+      </div>
 
     </form>
   </div>
 
   <script>
-
+    // Supabase configuration
     const supabase_url = 'https://pxjndwrkafegopsolnde.supabase.co'
     const supabase_key = 'sb_publishable_eOUJ3K3GNczOncszRwYhyA_A1QAw72F'
+    
+    // Initialize Supabase client
     const supabaseClient = supabase.createClient(
       'https://pxjndwrkafegopsolnde.supabase.co',
       'sb_publishable_eOUJ3K3GNczOncszRwYhyA_A1QAw72F'
     );
 
+    // Get DOM elements
     let usernameElement = document.getElementById('Username');
     let passwordElement = document.getElementById('Password');
     let statusElement = document.getElementById('statusMessage')
 
+    // Update status message function
     function updateStatus(message) {
-    statusElement.textContent = message;
+      statusElement.textContent = message;
     }
     
+    // Check login credentials against database
     async function checkCredentials() {
-
+      // Hash the entered password
       hashedPassword = hash(passwordElement.value).toString()
+      
+      // Query database for username
       const { data, error } = await supabaseClient
         .from('userinfo')
         .select('*')
         .eq('username', usernameElement.value)
 
       console.log('Query:', { data, error })
+      
+      // Handle username not found
       if (error || !data || data.length === 0) {
         updateStatus('Username not found')
       }
-
+      // Username found - check password
       else {
-
         console.log(hashedPassword)
+        // Password matches
         if (data[0].password_hash === hashedPassword) {
           updateStatus('Login Succesful')
+          // Store user in session storage
           sessionStorage.setItem('currentUser',data[0].username);
           console.log(data[0].user_type);
+          
+          // Redirect based on user type
           if(data[0].user_type === 'Teacher') {
-          setTimeout(() => {
-            window.location.href = 'teacher.html'  
-        },1500)
+            setTimeout(() => {
+              window.location.href = 'teacher.html'  
+            },1500)
           } else {
-          setTimeout(() => {
-            window.location.href = 'main.html'   
-        },1500)
+            setTimeout(() => {
+              window.location.href = 'main.html'   
+            },1500)
+          }
         }
-        }
+        // Password incorrect
         else {
           updateStatus('Password Incorrect')
         }
       }
-
     };
 
- function hash(password) {
-   let product = 1;
-   for(let i = 0; i < password.length; i++) {
-     product *= password.charCodeAt(i);
-   }
-   return product
- }
+    // Simple hash function for passwords
+    function hash(password) {
+      let product = 1;
+      for(let i = 0; i < password.length; i++) {
+        product *= password.charCodeAt(i);
+      }
+      return product
+    }
 
+    // Event listeners for buttons
     document.addEventListener('DOMContentLoaded', function () {   
+      // Login button click handler
       let button = document.getElementById('btnSubmit');
       button.addEventListener('click', function () {
         console.log(usernameElement.value);
         checkCredentials()
       });
 
+      // Signup button click handler
       let signupButton = document.getElementById('btnSignup');
       if (signupButton) {
         signupButton.addEventListener('click', function () {
           window.location.href = 'signup.html';
         });
       }
-
     });
 
   </script>

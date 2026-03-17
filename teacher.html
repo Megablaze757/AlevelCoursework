@@ -30,7 +30,7 @@
         );
 
         async function loadClasses() {
-            const { data: classes, error } = await supabaseClient
+            const { data: classes } = await supabaseClient
                 .from('classes')
                 .select('class_code, class_name')
                 .eq('school', 'test1\n');
@@ -55,7 +55,6 @@
             const { data: students, error } = await supabaseClient
                 .from('students')
                 .select('student_id')
-                .eq('school', 'test1\n')
                 .eq('class_code', parseInt(classCode));
 
             if (error) {
@@ -71,7 +70,8 @@
             const { data: users } = await supabaseClient
                 .from('userinfo')
                 .select('username, name')
-                .in('username', students.map(s => s.student_id));
+                .in('username', students.map(s => s.student_id))
+                .eq('school', 'test1\n');
 
             const select = document.getElementById('studentSelect');
             select.innerHTML = '<option value="">Select a student...</option>';

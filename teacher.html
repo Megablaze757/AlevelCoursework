@@ -72,14 +72,22 @@
             return;
         }
 
-        // Get all students in this class from the students table
+        // Get teacher's school
+        const { data: teacherInfo, error: teacherError } = await supabaseClient
+            .from('userinfo')
+            .select('school')
+            .eq('username', teacherId)
+            .eq('user_type', 'Teacher')
+            .single();
+        
+        // Get students where school = teacher's school AND class = selected class name
         const { data: students, error } = await supabaseClient
             .from('students')
-            .select('student_id')
-            .eq('class_code', selectedClass);
-        
-        console.log(students);
-    }
+            .select('student_id, student_name')
+            .eq('school', teacherInfo.school)
+            .eq('class', selectedClass);
+                console.log(students);
+            }
     
   // Call the function
   loadClassesData();

@@ -300,6 +300,11 @@ async function topicButtons() {
 
   // Wait for the DOM to be fully loaded
   document.addEventListener('DOMContentLoaded', function() {
+    //If no username then go to 
+    if (!sessionStorage.getItem('username')) {
+    window.location.href = 'login.html';
+    return;
+}
     console.log('DOM loaded, fetching topics...');
     fetchTopics();
 

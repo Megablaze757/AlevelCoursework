@@ -86,14 +86,14 @@
         const {data: classes} = await supabaseClient
             .from('classes')
             .select('class_code')
-            .eq('class_name', selectedClass)
+            .eq('class_code', selectedClass)
         
         // Get students 
         const { data: students, error } = await supabaseClient
             .from('userinfo')
             .select('*')
             .eq('school', teacherInfo.school)
-            .eq('class', classes.class_code);
+            .eq('class', selectedClass);
                 console.log(students);
             }
     

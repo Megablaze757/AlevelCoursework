@@ -23,6 +23,7 @@
     <select id="studentSelect">
         <option value="">Select a class first...</option>
     </select>
+    <button id="loadStudentsBtn">View Students Analytics</button>
 </div>
     <script>
         const supabaseClient = supabase.createClient(
@@ -111,6 +112,40 @@
             studentSelect.innerHTML = '<option value="">No students in the class</option>';
         }
     }
+    
+        async loadAnalytics() {
+            const studentId = studentSelect.value;
+             const{data: scores} = await supabaseClient
+                .from('topic_performance')
+                .select('*')
+                .eq('student_id', studentId);
+            console.log(scores);
+            const performance = scores;
+
+            let totalQuestions = 0;
+            let totalCorrect = 0;
+            console.log(performance)
+
+            performance.forEach( p => {
+                totalQuestions += p.questions_attempted || 0;
+                totalCorrect += p.questions_correct || 0;                
+            });
+            
+            const totalIncorrect = totalQuestions - totalCorrect;
+            const totalAccuracy = totalQuestions > 0 ? Math.round((totalCorrect/totalQuestions) * 100) : 0;
+            console.log('total Questions ', totalQuestions);
+            console.log('total correct ', totalCorrect)
+            console.log('total incorrect ', totalIncorrect)
+            console.log('total accuracy ', totalAccuracy)
+
+        };
+        }
+
+
+        
+    //Add  an event listener to the button
+    document.getElementById('loadStudentsBtn').addEventListener('click', loadAnalytics)
+
     
   // Call the function
   loadClassesData();

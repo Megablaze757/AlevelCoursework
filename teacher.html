@@ -32,35 +32,24 @@
       let teacherId = 'TeacherTest'
 
       async function loadClassesData(){
-        const { data: teacherInfo, error: teacherError } = await supabaseClient
-          .from('userinfo')
-          .select('school')
-          .eq('username', teacherId)
-          .eq('user_type', 'Teacher')
-          .single();
+        const { data: classes, error: classesError } = await supabaseClient
+          .from('classes')
+          .select('class_code, class_name')
+          .eq('school', 'test1\n')
+          .order('class_name');
         
-        if (teacherInfo) {
-            const schoolName = teacherInfo.school.replace('\n', '');
-            
-            const { data: classes, error: classesError } = await supabaseClient
-              .from('classes')
-              .select('class_code, class_name')
-              .eq('school', schoolName)
-              .order('class_name');
-            
-            const classSelect = document.getElementById('classSelect');
-            classSelect.innerHTML = '<option value="">Select a class...</option>';
+        const classSelect = document.getElementById('classSelect');
+        classSelect.innerHTML = '<option value="">Select a class...</option>';
 
-            if (classes && classes.length > 0) {
-                classes.forEach(cls => {
-                    const option = document.createElement('option');
-                    option.value = cls.class_code;
-                    option.textContent = cls.class_name || `Class ${cls.class_code}`;
-                    classSelect.appendChild(option);
-                });
-            } else {
-                classSelect.innerHTML = '<option value="">No classes available for your school</option>';
-            }
+        if (classes && classes.length > 0) {
+            classes.forEach(cls => {
+                const option = document.createElement('option');
+                option.value = cls.class_code;
+                option.textContent = cls.class_name || `Class ${cls.class_code}`;
+                classSelect.appendChild(option);
+            });
+        } else {
+            classSelect.innerHTML = '<option value="">No classes available for your school</option>';
         }
       } 
     
@@ -74,19 +63,10 @@
             return;
         }
 
-        const { data: teacherInfo, error: teacherError } = await supabaseClient
-            .from('userinfo')
-            .select('school')
-            .eq('username', teacherId)
-            .eq('user_type', 'Teacher')
-            .single();
-        
-        const schoolName = teacherInfo.school.replace('\n', '');
-        
         const { data: students, error } = await supabaseClient
             .from('students')
             .select('student_id')
-            .eq('school', schoolName)
+            .eq('school', 'test1\n')
             .eq('class_code', parseInt(selectedClass));
         
         if (students && students.length > 0) {

@@ -42,7 +42,7 @@
         const { data: classes, error: classesError } = await supabaseClient
           .from('classes')
           .select('class_code, class_name')
-          .eq('school', teacherInfo.school)
+          .eq('school', teacherInfo.school.trim())
           .order('class_name')
         
         const classSelect = document.getElementById('classSelect');
@@ -80,7 +80,7 @@
         const { data: students, error } = await supabaseClient
             .from('students')
             .select('student_id')
-            .eq('school', teacherInfo.school)
+            .eq('school', teacherInfo.school.trim())
             .eq('class_code', selectedClass);
         
         if (students && students.length > 0) {

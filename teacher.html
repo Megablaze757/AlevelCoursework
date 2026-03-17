@@ -79,12 +79,28 @@
         
         const { data: students, error } = await supabaseClient
             .from('students')
-            .select('student_id, student_name')
+            .select('student_id')
             .eq('school', teacherInfo.school)
             .eq('class_code', selectedClass);
         
-        console.log(students);
-        console.log(error);
+        if (students && students.length > 0) {
+            const studentIds = students.map(s => s.student_id);
+            
+            const { data: userInfo, error: userError } = await supabaseClient
+                .from('userinfo')
+                .select('username, name')
+                .in('username', studentIds);
+            
+            const studentSelect = document.getElementById('studentSelect');
+            studentSelect.innerHTML = '<option value="">Select a student...</option>';
+            
+            userInfo.forEach(user => {
+                const option = document.createElement('option');
+                option.value = user.username;
+                option.textContent = user.name || user.username;
+                studentSelect.appendChild(option);
+            });
+        }
     }
     
   loadClassesData();

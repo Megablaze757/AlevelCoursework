@@ -395,6 +395,163 @@
                 padding: 15px 25px;
             }
         }
+            /* Students ranking grid */
+        .students-ranking-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 25px;
+        margin-bottom: 30px;
+        }
+        
+        /* Ranking containers */
+        .ranking-container {
+        background: white;
+        border-radius: 30px;
+        padding: 30px;
+        box-shadow: 0 10px 40px rgba(0,0,0,0.08);
+        border: 1px solid #f0f0f0;
+        }
+        
+        .top-students .section-title {
+        border-bottom-color: #48bb78;
+        }
+        
+        .bottom-students .section-title {
+        border-bottom-color: #f56565;
+        }
+        
+        /* Students list */
+        .students-list {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+        max-height: 400px;
+        overflow-y: auto;
+        padding-right: 10px;
+        }
+        
+        /* Student card */
+        .student-card {
+        background: #f8fafc;
+        border: 1px solid #e2e8f0;
+        border-radius: 20px;
+        padding: 15px 20px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        }
+        
+        .student-card:hover {
+        transform: translateX(5px);
+        box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+        
+        .student-card.top-student:hover {
+        border-color: #48bb78;
+        background: #f0fff4;
+        }
+        
+        .student-card.bottom-student:hover {
+        border-color: #f56565;
+        background: #fff5f5;
+        }
+        
+        .student-info {
+        display: flex;
+        flex-direction: column;
+        gap: 5px;
+        }
+        
+        .student-name {
+        font-weight: 700;
+        color: #2d3748;
+        font-size: 1.1rem;
+        }
+        
+        .student-details {
+        display: flex;
+        gap: 15px;
+        font-size: 0.9rem;
+        }
+        
+        .student-accuracy {
+        color: #48bb78;
+        font-weight: 600;
+        }
+        
+        .student-attempts {
+        color: #718096;
+        }
+        
+        .student-rank {
+        font-size: 1.5rem;
+        font-weight: 800;
+        opacity: 0.2;
+        margin-right: 10px;
+        }
+        
+        /* Alerts container */
+        .alerts-container {
+        background: white;
+        border-radius: 30px;
+        padding: 30px;
+        box-shadow: 0 10px 40px rgba(0,0,0,0.08);
+        border: 1px solid #f0f0f0;
+        margin-bottom: 30px;
+        }
+        
+        .alerts-list {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+        }
+        
+        /* Alert item */
+        .alert-item {
+        background: #fff5f5;
+        border: 1px solid #fed7d7;
+        border-left: 4px solid #f56565;
+        border-radius: 20px;
+        padding: 15px 25px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        animation: slideIn 0.3s ease;
+        }
+        
+        .alert-content {
+        display: flex;
+        flex-direction: column;
+        gap: 5px;
+        }
+        
+        .alert-student {
+        font-weight: 700;
+        color: #c53030;
+        }
+        
+        .alert-topic {
+        color: #4a5568;
+        font-size: 0.95rem;
+        }
+        
+        .alert-score {
+        background: #f56565;
+        color: white;
+        padding: 5px 15px;
+        border-radius: 50px;
+        font-weight: 700;
+        font-size: 0.9rem;
+        }
+        
+        /* Responsive adjustments */
+        @media (max-width: 1024px) {
+        .students-ranking-grid {
+            grid-template-columns: 1fr;
+        }
+        }
     </style>
 </head>
 <body>
@@ -467,7 +624,24 @@
         </div>
     </div>
 
-    <!-- Original JavaScript -->
+<div class="students-ranking-grid">
+    <!-- Top 5 Students -->
+    <div class="ranking-container top-students">
+        <h3 class="section-title">🏆 Top 5 Strongest Students</h3>
+        <div id="topStudentsList" class="students-list"></div>
+    </div>
+    
+    <div class="ranking-container bottom-students">
+        <h3 class="section-title">⚠️ Top 5 Weakest Students</h3>
+        <div id="bottomStudentsList" class="students-list"></div>
+    </div>
+</div>
+
+<div class="alerts-container">
+    <h3 class="section-title">🚨 Class Topic Alerts</h3>
+    <div id="topicAlertsList" class="alerts-list"></div>
+</div>
+
     <script>
         const supabaseClient = supabase.createClient(
             'https://pxjndwrkafegopsolnde.supabase.co',
@@ -677,7 +851,273 @@
                 weaknessesList.innerHTML = '<div class="empty-message">No weaknesses identified yet</div>';
             }
         }
+        // Function to load top and bottom students for a class
+async function loadClassRankings() {
+    const classSelect = document.getElementById('classSelect');
+    const selectedClass = classSelect.value;
+    
+    if (!selectedClass || selectedClass === '') {
+        return;
+    }
+    
+    // Get all students in the class
+    const { data: students, error: studentsError } = await supabaseClient
+        .from('userinfo')
+        .select('username, name')
+        .eq('class', selectedClass);
+    
+    if (!students || students.length === 0) {
+        return;
+    }
+    
+    // Calculate overall performance for each student
+    const studentPerformance = [];
+    
+    for (const student of students) {
+        const { data: scores } = await supabaseClient
+            .from('topic_performance')
+            .select('*')
+            .eq('student_id', student.username);
         
+        let totalQuestions = 0;
+        let totalCorrect = 0;
+        
+        if (scores) {
+            scores.forEach(p => {
+                totalQuestions += p.questions_attempted || 0;
+                totalCorrect += p.questions_correct || 0;
+            });
+        }
+        
+        const accuracy = totalQuestions > 0 ? Math.round((totalCorrect / totalQuestions) * 100) : 0;
+        
+        studentPerformance.push({
+            ...student,
+            totalQuestions,
+            totalCorrect,
+            accuracy
+        });
+    }
+    
+    // Sort by accuracy (descending for top, ascending for bottom)
+    const sortedByAccuracy = [...studentPerformance].sort((a, b) => b.accuracy - a.accuracy);
+    
+    // Get top 5 (filter out those with no data)
+    const top5 = sortedByAccuracy
+        .filter(s => s.totalQuestions > 0)
+        .slice(0, 5);
+    
+    // Get bottom 5 (filter out those with no data)
+    const bottom5 = sortedByAccuracy
+        .filter(s => s.totalQuestions > 0)
+        .reverse()
+        .slice(0, 5);
+    
+    displayTopStudents(top5);
+    displayBottomStudents(bottom5);
+    
+    // Load topic alerts for the class
+    await loadClassTopicAlerts(selectedClass);
+}
+
+// Function to display top students
+function displayTopStudents(students) {
+    const topList = document.getElementById('topStudentsList');
+    topList.innerHTML = '';
+    
+    if (students.length === 0) {
+        topList.innerHTML = '<div class="empty-message">No student data available yet</div>';
+        return;
+    }
+    
+    students.forEach((student, index) => {
+        const card = document.createElement('div');
+        card.className = 'student-card top-student';
+        card.setAttribute('data-student-id', student.username);
+        
+        card.innerHTML = `
+            <div class="student-info">
+                <span class="student-name">${student.name || student.username}</span>
+                <div class="student-details">
+                    <span class="student-accuracy">${student.accuracy}% accuracy</span>
+                    <span class="student-attempts">${student.totalQuestions} questions</span>
+                </div>
+            </div>
+            <span class="student-rank">#${index + 1}</span>
+        `;
+        
+        card.addEventListener('click', function() {
+            // Auto-select this student in the dropdown
+            const studentSelect = document.getElementById('studentSelect');
+            studentSelect.value = student.username;
+            // Load their analytics
+            loadAnalytics();
+        });
+        
+        topList.appendChild(card);
+    });
+}
+
+// Function to display bottom students
+function displayBottomStudents(students) {
+    const bottomList = document.getElementById('bottomStudentsList');
+    bottomList.innerHTML = '';
+    
+    if (students.length === 0) {
+        bottomList.innerHTML = '<div class="empty-message">No student data available yet</div>';
+        return;
+    }
+    
+    students.forEach((student, index) => {
+        const card = document.createElement('div');
+        card.className = 'student-card bottom-student';
+        card.setAttribute('data-student-id', student.username);
+        
+        card.innerHTML = `
+            <div class="student-info">
+                <span class="student-name">${student.name || student.username}</span>
+                <div class="student-details">
+                    <span class="student-accuracy" style="color: #f56565;">${student.accuracy}% accuracy</span>
+                    <span class="student-attempts">${student.totalQuestions} questions</span>
+                </div>
+            </div>
+            <span class="student-rank">#${index + 1}</span>
+        `;
+        
+        card.addEventListener('click', function() {
+            // Auto-select this student in the dropdown
+            const studentSelect = document.getElementById('studentSelect');
+            studentSelect.value = student.username;
+            // Load their analytics
+            loadAnalytics();
+        });
+        
+        bottomList.appendChild(card);
+    });
+}
+
+// Function to load class-wide topic alerts
+async function loadClassTopicAlerts(classCode) {
+    const alertsList = document.getElementById('topicAlertsList');
+    alertsList.innerHTML = '';
+    
+    // Get all students in the class
+    const { data: students } = await supabaseClient
+        .from('userinfo')
+        .select('username, name')
+        .eq('class', classCode);
+    
+    if (!students || students.length === 0) {
+        alertsList.innerHTML = '<div class="empty-message">No students in this class</div>';
+        return;
+    }
+    
+    // Get all topics
+    const { data: topics } = await supabaseClient
+        .from('topics')
+        .select('topic_id, topic_name');
+    
+    const topicMap = {};
+    topics.forEach(t => topicMap[t.topic_id] = t.topic_name);
+    
+    // Collect low performance alerts (less than 50% accuracy on any topic with at least 5 attempts)
+    const alerts = [];
+    
+    for (const student of students) {
+        const { data: performances } = await supabaseClient
+            .from('topic_performance')
+            .select('*')
+            .eq('student_id', student.username);
+        
+        if (performances) {
+            performances.forEach(perf => {
+                if (perf.questions_attempted >= 5) {
+                    const accuracy = (perf.questions_correct / perf.questions_attempted) * 100;
+                    if (accuracy < 50) {
+                        alerts.push({
+                            student_name: student.name || student.username,
+                            topic_name: topicMap[perf.topic_id] || 'Unknown Topic',
+                            accuracy: Math.round(accuracy),
+                            attempted: perf.questions_attempted
+                        });
+                    }
+                }
+            });
+        }
+    }
+    
+    // Sort by accuracy (lowest first) and take top 10
+    alerts.sort((a, b) => a.accuracy - b.accuracy);
+    const topAlerts = alerts.slice(0, 10);
+    
+    if (topAlerts.length === 0) {
+        alertsList.innerHTML = '<div class="empty-message">No critical alerts at this time</div>';
+        return;
+    }
+    
+    topAlerts.forEach(alert => {
+        const alertItem = document.createElement('div');
+        alertItem.className = 'alert-item';
+        
+        alertItem.innerHTML = `
+            <div class="alert-content">
+                <span class="alert-student">${alert.student_name}</span>
+                <span class="alert-topic">${alert.topic_name}</span>
+            </div>
+            <span class="alert-score">${alert.accuracy}%</span>
+        `;
+        
+        alertsList.appendChild(alertItem);
+    });
+}
+
+// Modify the existing loadStudents function to also load rankings
+async function loadStudents() {
+    const classSelect = document.getElementById('classSelect');
+    const studentSelect = document.getElementById('studentSelect');
+    const selectedClass = classSelect.value;
+    console.log(selectedClass)
+
+    if (!selectedClass || selectedClass === '') {
+        return;
+    }
+
+    const {data: students, error} = await supabaseClient
+        .from('userinfo')
+        .select('name, username')
+        .eq('class', selectedClass);
+        console.log(students);
+        
+    studentSelect.innerHTML = '<option value="">Select a student...</option>';
+
+    if (students && students.length > 0) {
+        students.forEach(s => {
+            const option = document.createElement('option');
+            option.value = s.username;
+            option.textContent = s.name || `student ${s.username}`;
+            studentSelect.appendChild(option);
+        });
+        
+        // Load the class rankings after loading students
+        await loadClassRankings();
+    } else {
+        studentSelect.innerHTML = '<option value="">No students in the class</option>';
+    }
+}
+        // Update event listeners
+document.getElementById('loadClassBtn').addEventListener('click', loadStudents);
+document.getElementById('loadStudentsBtn').addEventListener('click', loadAnalytics);
+
+// Also load rankings when class is selected from dropdown
+document.getElementById('classSelect').addEventListener('change', function() {
+    if (this.value) {
+        loadStudents(); // This will load students AND rankings
+    }
+});
+
+// Initialize
+loadClassesData();
+loadTopic();
     document.getElementById('loadStudentsBtn').addEventListener('click', loadAnalytics)
 
     loadClassesData();

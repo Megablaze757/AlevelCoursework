@@ -39,24 +39,26 @@
           .eq('user_type', 'Teacher')
           .single();
         
-        const { data: classes, error: classesError } = await supabaseClient
-          .from('classes')
-          .select('class_code, class_name')
-          .eq('school', teacherInfo.school.trim())
-          .order('class_name')
-        
-        const classSelect = document.getElementById('classSelect');
-        classSelect.innerHTML = '<option value="">Select a class...</option>';
+        if (teacherInfo) {
+            const { data: classes, error: classesError } = await supabaseClient
+              .from('classes')
+              .select('class_code, class_name')
+              .eq('school', teacherInfo.school.trim())
+              .order('class_name');
+            
+            const classSelect = document.getElementById('classSelect');
+            classSelect.innerHTML = '<option value="">Select a class...</option>';
 
-        if (classes && classes.length > 0) {
-            classes.forEach(cls => {
-                const option = document.createElement('option');
-                option.value = cls.class_code;
-                option.textContent = cls.class_name || `Class ${cls.class_code}`;
-                classSelect.appendChild(option);
-            });
-        } else {
-            classSelect.innerHTML = '<option value="">No classes available for your school</option>';
+            if (classes && classes.length > 0) {
+                classes.forEach(cls => {
+                    const option = document.createElement('option');
+                    option.value = cls.class_code;
+                    option.textContent = cls.class_name || `Class ${cls.class_code}`;
+                    classSelect.appendChild(option);
+                });
+            } else {
+                classSelect.innerHTML = '<option value="">No classes available for your school</option>';
+            }
         }
       } 
     
@@ -81,7 +83,7 @@
             .from('students')
             .select('student_id')
             .eq('school', teacherInfo.school.trim())
-            .eq('class_code', selectedClass);
+            .eq('class_code', parseInt(selectedClass));
         
         if (students && students.length > 0) {
             const studentIds = students.map(s => s.student_id);

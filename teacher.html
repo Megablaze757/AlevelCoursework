@@ -7,8 +7,7 @@
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body>
- <!-- Class Selection for Teachers -->
-<div>
+ <div>
     <label for="classSelect">Select Class:</label>
     <select id="classSelect">
         <option value="">Loading classes...</option>
@@ -25,7 +24,6 @@
     </select>
     <button id="loadStudentsBtn">View Students Analytics</button>
 </div>
-        <!--Topic stats display -->
     <div class='statsContainer'>
         <div class='statsBox'>
             <button class='backButton' id='backToHome'>← Back to Home</button>
@@ -63,7 +61,6 @@
       let teacherId = 'TeacherTest'
 
       async function loadClassesData(){
-        //  Get teacher's school from userinfo
         const { data: teacherInfo, error: teacherError } = await supabaseClient
           .from('userinfo')
           .select('school')
@@ -71,13 +68,12 @@
           .eq('user_type', 'Teacher')
           .single();
         
-        // Get classes for that school
         const { data: classes, error: classesError } = await supabaseClient
           .from('classes')
           .select('class_code, class_name')
           .eq('school', teacherInfo.school)
           .order('class_name')
-        // Populate the dropdown
+
         const classSelect = document.getElementById('classSelect');
         classSelect.innerHTML = '<option value="">Select a class...</option>';
 
@@ -92,12 +88,12 @@
             classSelect.innerHTML = '<option value="">No classes available for your school</option>';
         }
       } 
-    //Event listener for the class dropdown to trigger students being loaded
+
     document.getElementById('loadClassBtn').addEventListener('click', loadStudents)
-    //Function to load the students based on the class
    
     async function loadStudents() {
         const classSelect = document.getElementById('classSelect');
+        const studentSelect = document.getElementById('studentSelect');
         const selectedClass = classSelect.value;
         console.log(selectedClass)
 
@@ -105,7 +101,6 @@
             return;
         }
 
-        // Get teacher's school
         const { data: teacherInfo, error: teacherError } = await supabaseClient
             .from('userinfo')
             .select('school')
@@ -113,23 +108,18 @@
             .eq('user_type', 'Teacher')
             .single();
 
-        //get class code
         const {data: classes} = await supabaseClient
             .from('classes')
             .select('class_code')
             .eq('class_code', selectedClass)
         
-        // Get students 
         const { data: students, error } = await supabaseClient
             .from('userinfo')
             .select('name')
             .eq('class', selectedClass);
             console.log(students);
             
-        
-        
-        const studentSelect = document.getElementById('studentSelect');
-        classSelect.innerHTML = '<option value="">Select a student...</option>';
+        studentSelect.innerHTML = '<option value="">Select a student...</option>';
 
         if (students && students.length > 0) {
             students.forEach(s => {
@@ -144,7 +134,14 @@
     }
     
         async function loadAnalytics() {
+            const studentSelect = document.getElementById('studentSelect');
             const studentId = studentSelect.value;
+            
+            if (!studentId || studentId === '') {
+                console.log('No student selected');
+                return;
+            }
+            
              const{data: scores} = await supabaseClient
                 .from('topic_performance')
                 .select('*')
@@ -176,6 +173,9 @@
 
         }
           async function loadTopicStats(topicId, topicName){
+            const studentSelect = document.getElementById('studentSelect');
+            const studentId = studentSelect.value;
+            
             document.getElementById('topicName').textContent = topicName;
   
             const {data: topicPerf} = await supabaseClient
@@ -225,15 +225,8 @@
             });
         }
         
-
-
-        
-    //Add  an event listener to the button
-
     document.getElementById('loadStudentsBtn').addEventListener('click', loadAnalytics)
 
-    
-  // Call the function
   loadClassesData();
   loadTopic();
     </script>

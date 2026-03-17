@@ -127,8 +127,15 @@ if (data[0].password_hash === hashedPassword) {
    }
    return product
  }
-
-
+//Signup button event Listener
+  let signupButton = document.getElementById('btnSignup');
+  if (signupButton) {
+    signupButton.addEventListener('click', function () {
+      window.location.href = 'signup.html';
+    });
+  }
+});
+    
 
     
     document.addEventListener('DOMContentLoaded', function () {

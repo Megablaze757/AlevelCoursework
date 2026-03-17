@@ -89,7 +89,7 @@
         // Get students 
         const { data: students, error } = await supabaseClient
             .from('userinfo')
-            .select('name')
+            .select('*')
             .eq('school', teacherInfo.school)
             .eq('class', classes.class_code);
                 console.log(students);

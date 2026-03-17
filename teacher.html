@@ -69,7 +69,6 @@
         const selectedClass = classSelect.value;
 
         if (!selectedClass || selectedClass === '') {
-            console.log('No class selected');
             return;
         }
 
@@ -80,22 +79,6 @@
             .eq('class_code', selectedClass);
         
         console.log(students);
-            // Create a map of student Id to names
-            const nameMap = {};
-            userinfo.forEach(user => {
-                nameMap[user.username] = user.name || user.username;
-            });
-            
-            // Populate the student dropdown
-            const studentSelect = document.getElementById('studentSelect');
-            studentSelect.innerHTML = '<option value="">Select a student...</option>';
-            
-            students.forEach(student => {
-                const option = document.createElement('option');
-                option.value = student.student_id;
-                option.textContent = nameMap[student.student_id] || student.student_id;
-                studentSelect.appendChild(option);
-            });
     }
     
   // Call the function

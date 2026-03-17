@@ -85,7 +85,7 @@
             .from('students')
             .select('student_id, student_name')
             .eq('school', teacherInfo.school)
-            .eq('class', selectedClass);
+            .eq('class_code', selectedClass);
                 console.log(students);
             }
     

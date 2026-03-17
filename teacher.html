@@ -208,6 +208,7 @@
             const{data:topics, error} = await supabaseClient
                 .from('topics')
                 .select('topic_name, topic_id');
+            console.log(topics);
             
             topicsList.innerHTML = '';
             

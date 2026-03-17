@@ -40,7 +40,7 @@
           .single();
         
         if (teacherInfo) {
-            const schoolName = teacherInfo.school;
+            const schoolName = teacherInfo.school.replace('\n', '');
             
             const { data: classes, error: classesError } = await supabaseClient
               .from('classes')
@@ -81,7 +81,7 @@
             .eq('user_type', 'Teacher')
             .single();
         
-        const schoolName = teacherInfo.school;
+        const schoolName = teacherInfo.school.replace('\n', '');
         
         const { data: students, error } = await supabaseClient
             .from('students')
@@ -106,6 +106,8 @@
                 option.textContent = user.name || user.username;
                 studentSelect.appendChild(option);
             });
+        } else {
+            document.getElementById('studentSelect').innerHTML = '<option value="">No students in this class</option>';
         }
     }
     

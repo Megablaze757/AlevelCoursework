@@ -24,13 +24,13 @@
     </div>
 
     <script>
-        const supabase = supabase.createClient(
+        const supabaseClient = supabase.createClient(
             'https://pxjndwrkafegopsolnde.supabase.co',
             'sb_publishable_eOUJ3K3GNczOncszRwYhyA_A1QAw72F'
         );
 
         async function loadClasses() {
-            const { data: classes } = await supabase
+            const { data: classes } = await supabaseClient
                 .from('classes')
                 .select('class_code, class_name')
                 .eq('school', 'test1\n');
@@ -50,7 +50,7 @@
             const classCode = document.getElementById('classSelect').value;
             if (!classCode) return;
 
-            const { data: students } = await supabase
+            const { data: students } = await supabaseClient
                 .from('students')
                 .select('student_id')
                 .eq('school', 'test1\n')
@@ -61,7 +61,7 @@
                 return;
             }
 
-            const { data: users } = await supabase
+            const { data: users } = await supabaseClient
                 .from('userinfo')
                 .select('username, name')
                 .in('username', students.map(s => s.student_id));

@@ -521,7 +521,19 @@
             'https://pxjndwrkafegopsolnde.supabase.co',
             'sb_publishable_eOUJ3K3GNczOncszRwYhyA_A1QAw72F'
         );
-        let studentId = 'StudentTest';
+        
+        // Check if user is logged in redirect to index.html if not
+        const username = sessionStorage.getItem('username');
+        if (!username) {
+            window.location.href = 'index.html';
+
+            throw new Error('No username found, redirecting to login');
+        }
+        
+   
+        let studentId = username;
+
+        console.log('Current student:', studentId);
 
         async function loadOverallStats() {
             const{data: scores} = await supabaseClient

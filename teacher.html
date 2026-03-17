@@ -113,7 +113,7 @@
         }
     }
     
-        async loadAnalytics() {
+        async function loadAnalytics() {
             const studentId = studentSelect.value;
              const{data: scores} = await supabaseClient
                 .from('topic_performance')

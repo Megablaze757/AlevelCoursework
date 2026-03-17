@@ -30,7 +30,7 @@
         );
 
         async function loadClasses() {
-            const { data: classes } = await supabaseClient
+            const { data: classes, error } = await supabaseClient
                 .from('classes')
                 .select('class_code, class_name')
                 .eq('school', 'test1\n');
@@ -38,25 +38,32 @@
             const select = document.getElementById('classSelect');
             select.innerHTML = '<option value="">Select a class...</option>';
             
-            classes.forEach(cls => {
-                const option = document.createElement('option');
-                option.value = cls.class_code;
-                option.textContent = cls.class_name;
-                select.appendChild(option);
-            });
+            if (classes && classes.length > 0) {
+                classes.forEach(cls => {
+                    const option = document.createElement('option');
+                    option.value = cls.class_code;
+                    option.textContent = cls.class_name;
+                    select.appendChild(option);
+                });
+            }
         }
 
         async function loadStudents() {
             const classCode = document.getElementById('classSelect').value;
             if (!classCode) return;
 
-            const { data: students } = await supabaseClient
+            const { data: students, error } = await supabaseClient
                 .from('students')
                 .select('student_id')
                 .eq('school', 'test1\n')
-                .eq('class_code', classCode);
+                .eq('class_code', parseInt(classCode));
 
-            if (!students.length) {
+            if (error) {
+                console.log(error);
+                return;
+            }
+
+            if (!students || students.length === 0) {
                 document.getElementById('studentSelect').innerHTML = '<option value="">No students</option>';
                 return;
             }
@@ -69,12 +76,14 @@
             const select = document.getElementById('studentSelect');
             select.innerHTML = '<option value="">Select a student...</option>';
             
-            users.forEach(user => {
-                const option = document.createElement('option');
-                option.value = user.username;
-                option.textContent = user.name || user.username;
-                select.appendChild(option);
-            });
+            if (users) {
+                users.forEach(user => {
+                    const option = document.createElement('option');
+                    option.value = user.username;
+                    option.textContent = user.name || user.username;
+                    select.appendChild(option);
+                });
+            }
         }
 
         document.getElementById('loadClassBtn').addEventListener('click', loadStudents);

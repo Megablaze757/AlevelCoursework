@@ -1,166 +1,104 @@
 <!DOCTYPE html>
 <html>
   <head>
+    <title>Sign Up - Revision App</title>
     <script src='https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2'></script>
-  <style>
-    
-    /* School Section styling */
-    .schoolSection {
-      margin: 20px;
-      padding: 15px;
-    }
-    /* Style for dropdown */
-    #schoolSelect{
-      width: 250px;
-      padding: 8px;
-      margin: 5px 0;
-    }
-   /* style for input area */
-    #newSchoolContainer {
-      margin-top: 10px;
-      padding: 10px;
-      
-    }
-    
-
-    #newSchool {
-      width: 200px;
-      padding: 6px;
-      margin-right: 5px;
-    }
-
-    #addSchoolBtn {
-      padding: 6px 12px;
-
-    }
-    /* Class section styling */
-.class-section {
-    margin: 20px 0;
-    padding: 15px;
-    border: 1px solid #ddd;
-    border-radius: 5px;
-    background-color: #fafafa;
-}
-
-/* Style for class dropdown */
-#classSelect {
-    width: 250px;
-    padding: 8px;
-    margin: 5px 0;
-    border: 1px solid #ccc;
-    border-radius: 4px;
-}
-
-/* Style for disabled dropdown */
-#classSelect:disabled {
-    background-color: #f5f5f5;
-    cursor: not-allowed;
-
-}
-
-/* Style for new class input area */
-#newClassContainer {
-    margin-top: 10px;
-    padding: 10px;
-
-}
-
-#newClass {
-    width: 200px;
-    padding: 6px;
-
-}
-
-#addClassBtn {
-    padding: 6px 12px;
-
-}
-
-
-
-    
-    
-  </style>
+    <link rel="stylesheet" href="stylesignup.css">
   </head>
   
   <body>
-    <div class='signupForm'>
-    <label for='Username'>Username</label><br>
-    <input type='text' id='Username' username=username><br>
-    
-    <label for='Password'>Password</label><br>
-    <input type='text' id='Password' password=password><br>
-
-    <label for='Name'>Name</label><br>
-    <input type='text' id='Name' name=name><br>
-    <label for='isTeacher'>Are you a Teacher</label> 
-    //CheckBox to see if the person signing up is a teacher
-    <input type="checkbox" class='isTeacher' id='isTeacher'>
-      
-      
-      <!-- School Selection -->
-      <div class='schoolSection'>
-        <label for='schoolSelect'>Select School</label><br>
-
-        <!-- Dropdown for schools -->
-        <select id="schoolSelect">
-          <option value="">Loading schools...</option>
-        </select>
-
-        <!-- Container for adding a new school hidden by default -->
-         <div id='newSchoolContainer' style='display:none;'>
-            <label for='newSchool'>Add a new school</label>
-            <input type="text" id="newSchool" placeholder="Enter school name">
-            <button type="button" id="addSchoolBtn">Add School</button>
-          </div>
-      </div>
-      
-      <!-- Class section -->
-      <div class='classSection' id='classSection' style='display: block;'>
-        <label for='classSelect'> Select class></label><br>
-
-        <!-- Class dropdown -->
-        <select id='classSelect' disabled>
-          <option value=''> Select school first</option>
-        </select>
-
-        <!-- container for adding a new class -->
-        <div id='newClassContainer' style='display: none;'>
-          <label for='newSchool'>Add a new Class</label><br>
-          <input type='text' id='newClass' placeholder='Enter class name'>
-          <button type='button' id='addClassBtn'> Add Class </button>
-            
-          
+    <!-- Main container for the signup form -->
+    <div class="container">
+      <!-- Signup form -->
+      <div class='signupForm'>
+        <h2>Create an Account</h2>
+        
+        <!-- Username input field -->
+        <label for='Username'>Username</label><br>
+        <input type='text' id='Username' username=username placeholder="Enter username"><br>
+        
+        <!-- Password input field -->
+        <label for='Password'>Password</label><br>
+        <input type='password' id='Password' password=password placeholder="Enter password (min. 8 characters)"><br>
+        
+        <!-- Full name input field -->
+        <label for='Name'>Full Name</label><br>
+        <input type='text' id='Name' name=name placeholder="Enter your full name"><br>
+        
+        <!-- Teacher checkbox -->
+        <div class="checkbox-container">
+          <label for='isTeacher'>Are you a Teacher?</label> 
+          <input type="checkbox" class='isTeacher' id='isTeacher'>
         </div>
         
-      </div>
+        <!-- School Selection Section -->
+        <div class='schoolSection'>
+          <label for='schoolSelect'>Select School</label><br>
+          
+          <!-- Dropdown for schools -->
+          <select id="schoolSelect">
+            <option value="">Loading schools...</option>
+          </select>
+
+          <!-- Container for adding a new school (hidden by default) -->
+          <div id='newSchoolContainer' style='display:none;'>
+            <label for='newSchool'>Add a new school</label>
+            <input type="text" id="newSchool" placeholder="Enter school name">
+            <button type="button" id="addSchoolBtn" class="small-btn">Add School</button>
+          </div>
+        </div>
         
-      
-    <button type="button" id='btnSubmit'>Submit</button>
-    
-    <div class='statusMessage' id='statusMessage'></div>
+        <!-- Class Selection Section -->
+        <div class='classSection' id='classSection' style='display: block;'>
+          <label for='classSelect'>Select Class</label><br>
+
+          <!-- Class dropdown (disabled until school is selected) -->
+          <select id='classSelect' disabled>
+            <option value=''>Select school first</option>
+          </select>
+
+          <!-- Container for adding a new class (hidden by default) -->
+          <div id='newClassContainer' style='display: none;'>
+            <label for='newClass'>Add a new Class</label><br>
+            <input type='text' id='newClass' placeholder='Enter class name'>
+            <button type='button' id='addClassBtn' class="small-btn">Add Class</button>
+          </div>
+        </div>
+        
+        <!-- Submit button -->
+        <button type="button" id='btnSubmit' class="submit-btn">Sign Up</button>
+        
+        <!-- Status message display area -->
+        <div class='statusMessage' id='statusMessage'></div>
+        
+        <!-- Login link -->
+        <div class="login-link">
+          Already have an account? <a href="index.html">Login here</a>
+        </div>
+      </div>
     </div>
+    
   <script>
+    // Supabase configuration
     const supabase_url = 'https://pxjndwrkafegopsolnde.supabase.co'
     const supabase_key = 'sb_publishable_eOUJ3K3GNczOncszRwYhyA_A1QAw72F'
+    
+    // Initialize Supabase client
     const supabaseClient = supabase.createClient(
       'https://pxjndwrkafegopsolnde.supabase.co',
       'sb_publishable_eOUJ3K3GNczOncszRwYhyA_A1QAw72F'
     );
 
+    // Get DOM elements
     let teacherCheckbox =  document.getElementById('isTeacher')
-    
     let usernameElement = document.getElementById('Username');
     let passwordElement = document.getElementById('Password');
     let nameElement = document.getElementById('Name')
-
     let statusElement = document.getElementById('statusMessage')
-
     let schoolSelect = document.getElementById('schoolSelect');
     let newSchoolContainer = document.getElementById('newSchoolContainer');
     let newSchoolInput = document.getElementById('newSchool');
     let addSchoolBtn = document.getElementById('addSchoolBtn');
-    
     let classSection = document.getElementById('classSection');
     let classSelect = document.getElementById('classSelect');
     let newClassContainer = document.getElementById('newClassContainer');
@@ -170,6 +108,7 @@
     let selectedSchoolId = null;
     let userType = ''
     
+    // Load schools from database
     async function loadSchools() {
         const {data, error} = await supabaseClient
           .from('schools')
@@ -177,7 +116,7 @@
           .order('school');
 
         console.log(data)
-      schoolSelect.innerHTML = '<option value=""> Select a School</option>';
+      schoolSelect.innerHTML = '<option value="">Select a School</option>';
 
       data.forEach(school => {
         let option = document.createElement('option')
@@ -192,6 +131,7 @@
     schoolSelect.appendChild(otherOption);
     }
 
+    // Toggle add school input visibility
     function toggleAddSchool() {
       let selectedValue = schoolSelect.value;
 
@@ -202,6 +142,7 @@
       }
     }
 
+    // Add new school to database
     async function addNewSchool() {
       let newSchoolName = newSchoolInput.value.trim()
 
@@ -225,6 +166,7 @@
       }
     }
 
+    // Load classes based on selected school
     async function loadClasses(school) {
       if(!school || school === '' || school === 'other') {
         classSection.style.display = 'none';
@@ -255,6 +197,7 @@
       }
     }
 
+    // Toggle add class input visibility
     function toggleNewClassInput() {
       let selectedValue = classSelect.value;
       
@@ -265,10 +208,12 @@
       }
     }
 
+    // Update status message
     function updateStatus(message) {
       statusElement.textContent = message;
     }
 
+    // Hash function for password
     function hash(password) {
       let product = 1;
       for(let i = 0; i < password.length; i++) {
@@ -277,6 +222,7 @@
       return product
     }
 
+    // Add new class to database
     async function addNewClass() {
       let className = newClassInput.value.trim();
 
@@ -304,15 +250,16 @@
               class_name: className,
               school: schoolSelect.value
             }]);
-          updateStatus('class added successfully');
+          updateStatus('Class added successfully');
         } else {
-          updateStatus('class not added');
+          updateStatus('Class not added');
         }
         
         await loadClasses(schoolSelect.value);
       }
     }
 
+    // Get user type from checkbox
     function getUserType(){
       var isChecked = teacherCheckbox.checked;
       console.log(isChecked)
@@ -323,6 +270,7 @@
       }
     }
 
+    // Validate all form inputs
     async function checkValidation() {
       let selectedClass = classSelect.value;
       let selectedSchool = schoolSelect.value;
@@ -333,33 +281,34 @@
         .eq('username', usernameElement.value);
 
       if ((error || !data || data.length === 0) && (usernameElement.value.length > 0)) {
-        if (passwordElement.value.length > 8 && !passwordElement.value.includes(' ')) {
-          if (nameElement.value.length > 2 && nameElement.value.length < 50 && /^[a-zA-Z]+$/.test(nameElement.value)) {
+        if (passwordElement.value.length >= 8 && !passwordElement.value.includes(' ')) {
+          if (nameElement.value.length > 2 && nameElement.value.length < 50 && /^[a-zA-Z\s]+$/.test(nameElement.value)) {
             if (selectedSchool && selectedSchool !== '' && !(selectedSchool === 'other' )) {
               if (selectedClass && selectedClass !== '' && selectedClass !== 'none' && !(selectedClass === 'other'  )) {
                 return true;
               } else {
-                updateStatus('Class invalid');
+                updateStatus('Please select a valid class');
                 return false;
               }
             } else {
-              updateStatus('School invalid');
+              updateStatus('Please select a valid school');
               return false;
             }
           } else {
-            updateStatus('Name invalid');
+            updateStatus('Name must be 3-50 letters only');
             return false;
           }
         } else {
-          updateStatus('Password invalid');
+          updateStatus('Password must be at least 8 characters and no spaces');
           return false;
         }
       } else {
-        updateStatus('Username invalid');
+        updateStatus('Username already taken or invalid');
         return false;
       }
     }
 
+    // Upload user credentials to database
     async function uploadCredentials() {
       getUserType()
       
@@ -375,7 +324,7 @@
           updateStatus('Registration failed: ' + error.message);
         } else {
           console.log('Upload successful:', data);
-          updateStatus('Registration successful!');
+          updateStatus('Registration successful! Redirecting...');
           setTimeout(() => {
             window.location.href = 'index.html'
           },1500)
@@ -383,6 +332,7 @@
       }
     }
     
+    // Event listeners when DOM is loaded
     document.addEventListener('DOMContentLoaded', function () {
       loadSchools()
 

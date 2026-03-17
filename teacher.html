@@ -29,48 +29,36 @@
             'https://pxjndwrkafegopsolnde.supabase.co',
             'sb_publishable_eOUJ3K3GNczOncszRwYhyA_A1QAw72F'
         );
-
-      async function checkData() {
-        const { data: schools, error: schoolError } = await supabaseClient
-          .from('schools')
-          .select('*');
-        console.log('All schools:', schools);
-        
-        const { data: classes, error: classesError } = await supabaseClient
-          .from('classes')
-          .select('*');
-        console.log('All classes:', classes);
-        
-        const { data: userinfo, error: userError } = await supabaseClient
-          .from('userinfo')
-          .select('*');
-        console.log('All userinfo:', userinfo);
-      }
-      
-      checkData();
+      let teacherId = 'TeacherTest'
 
       async function loadClassesData(){
-        const { data: classes, error: classesError } = await supabaseClient
-          .from('classes')
-          .select('class_code, class_name')
-          .eq('school', 'test1')
-          .order('class_name');
+        const { data: teacherInfo, error: teacherError } = await supabaseClient
+          .from('userinfo')
+          .select('school')
+          .eq('username', teacherId)
+          .eq('user_type', 'Teacher')
+          .single();
         
-        console.log('Classes:', classes);
-        console.log('Error:', classesError);
-        
-        const classSelect = document.getElementById('classSelect');
-        classSelect.innerHTML = '<option value="">Select a class...</option>';
+        if (teacherInfo) {
+            const { data: classes, error: classesError } = await supabaseClient
+              .from('classes')
+              .select('class_code, class_name')
+              .eq('school', 'test1\n')
+              .order('class_name');
+            
+            const classSelect = document.getElementById('classSelect');
+            classSelect.innerHTML = '<option value="">Select a class...</option>';
 
-        if (classes && classes.length > 0) {
-            classes.forEach(cls => {
-                const option = document.createElement('option');
-                option.value = cls.class_code;
-                option.textContent = cls.class_name || `Class ${cls.class_code}`;
-                classSelect.appendChild(option);
-            });
-        } else {
-            classSelect.innerHTML = '<option value="">No classes available for your school</option>';
+            if (classes && classes.length > 0) {
+                classes.forEach(cls => {
+                    const option = document.createElement('option');
+                    option.value = cls.class_code;
+                    option.textContent = cls.class_name || `Class ${cls.class_code}`;
+                    classSelect.appendChild(option);
+                });
+            } else {
+                classSelect.innerHTML = '<option value="">No classes available for your school</option>';
+            }
         }
       } 
     
@@ -87,11 +75,8 @@
         const { data: students, error } = await supabaseClient
             .from('students')
             .select('student_id')
-            .eq('school', 'test1')
+            .eq('school', 'test1\n')
             .eq('class_code', parseInt(selectedClass));
-        
-        console.log('Students:', students);
-        console.log('Students error:', error);
         
         if (students && students.length > 0) {
             const studentIds = students.map(s => s.student_id);
@@ -100,8 +85,6 @@
                 .from('userinfo')
                 .select('username, name')
                 .in('username', studentIds);
-            
-            console.log('UserInfo:', userInfo);
             
             const studentSelect = document.getElementById('studentSelect');
             studentSelect.innerHTML = '<option value="">Select a student...</option>';
@@ -112,8 +95,6 @@
                 option.textContent = user.name || user.username;
                 studentSelect.appendChild(option);
             });
-        } else {
-            document.getElementById('studentSelect').innerHTML = '<option value="">No students in this class</option>';
         }
     }
     

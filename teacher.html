@@ -81,7 +81,7 @@
             .single();
 
         //get class code
-        const {data: classes,error} = await supabaseClient
+        const {data: classes} = await supabaseClient
             .from('classes')
             .select('class_code')
             .eq('class_name', selectedClass)

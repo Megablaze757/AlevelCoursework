@@ -23,7 +23,7 @@
       <div id='statusMessage' class='status-message'></div>
 
       <div>
-      <button id='btnSignup'>Sign Up</button>
+      <button type="button" id='btnSignup'>Sign Up</button>
         </div>
 
 
@@ -32,82 +32,49 @@
 
   <script>
 
-    //The supabase url
     const supabase_url = 'https://pxjndwrkafegopsolnde.supabase.co'
-    //Supabase key
     const supabase_key = 'sb_publishable_eOUJ3K3GNczOncszRwYhyA_A1QAw72F'
-    //Initialize supabase client
     const supabaseClient = supabase.createClient(
       'https://pxjndwrkafegopsolnde.supabase.co',
       'sb_publishable_eOUJ3K3GNczOncszRwYhyA_A1QAw72F'
     );
 
-    //fetch the data from the username field
     let usernameElement = document.getElementById('Username');
     let passwordElement = document.getElementById('Password');
-    
-
-
-
-
-    //get the status element
     let statusElement = document.getElementById('statusMessage')
 
-    //Update the status message
     function updateStatus(message) {
     statusElement.textContent = message;
-    
     }
     
-
-    //function to check if username is in database
     async function checkCredentials() {
 
-
-      //Create a hash of the password in the form
       hashedPassword = hash(passwordElement.value).toString()
-      //Fetches from the table username
-      //if not found returns not found to the console
       const { data, error } = await supabaseClient
-        //Sql query to fetch username
         .from('userinfo')
         .select('*')
         .eq('username', usernameElement.value)
 
-
-
-      //Log the query to the console
       console.log('Query:', { data, error })
-      //Checks if data array if empty
       if (error || !data || data.length === 0) {
         updateStatus('Username not found')
       }
 
-
-      //If there are no errors and the array is not 0, then it goes to the else statement  
       else {
 
-        //Checks if the Row with the username passwords matches the password entered
-        //Made it so it checks the hash function of the password
-
-        
         console.log(hashedPassword)
-if (data[0].password_hash === hashedPassword) {
+        if (data[0].password_hash === hashedPassword) {
           updateStatus('Login Succesful')
-          //Store users information in sessions storage
           sessionStorage.setItem('currentUser',data[0].username);
-          //Check if teacher
           console.log(data[0].user_type);
           if(data[0].user_type === 'Teacher') {
           setTimeout(() => {
-            window.location.href = 'teacher.html'
-        //added a delay to allow the user to have time to see the message before redirecting.    
+            window.location.href = 'teacher.html'  
         },1500)
-          } else {//Make page redirect to the main page after login is successful
-          //setTimeout(() => {
-            //window.location.href = 'main.html'
-        //added a delay to allow the user to have time to see the message before redirecting.    
-        //},1500)
+          } else {
+          setTimeout(() => {
+            window.location.href = 'main.html'   
+        },1500)
         }
         }
         else {
@@ -117,41 +84,29 @@ if (data[0].password_hash === hashedPassword) {
 
     };
 
-//This is the function to hash the password of the user
  function hash(password) {
    let product = 1;
-   //iterates through string
    for(let i = 0; i < password.length; i++) {
-     // mutiplies product by the code
      product *= password.charCodeAt(i);
    }
    return product
  }
-//Signup button event Listener
-  let signupButton = document.getElementById('btnSignup');
-  if (signupButton) {
-    signupButton.addEventListener('click', function () {
-      window.location.href = 'signup.html';
-    });
-  }
 
-    
-
-    
-    document.addEventListener('DOMContentLoaded', function () {
-      //Get the element of the submit button   
+    document.addEventListener('DOMContentLoaded', function () {   
       let button = document.getElementById('btnSubmit');
-      // Add event listener to the button
       button.addEventListener('click', function () {
-
-        //log the value of the username form to the console
         console.log(usernameElement.value);
         checkCredentials()
       });
 
+      let signupButton = document.getElementById('btnSignup');
+      if (signupButton) {
+        signupButton.addEventListener('click', function () {
+          window.location.href = 'signup.html';
+        });
+      }
 
     });
-
 
   </script>
 </body>

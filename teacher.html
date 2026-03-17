@@ -114,21 +114,9 @@
             return;
         }
 
-        const { data: teacherInfo, error: teacherError } = await supabaseClient
+        const {data: students, error} = await supabaseClient
             .from('userinfo')
-            .select('school')
-            .eq('username', teacherId)
-            .eq('user_type', 'Teacher')
-            .single();
-
-        const {data: classes} = await supabaseClient
-            .from('classes')
-            .select('class_code')
-            .eq('class_code', selectedClass)
-        
-        const { data: students, error } = await supabaseClient
-            .from('userinfo')
-            .select('name')
+            .select('name, username')
             .eq('class', selectedClass);
             console.log(students);
             
@@ -137,8 +125,9 @@
         if (students && students.length > 0) {
             students.forEach(s => {
                 const option = document.createElement('option');
-                option.value = s.name;
-                option.textContent = s.name || `student ${s.name}`;
+                // Use username as the value since that's likely the student_id
+                option.value = s.username;
+                option.textContent = s.name || `student ${s.username}`;
                 studentSelect.appendChild(option);
             });
         } else {
@@ -155,7 +144,8 @@
                 return;
             }
             
-             const{data: scores} = await supabaseClient
+            // Load overall analytics
+            const{data: scores} = await supabaseClient
                 .from('topic_performance')
                 .select('*')
                 .eq('student_id', studentId);
@@ -183,11 +173,20 @@
             document.getElementById('correct').textContent = totalCorrect;
             document.getElementById('incorrect').textContent = totalIncorrect;
             document.getElementById('topicName').textContent = 'Overall Performance';
-
+            
+            // Load strengths and weaknesses for this student
+            await loadStrengths(studentId);
+            await loadWeaknesses(studentId);
         }
-          async function loadTopicStats(topicId, topicName){
+        
+        async function loadTopicStats(topicId, topicName){
             const studentSelect = document.getElementById('studentSelect');
             const studentId = studentSelect.value;
+            
+            if (!studentId || studentId === '') {
+                console.log('No student selected');
+                return;
+            }
             
             document.getElementById('topicName').textContent = topicName;
   
@@ -237,7 +236,8 @@
                 });
             });
         }
-                async function loadStrengths() {
+        
+        async function loadStrengths(studentId) {
             const strengthsList = document.getElementById('strengthsList');
             strengthsList.innerHTML = '';
             
@@ -246,15 +246,19 @@
                 .select('topics(topic_name)')
                 .eq('student_id', studentId);
             
-            strengths.forEach ( s => {
-                const div = document.createElement('div');
-                div.className = 'strengthItem';
-                div.textContent = s.topics.topic_name;
-                strengthsList.appendChild(div);
-            });
+            if (strengths && strengths.length > 0) {
+                strengths.forEach(s => {
+                    const div = document.createElement('div');
+                    div.className = 'strengthItem';
+                    div.textContent = s.topics.topic_name;
+                    strengthsList.appendChild(div);
+                });
+            } else {
+                strengthsList.innerHTML = '<div>No strengths identified yet</div>';
+            }
         }
         
-        async function loadWeaknesses() {
+        async function loadWeaknesses(studentId) {
             const weaknessesList = document.getElementById('weaknessesList');
             weaknessesList.innerHTML = '';
             
@@ -263,21 +267,22 @@
                 .select('topics(topic_name)')
                 .eq('student_id', studentId);
             
-            weaknesses.forEach ( w => {
-                const div = document.createElement('div');
-                div.className = 'weaknessItem';
-                div.textContent = w.topics.topic_name;
-                weaknessesList.appendChild(div);
-            });
+            if (weaknesses && weaknesses.length > 0) {
+                weaknesses.forEach(w => {
+                    const div = document.createElement('div');
+                    div.className = 'weaknessItem';
+                    div.textContent = w.topics.topic_name;
+                    weaknessesList.appendChild(div);
+                });
+            } else {
+                weaknessesList.innerHTML = '<div>No weaknesses identified yet</div>';
+            }
         }
-        
         
     document.getElementById('loadStudentsBtn').addEventListener('click', loadAnalytics)
 
-  loadClassesData();
-  loadTopic();
-  loadWeaknesses();
-  loadStrengths();
+    loadClassesData();
+    loadTopic();
     </script>
 </body>
 </html>

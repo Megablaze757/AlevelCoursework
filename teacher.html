@@ -170,6 +170,54 @@
             document.getElementById('topicName').textContent = 'Overall Performance';
 
         }
+          async function loadTopicStats(topicId, topicName){
+            document.getElementById('topicName').textContent = topicName;
+  
+            const {data: topicPerf} = await supabaseClient
+                .from('topic_performance')
+                .select('*')
+                .eq('student_id', studentId)
+                .eq('topic_id', topicId);
+            
+            if (topicPerf && topicPerf.length > 0) {
+                const attempted = topicPerf[0].questions_attempted || 0;
+                const correct = topicPerf[0].questions_correct || 0;
+                const incorrect = attempted - correct;
+                const accuracy = attempted > 0 ? Math.round((correct/attempted) * 100) : 0;
+                
+                document.getElementById('accuracy').textContent = accuracy + '%';
+                document.getElementById('totalQuestions').textContent = attempted;
+                document.getElementById('correct').textContent = correct;
+                document.getElementById('incorrect').textContent = incorrect;
+            } else {
+                document.getElementById('accuracy').textContent = '0%';
+                document.getElementById('totalQuestions').textContent = '0';
+                document.getElementById('correct').textContent = '0';
+                document.getElementById('incorrect').textContent = '0';
+            }
+        }
+        
+        async function loadTopic(){
+            const topicsList = document.getElementById('topicsList');
+            
+            const{data:topics, error} = await supabaseClient
+                .from('topics')
+                .select('topic_name, topic_id');
+            
+            topicsList.innerHTML = '';
+            
+            topics.forEach(topic => {
+                const button = document.createElement('button');
+                button.className = 'topicButton';
+                button.textContent = topic.topic_name;
+                button.setAttribute('data-topic-id', topic.topic_id);
+                topicsList.appendChild(button);
+
+                button.addEventListener('click', function() {
+                    loadTopicStats(topic.topic_id, topic.topic_name);
+                });
+            });
+        }
         
 
 

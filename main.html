@@ -273,7 +273,9 @@
   // Wait for the DOM to be fully loaded
   document.addEventListener('DOMContentLoaded', function() {
     if (!sessionStorage.getItem('username')) {
-      window.location.href = 'index.html';
+      setTimeout(() => {
+        window.location.href = 'index.html';
+      }, 2000);
       return;
     }
     

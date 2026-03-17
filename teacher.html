@@ -79,13 +79,19 @@
             .eq('username', teacherId)
             .eq('user_type', 'Teacher')
             .single();
+
+        //get class code
+        const {data: classes,error} = await supabaseClient
+            .from('classes')
+            .select('class_code')
+            .eq('class_name', selectedClass)
         
-        // Get students where school = teacher's school AND class = selected class name
+        // Get students 
         const { data: students, error } = await supabaseClient
             .from('userinfo')
             .select('name')
             .eq('school', teacherInfo.school)
-            .eq('class', selectedClass);
+            .eq('class', classes.class_code);
                 console.log(students);
             }
     

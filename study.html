@@ -913,7 +913,8 @@ const supabaseClient = supabase.createClient(
     }
       
     document.addEventListener('DOMContentLoaded', async function () {
-      // Next button starts visible - NOT hidden
+
+      questionHolder.innerHTML = ' Click "Next Question" to start';
       
       await getInitialAccuracies();
       await fetchQuestion();

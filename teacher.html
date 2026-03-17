@@ -6,6 +6,7 @@
     <title>Teacher Dashboard</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
+        /* Remove browser defaults - same approach as student page */
         * {
             margin: 0;
             padding: 0;
@@ -13,22 +14,24 @@
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
         }
 
+        /* Create a nice gradient background - matching student page style */
         body {
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             min-height: 100vh;
             padding: 30px 20px;
         }
 
+        /* Main container - keeps everything centered */
         .dashboard-container {
             max-width: 1400px;
             margin: 0 auto;
         }
 
-        /* Selection Section */
+        /* Selection Section - card style like question container */
         .selection-section {
             background: white;
-            border-radius: 20px;
-            padding: 30px;
+            border-radius: 30px;
+            padding: 35px;
             margin-bottom: 30px;
             box-shadow: 0 20px 60px rgba(0,0,0,0.3);
             display: flex;
@@ -37,11 +40,13 @@
             align-items: flex-end;
         }
 
+        /* Individual selection groups */
         .selection-group {
             flex: 1;
             min-width: 250px;
         }
 
+        /* Labels - styled like stat labels */
         .selection-group label {
             display: block;
             margin-bottom: 8px;
@@ -52,11 +57,12 @@
             letter-spacing: 0.5px;
         }
 
+        /* Select dropdowns - matching answer box style */
         .selection-group select {
             width: 100%;
-            padding: 12px 15px;
+            padding: 15px 20px;
             border: 2px solid #e2e8f0;
-            border-radius: 12px;
+            border-radius: 50px;
             font-size: 1rem;
             color: #2d3748;
             background: white;
@@ -71,69 +77,96 @@
         .selection-group select:focus {
             outline: none;
             border-color: #667eea;
-            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.2);
         }
 
+        /* Buttons - matching check answer and next question buttons */
         .btn {
-            padding: 12px 30px;
+            padding: 15px 30px;
             border: none;
-            border-radius: 12px;
+            border-radius: 50px;
             font-size: 1rem;
             font-weight: 600;
             cursor: pointer;
             transition: all 0.3s ease;
+            min-width: 200px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        /* Primary button - like check answer */
+        .btn-primary {
             background: #667eea;
             color: white;
             box-shadow: 0 4px 6px rgba(102, 126, 234, 0.25);
-            min-width: 180px;
         }
 
-        .btn:hover {
+        .btn-primary:hover {
             background: #5a67d8;
             transform: translateY(-2px);
             box-shadow: 0 6px 12px rgba(102, 126, 234, 0.3);
         }
 
-        .btn:active {
-            transform: translateY(0);
+        /* Secondary button - like end session */
+        .btn-secondary {
+            background: white;
+            color: #4a5568;
+            border: 2px solid #e2e8f0;
         }
 
-        /* Stats Container */
+        .btn-secondary:hover {
+            background: #667eea;
+            color: white;
+            border-color: #667eea;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(102, 126, 234, 0.3);
+        }
+
+        .btn:active {
+            transform: scale(0.98);
+        }
+
+        /* Stats Container - card style */
         .stats-container {
             background: white;
-            border-radius: 20px;
-            padding: 30px;
+            border-radius: 30px;
+            padding: 35px;
             margin-bottom: 30px;
             box-shadow: 0 20px 60px rgba(0,0,0,0.3);
         }
 
-        .stats-header {
-            margin-bottom: 25px;
-        }
-
+        /* Stats header */
         .stats-header h2 {
             color: #2d3748;
-            font-size: 1.8rem;
+            font-size: 2rem;
             font-weight: 700;
+            margin-bottom: 25px;
+            background: linear-gradient(135deg, #f7fafc 0%, #edf2f7 100%);
+            padding: 20px 30px;
+            border-radius: 50px;
+            display: inline-block;
+            border-left: 4px solid #667eea;
         }
 
+        /* Stats grid - 4 columns */
         .stats-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 20px;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 25px;
         }
 
+        /* Stat cards - like numCorrect/numIncorrect boxes */
         .stat-card {
             background: linear-gradient(135deg, #f7fafc 0%, #edf2f7 100%);
             padding: 25px;
-            border-radius: 16px;
+            border-radius: 30px;
             text-align: center;
             transition: transform 0.3s ease;
-            border: 1px solid rgba(102, 126, 234, 0.1);
+            border: 2px solid transparent;
         }
 
         .stat-card:hover {
             transform: translateY(-5px);
+            border-color: #667eea;
         }
 
         .stat-label {
@@ -141,16 +174,16 @@
             color: #718096;
             text-transform: uppercase;
             letter-spacing: 0.5px;
-            margin-bottom: 8px;
+            margin-bottom: 10px;
         }
 
         .stat-value {
-            font-size: 2.5rem;
+            font-size: 3rem;
             font-weight: 800;
-            color: #2d3748;
             line-height: 1.2;
         }
 
+        /* Different colors for different stats */
         .stat-value.accuracy {
             color: #48bb78;
         }
@@ -167,30 +200,33 @@
             color: #f56565;
         }
 
-        /* Topics and Analysis Grid */
+        /* Analysis grid - 3 columns like modal layout */
         .analysis-grid {
             display: grid;
             grid-template-columns: 1.5fr 1fr 1fr;
             gap: 25px;
         }
 
+        /* Container styles - matching questionContainer */
         .topics-container, .strengths-container, .weaknesses-container {
             background: white;
-            border-radius: 20px;
-            padding: 25px;
+            border-radius: 30px;
+            padding: 30px;
             box-shadow: 0 20px 60px rgba(0,0,0,0.3);
         }
 
+        /* Section titles */
         .section-title {
-            font-size: 1.3rem;
+            font-size: 1.4rem;
             font-weight: 700;
             color: #2d3748;
             margin-bottom: 20px;
-            padding-bottom: 10px;
+            padding-bottom: 12px;
             border-bottom: 3px solid #667eea;
             display: inline-block;
         }
 
+        /* Topics list - scrollable area */
         .topics-list {
             display: flex;
             flex-direction: column;
@@ -200,12 +236,13 @@
             padding-right: 10px;
         }
 
+        /* Topic buttons - like modal buttons but vertical */
         .topic-button {
             width: 100%;
-            padding: 15px 20px;
+            padding: 18px 25px;
             background: linear-gradient(135deg, #f7fafc 0%, #edf2f7 100%);
             border: 2px solid transparent;
-            border-radius: 12px;
+            border-radius: 50px;
             font-size: 1rem;
             font-weight: 600;
             color: #2d3748;
@@ -226,35 +263,41 @@
             transform: translateX(2px);
         }
 
-        .strength-item, .weakness-item {
-            padding: 15px 20px;
+        /* Strength items - like in modal */
+        .strength-item {
+            padding: 15px 25px;
             margin-bottom: 10px;
-            border-radius: 12px;
+            background: linear-gradient(135deg, #f0fff4 0%, #c6f6d5 100%);
+            color: #276749;
+            border-left: 4px solid #48bb78;
+            border-radius: 50px;
             font-weight: 600;
             animation: slideIn 0.3s ease;
         }
 
-        .strength-item {
-            background: linear-gradient(135deg, #f0fff4 0%, #c6f6d5 100%);
-            color: #276749;
-            border-left: 4px solid #48bb78;
-        }
-
+        /* Weakness items - like in modal */
         .weakness-item {
+            padding: 15px 25px;
+            margin-bottom: 10px;
             background: linear-gradient(135deg, #fff5f5 0%, #fed7d7 100%);
             color: #c53030;
             border-left: 4px solid #f56565;
+            border-radius: 50px;
+            font-weight: 600;
+            animation: slideIn 0.3s ease;
         }
 
+        /* Empty message styling */
         .empty-message {
             padding: 20px;
             text-align: center;
             color: #a0aec0;
             font-style: italic;
             background: #f7fafc;
-            border-radius: 12px;
+            border-radius: 50px;
         }
 
+        /* Animation - same as student page */
         @keyframes slideIn {
             from {
                 opacity: 0;
@@ -266,7 +309,7 @@
             }
         }
 
-        /* Scrollbar Styling */
+        /* Custom scrollbar - matches student page style */
         .topics-list::-webkit-scrollbar {
             width: 8px;
         }
@@ -285,7 +328,28 @@
             background: #5a67d8;
         }
 
-        /* Responsive Design */
+        /* Message styling */
+        .message {
+            padding: 15px 25px;
+            border-radius: 50px;
+            margin-top: 15px;
+            font-weight: 600;
+            animation: slideIn 0.3s ease;
+        }
+
+        .message.success {
+            background: linear-gradient(135deg, #f0fff4 0%, #c6f6d5 100%);
+            color: #276749;
+            border-left: 4px solid #48bb78;
+        }
+
+        .message.error {
+            background: linear-gradient(135deg, #fff5f5 0%, #fed7d7 100%);
+            color: #c53030;
+            border-left: 4px solid #f56565;
+        }
+
+        /* Responsive Design - matches student page */
         @media (max-width: 1024px) {
             .analysis-grid {
                 grid-template-columns: 1fr;
@@ -293,7 +357,7 @@
             
             .selection-section {
                 flex-direction: column;
-                gap: 15px;
+                gap: 20px;
             }
             
             .btn {
@@ -301,7 +365,7 @@
             }
             
             .stat-value {
-                font-size: 2rem;
+                font-size: 2.5rem;
             }
         }
 
@@ -315,41 +379,75 @@
             }
             
             .section-title {
-                font-size: 1.1rem;
+                font-size: 1.2rem;
+            }
+            
+            .stats-header h2 {
+                font-size: 1.5rem;
+                padding: 15px 25px;
             }
         }
 
-        /* Loading State */
+        /* Loading state */
         .loading {
             opacity: 0.7;
             pointer-events: none;
+        }
+
+        /* Back button - matching end session style */
+        .back-button {
+            background: white;
+            border: 2px solid #e2e8f0;
+            color: #4a5568;
+            padding: 12px 30px;
+            border-radius: 50px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-bottom: 20px;
+            display: inline-block;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        .back-button:hover {
+            background: #667eea;
+            color: white;
+            border-color: #667eea;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(102, 126, 234, 0.3);
+        }
+
+        .back-button:active {
+            transform: translateY(0);
         }
     </style>
 </head>
 <body>
     <div class="dashboard-container">
+        <!-- Selection Section - matches student page card style -->
         <div class="selection-section">
             <div class="selection-group">
-                <label for="classSelect">Select Class</label>
+                <label for="classSelect">📚 Select Class</label>
                 <select id="classSelect">
                     <option value="">Loading classes...</option>
                 </select>
             </div>
             
             <div class="selection-group">
-                <label for="studentSelect">Select Student</label>
+                <label for="studentSelect">👤 Select Student</label>
                 <select id="studentSelect">
                     <option value="">Select a class first...</option>
                 </select>
             </div>
             
-            <button class="btn" id="loadClassBtn">Load Class Students</button>
-            <button class="btn" id="loadStudentsBtn">View Student Analytics</button>
+            <button class="btn btn-secondary" id="loadClassBtn">Load Class Students</button>
+            <button class="btn btn-primary" id="loadStudentsBtn">View Student Analytics</button>
         </div>
 
+        <!-- Stats Container - matches question container style -->
         <div class="stats-container">
             <div class="stats-header">
-                <h2 id="topicName">Overall Performance</h2>
+                <h2 id="topicName">📊 Overall Performance</h2>
             </div>
             <div class="stats-grid">
                 <div class="stat-card">
@@ -357,7 +455,7 @@
                     <div class="stat-value accuracy" id="accuracy">0%</div>
                 </div>
                 <div class="stat-card">
-                    <div class="stat-label">Total Questions</div>
+                    <div class="stat-label">Questions Attempted</div>
                     <div class="stat-value questions" id="totalQuestions">0</div>
                 </div>
                 <div class="stat-card">
@@ -369,148 +467,170 @@
                     <div class="stat-value incorrect" id="incorrect">0</div>
                 </div>
             </div>
+            <div id="classMessage" class="message" style="display: none;"></div>
         </div>
 
+        <!-- Analysis Grid - 3 columns like modal -->
         <div class="analysis-grid">
+            <!-- Topics Container -->
             <div class="topics-container">
-                <h3 class="section-title">Topics</h3>
+                <h3 class="section-title">📋 All Topics</h3>
                 <div class="topics-list" id="topicsList"></div>
             </div>
 
+            <!-- Strengths Container -->
             <div class="strengths-container">
-                <h3 class="section-title">Strengths</h3>
+                <h3 class="section-title">✨ Strengths</h3>
                 <div id="strengthsList"></div>
             </div>
 
+            <!-- Weaknesses Container -->
             <div class="weaknesses-container">
-                <h3 class="section-title">Weaknesses</h3>
+                <h3 class="section-title">🎯 Areas for Improvement</h3>
                 <div id="weaknessesList"></div>
             </div>
         </div>
     </div>
 
     <script>
+        // Initialize Supabase - same as student page
         const supabaseClient = supabase.createClient(
             'https://pxjndwrkafegopsolnde.supabase.co',
             'sb_publishable_eOUJ3K3GNczOncszRwYhyA_A1QAw72F'
         );
-      let teacherId = 'TeacherTest'
-
-      async function loadClassesData(){
-        const { data: teacherInfo, error: teacherError } = await supabaseClient
-          .from('userinfo')
-          .select('school')
-          .eq('username', teacherId)
-          .eq('user_type', 'Teacher')
-          .single();
         
-        const { data: classes, error: classesError } = await supabaseClient
-          .from('classes')
-          .select('class_code, class_name')
-          .eq('school', teacherInfo.school)
-          .order('class_name')
+        // Teacher ID - hardcoded for now like student page
+        let teacherId = 'TeacherTest'
 
-        const classSelect = document.getElementById('classSelect');
-        classSelect.innerHTML = '<option value="">Select a class...</option>';
-
-        if (classes && classes.length > 0) {
-            classes.forEach(cls => {
-                const option = document.createElement('option');
-                option.value = cls.class_code;
-                option.textContent = cls.class_name || `Class ${cls.class_code}`;
-                classSelect.appendChild(option);
-            });
-        } else {
-            classSelect.innerHTML = '<option value="">No classes available for your school</option>';
-        }
-      } 
-
-    document.getElementById('loadClassBtn').addEventListener('click', loadStudents)
-   
-    async function loadStudents() {
-        const classSelect = document.getElementById('classSelect');
-        const studentSelect = document.getElementById('studentSelect');
-        const selectedClass = classSelect.value;
-        console.log(selectedClass)
-
-        if (!selectedClass || selectedClass === '') {
-            return;
-        }
-
-        const {data: students, error} = await supabaseClient
-            .from('userinfo')
-            .select('name, username')
-            .eq('class', selectedClass);
-            console.log(students);
+        // Load classes for this teacher's school
+        async function loadClassesData() {
+            // Get teacher's school from userinfo
+            const { data: teacherInfo, error: teacherError } = await supabaseClient
+                .from('userinfo')
+                .select('school')
+                .eq('username', teacherId)
+                .eq('user_type', 'Teacher')
+                .single();
             
-        studentSelect.innerHTML = '<option value="">Select a student...</option>';
+            // Get classes for that school
+            const { data: classes, error: classesError } = await supabaseClient
+                .from('classes')
+                .select('class_code, class_name')
+                .eq('school', teacherInfo.school)
+                .order('class_name')
 
-        if (students && students.length > 0) {
-            students.forEach(s => {
-                const option = document.createElement('option');
-                option.value = s.username;
-                option.textContent = s.name || `student ${s.username}`;
-                studentSelect.appendChild(option);
-            });
-        } else {
-            studentSelect.innerHTML = '<option value="">No students in the class</option>';
+            // Populate the dropdown
+            const classSelect = document.getElementById('classSelect');
+            classSelect.innerHTML = '<option value="">Select a class...</option>';
+
+            if (classes && classes.length > 0) {
+                classes.forEach(cls => {
+                    const option = document.createElement('option');
+                    option.value = cls.class_code;
+                    option.textContent = cls.class_name || `Class ${cls.class_code}`;
+                    classSelect.appendChild(option);
+                });
+                showMessage('Classes loaded successfully!', 'success');
+            } else {
+                classSelect.innerHTML = '<option value="">No classes available for your school</option>';
+                showMessage('No classes found for your school', 'error');
+            }
         }
-    }
-    
+
+        // Load students based on selected class
+        async function loadStudents() {
+            const classSelect = document.getElementById('classSelect');
+            const studentSelect = document.getElementById('studentSelect');
+            const selectedClass = classSelect.value;
+
+            if (!selectedClass || selectedClass === '') {
+                showMessage('Please select a class first', 'error');
+                return;
+            }
+
+            // Get students from the selected class
+            const { data: students, error } = await supabaseClient
+                .from('userinfo')
+                .select('name, username')
+                .eq('class', selectedClass)
+                .eq('user_type', 'Student');  // Only get students
+                
+            // Populate student dropdown
+            studentSelect.innerHTML = '<option value="">Select a student...</option>';
+
+            if (students && students.length > 0) {
+                students.forEach(s => {
+                    const option = document.createElement('option');
+                    option.value = s.username;
+                    option.textContent = s.name || `Student ${s.username}`;
+                    studentSelect.appendChild(option);
+                });
+                showMessage(`Found ${students.length} students in class`, 'success');
+            } else {
+                studentSelect.innerHTML = '<option value="">No students in this class</option>';
+                showMessage('No students found in this class', 'error');
+            }
+        }
+
+        // Load analytics for selected student
         async function loadAnalytics() {
             const studentSelect = document.getElementById('studentSelect');
             const studentId = studentSelect.value;
             
             if (!studentId || studentId === '') {
-                console.log('No student selected');
+                showMessage('Please select a student first', 'error');
                 return;
             }
             
-            const{data: scores} = await supabaseClient
+            // Get overall performance
+            const { data: scores } = await supabaseClient
                 .from('topic_performance')
                 .select('*')
                 .eq('student_id', studentId);
-            console.log(scores);
-            const performance = scores;
 
+            // Calculate totals
             let totalQuestions = 0;
             let totalCorrect = 0;
-            console.log(performance)
 
-            performance.forEach( p => {
-                totalQuestions += p.questions_attempted || 0;
-                totalCorrect += p.questions_correct || 0;                
-            });
+            if (scores) {
+                scores.forEach(p => {
+                    totalQuestions += p.questions_attempted || 0;
+                    totalCorrect += p.questions_correct || 0;                
+                });
+            }
             
             const totalIncorrect = totalQuestions - totalCorrect;
             const totalAccuracy = totalQuestions > 0 ? Math.round((totalCorrect/totalQuestions) * 100) : 0;
-            console.log('total Questions ', totalQuestions);
-            console.log('total correct ', totalCorrect)
-            console.log('total incorrect ', totalIncorrect)
-            console.log('total accuracy ', totalAccuracy)
             
+            // Update display
             document.getElementById('accuracy').textContent = totalAccuracy + '%';
             document.getElementById('totalQuestions').textContent = totalQuestions;
             document.getElementById('correct').textContent = totalCorrect;
             document.getElementById('incorrect').textContent = totalIncorrect;
-            document.getElementById('topicName').textContent = 'Overall Performance';
+            document.getElementById('topicName').textContent = '📊 Overall Performance';
             
+            // Load strengths and weaknesses
             await loadStrengths(studentId);
             await loadWeaknesses(studentId);
+            
+            showMessage('Analytics loaded successfully!', 'success');
         }
-        
-        async function loadTopicStats(topicId, topicName){
+
+        // Load stats for a specific topic
+        async function loadTopicStats(topicId, topicName) {
             const studentSelect = document.getElementById('studentSelect');
             const studentId = studentSelect.value;
             
             if (!studentId || studentId === '') {
-                console.log('No student selected');
+                showMessage('Please select a student first', 'error');
                 return;
             }
             
-            document.getElementById('topicName').textContent = topicName;
+            // Update title
+            document.getElementById('topicName').textContent = `📚 ${topicName}`;
   
-            const {data: topicPerf} = await supabaseClient
+            // Get topic performance
+            const { data: topicPerf } = await supabaseClient
                 .from('topic_performance')
                 .select('*')
                 .eq('student_id', studentId)
@@ -527,41 +647,49 @@
                 document.getElementById('correct').textContent = correct;
                 document.getElementById('incorrect').textContent = incorrect;
             } else {
+                // No data for this topic
                 document.getElementById('accuracy').textContent = '0%';
                 document.getElementById('totalQuestions').textContent = '0';
                 document.getElementById('correct').textContent = '0';
                 document.getElementById('incorrect').textContent = '0';
             }
         }
-        
-        async function loadTopic(){
+
+        // Load all topics and create buttons
+        async function loadTopics() {
             const topicsList = document.getElementById('topicsList');
             
-            const{data:topics, error} = await supabaseClient
+            const { data: topics, error } = await supabaseClient
                 .from('topics')
-                .select('topic_name, topic_id');
-            console.log(topics);
+                .select('topic_name, topic_id')
+                .order('topic_name');
             
             topicsList.innerHTML = '';
             
-            topics.forEach(topic => {
-                const button = document.createElement('button');
-                button.className = 'topic-button';
-                button.textContent = topic.topic_name;
-                button.setAttribute('data-topic-id', topic.topic_id);
-                topicsList.appendChild(button);
+            if (topics && topics.length > 0) {
+                topics.forEach(topic => {
+                    const button = document.createElement('button');
+                    button.className = 'topic-button';
+                    button.textContent = topic.topic_name;
+                    button.setAttribute('data-topic-id', topic.topic_id);
+                    topicsList.appendChild(button);
 
-                button.addEventListener('click', function() {
-                    loadTopicStats(topic.topic_id, topic.topic_name);
+                    // Add click event
+                    button.addEventListener('click', function() {
+                        loadTopicStats(topic.topic_id, topic.topic_name);
+                    });
                 });
-            });
+            } else {
+                topicsList.innerHTML = '<div class="empty-message">No topics available</div>';
+            }
         }
-        
+
+        // Load strengths for a student
         async function loadStrengths(studentId) {
             const strengthsList = document.getElementById('strengthsList');
             strengthsList.innerHTML = '';
             
-            const{data: strengths, error} = await supabaseClient
+            const { data: strengths, error } = await supabaseClient
                 .from('strengths')
                 .select('topics(topic_name)')
                 .eq('student_id', studentId);
@@ -570,19 +698,20 @@
                 strengths.forEach(s => {
                     const div = document.createElement('div');
                     div.className = 'strength-item';
-                    div.textContent = s.topics.topic_name;
+                    div.textContent = `✨ ${s.topics.topic_name}`;
                     strengthsList.appendChild(div);
                 });
             } else {
                 strengthsList.innerHTML = '<div class="empty-message">No strengths identified yet</div>';
             }
         }
-        
+
+        // Load weaknesses for a student
         async function loadWeaknesses(studentId) {
             const weaknessesList = document.getElementById('weaknessesList');
             weaknessesList.innerHTML = '';
             
-            const{data: weaknesses, error} = await supabaseClient
+            const { data: weaknesses, error } = await supabaseClient
                 .from('weaknesses')
                 .select('topics(topic_name)')
                 .eq('student_id', studentId);
@@ -591,18 +720,34 @@
                 weaknesses.forEach(w => {
                     const div = document.createElement('div');
                     div.className = 'weakness-item';
-                    div.textContent = w.topics.topic_name;
+                    div.textContent = `📚 ${w.topics.topic_name}`;
                     weaknessesList.appendChild(div);
                 });
             } else {
                 weaknessesList.innerHTML = '<div class="empty-message">No weaknesses identified yet</div>';
             }
         }
-        
-    document.getElementById('loadStudentsBtn').addEventListener('click', loadAnalytics)
 
-    loadClassesData();
-    loadTopic();
+        // Helper function to show messages
+        function showMessage(text, type) {
+            const messageDiv = document.getElementById('classMessage');
+            messageDiv.textContent = text;
+            messageDiv.className = `message ${type}`;
+            messageDiv.style.display = 'block';
+            
+            // Auto hide after 3 seconds
+            setTimeout(() => {
+                messageDiv.style.display = 'none';
+            }, 3000);
+        }
+
+        // Event Listeners
+        document.getElementById('loadClassBtn').addEventListener('click', loadStudents);
+        document.getElementById('loadStudentsBtn').addEventListener('click', loadAnalytics);
+
+        // Initialize on page load
+        loadClassesData();
+        loadTopics();
     </script>
 </body>
 </html>

@@ -53,6 +53,19 @@
             <h2>All topics</h2>
             <div id='topicsList'></div>
         </div>
+                <div class='strengthsContainer'>
+        <div class='strengthsBox'>
+            <h2>Strengths</h2>
+            <div id='strengthsList'></div> 
+        </div>    
+    </div>
+    
+    <div class='weaknessContainer'>
+        <div class='weaknessesBox'>
+            <h2>Weaknesses</h2>
+            <div id='weaknessesList'></div> 
+        </div>    
+    </div>
     <script>
         const supabaseClient = supabase.createClient(
             'https://pxjndwrkafegopsolnde.supabase.co',
@@ -224,6 +237,40 @@
                 });
             });
         }
+                async function loadStrengths() {
+            const strengthsList = document.getElementById('strengthsList');
+            strengthsList.innerHTML = '';
+            
+            const{data: strengths, error} = await supabaseClient
+                .from('strengths')
+                .select('topics(topic_name)')
+                .eq('student_id', studentId);
+            
+            strengths.forEach ( s => {
+                const div = document.createElement('div');
+                div.className = 'strengthItem';
+                div.textContent = s.topics.topic_name;
+                strengthsList.appendChild(div);
+            });
+        }
+        
+        async function loadWeaknesses() {
+            const weaknessesList = document.getElementById('weaknessesList');
+            weaknessesList.innerHTML = '';
+            
+            const{data: weaknesses, error} = await supabaseClient
+                .from('weaknesses')
+                .select('topics(topic_name)')
+                .eq('student_id', studentId);
+            
+            weaknesses.forEach ( w => {
+                const div = document.createElement('div');
+                div.className = 'weaknessItem';
+                div.textContent = w.topics.topic_name;
+                weaknessesList.appendChild(div);
+            });
+        }
+        
         
     document.getElementById('loadStudentsBtn').addEventListener('click', loadAnalytics)
 

@@ -2,8 +2,249 @@
 <html>
 
 <head>
-  <title>Revision App</title>
-  <link rel="stylesheet" href="styleslogin.css">
+  <title>Revision App - Login</title>
+  <style>
+    /* Remove browser defaults */
+    * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+    }
+
+    /* White background with subtle gradient */
+    body {
+        background: linear-gradient(135deg, #f5f7fa 0%, #ffffff 100%);
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 20px;
+    }
+
+    /* Main container - centered card */
+    .container {
+        width: 100%;
+        max-width: 450px;
+        margin: 0 auto;
+    }
+
+    /* Login form card */
+    .user-forms {
+        background: white;
+        border-radius: 30px;
+        padding: 45px 40px;
+        box-shadow: 0 20px 60px rgba(0,0,0,0.08);
+        border: 1px solid #f0f0f0;
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .user-forms:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 30px 80px rgba(102, 126, 234, 0.12);
+    }
+
+    /* Form title */
+    .user-forms h2 {
+        color: #2d3748;
+        font-size: 2.2rem;
+        font-weight: 700;
+        margin-bottom: 35px;
+        text-align: center;
+        background: #f8fafc;
+        padding: 20px 30px;
+        border-radius: 50px;
+        display: inline-block;
+        width: 100%;
+        border-left: 4px solid #667eea;
+        border: 1px solid #e2e8f0;
+    }
+
+    /* Labels */
+    .user-forms label {
+        display: block;
+        margin-bottom: 8px;
+        font-weight: 600;
+        color: #4a5568;
+        font-size: 0.95rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        margin-left: 5px;
+    }
+
+    /* Input fields */
+    .user-forms input {
+        width: 100%;
+        padding: 15px 20px;
+        border: 2px solid #e2e8f0;
+        border-radius: 50px;
+        font-size: 1rem;
+        color: #2d3748;
+        background: white;
+        transition: all 0.3s ease;
+        margin-bottom: 20px;
+    }
+
+    .user-forms input:hover {
+        border-color: #667eea;
+    }
+
+    .user-forms input:focus {
+        outline: none;
+        border-color: #667eea;
+        box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+    }
+
+    /* Submit button */
+    .submit-btn {
+        width: 100%;
+        padding: 15px 30px;
+        border: none;
+        border-radius: 50px;
+        font-size: 1rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        background: #667eea;
+        color: white;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+        margin: 10px 0 15px 0;
+    }
+
+    .submit-btn:hover {
+        background: #5a67d8;
+        transform: translateY(-2px);
+        box-shadow: 0 6px 12px rgba(102, 126, 234, 0.2);
+    }
+
+    .submit-btn:active {
+        transform: scale(0.98);
+    }
+
+    /* Sign up button container */
+    .signup-container {
+        margin-top: 20px;
+        text-align: center;
+        border-top: 2px solid #f0f0f0;
+        padding-top: 25px;
+    }
+
+    /* Sign up button */
+    .signup-btn {
+        padding: 12px 30px;
+        border: none;
+        border-radius: 50px;
+        font-size: 0.95rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        background: white;
+        color: #4a5568;
+        border: 2px solid #e2e8f0;
+        min-width: 150px;
+    }
+
+    .signup-btn:hover {
+        background: #667eea;
+        color: white;
+        border-color: #667eea;
+        transform: translateY(-2px);
+        box-shadow: 0 6px 12px rgba(102, 126, 234, 0.2);
+    }
+
+    .signup-btn:active {
+        transform: scale(0.98);
+    }
+
+    /* Status message */
+    .status-message {
+        padding: 15px 25px;
+        border-radius: 50px;
+        margin: 15px 0;
+        font-weight: 600;
+        animation: slideIn 0.3s ease;
+        text-align: center;
+        background: #f8fafc;
+        color: #4a5568;
+        border: 1px solid #e2e8f0;
+        min-height: 60px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    /* Success state for status message */
+    .status-message:not(:empty) {
+        background: #f0fff4;
+        color: #276749;
+        border-left: 4px solid #48bb78;
+        border: 1px solid #c6f6d5;
+    }
+
+    /* Error state for status message (when it contains error text) */
+    .status-message:not(:empty):contains("Incorrect"), 
+    .status-message:not(:empty):contains("not found") {
+        background: #fff5f5;
+        color: #c53030;
+        border-left: 4px solid #f56565;
+        border: 1px solid #fed7d7;
+    }
+
+    /* Animation */
+    @keyframes slideIn {
+        from {
+            opacity: 0;
+            transform: translateY(-10px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    /* Placeholder styling */
+    .user-forms input::placeholder {
+        color: #a0aec0;
+        opacity: 0.7;
+    }
+
+    /* Responsive design */
+    @media (max-width: 480px) {
+        .user-forms {
+            padding: 30px 20px;
+        }
+        
+        .user-forms h2 {
+            font-size: 1.8rem;
+            padding: 15px 20px;
+        }
+        
+        .container {
+            max-width: 100%;
+        }
+    }
+
+    /* Optional: Add a subtle background pattern */
+    body::before {
+        content: '';
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: radial-gradient(circle at 20% 20%, rgba(102, 126, 234, 0.03) 0%, transparent 50%),
+                    radial-gradient(circle at 80% 80%, rgba(102, 126, 234, 0.03) 0%, transparent 50%);
+        pointer-events: none;
+    }
+
+    /* Focus visible for accessibility */
+    .submit-btn:focus-visible,
+    .signup-btn:focus-visible,
+    .user-forms input:focus-visible {
+        outline: 2px solid #667eea;
+        outline-offset: 2px;
+    }
+  </style>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 
@@ -16,11 +257,11 @@
       
       <!-- Username input field -->
       <label for='Username'>Username</label><br>
-      <input type='text' id='Username' username=username><br>
+      <input type='text' id='Username' username=username placeholder="Enter your username"><br>
       
       <!-- Password input field -->
       <label for='Password'>Password</label><br>
-      <input type='text' id='Password' password=password><br>
+      <input type='password' id='Password' password=password placeholder="Enter your password"><br>
 
       <!-- Submit button for login -->
       <button type="button" id='btnSubmit' class="submit-btn">Submit</button>
@@ -55,12 +296,29 @@
     // Update status message function
     function updateStatus(message) {
       statusElement.textContent = message;
+      
+      // Add error class for error messages
+      if (message.includes('Incorrect') || message.includes('not found')) {
+        statusElement.style.background = '#fff5f5';
+        statusElement.style.color = '#c53030';
+        statusElement.style.borderLeft = '4px solid #f56565';
+        statusElement.style.border = '1px solid #fed7d7';
+      } else if (message.includes('Succesful')) {
+        statusElement.style.background = '#f0fff4';
+        statusElement.style.color = '#276749';
+        statusElement.style.borderLeft = '4px solid #48bb78';
+        statusElement.style.border = '1px solid #c6f6d5';
+      } else {
+        statusElement.style.background = '#f8fafc';
+        statusElement.style.color = '#4a5568';
+        statusElement.style.border = '1px solid #e2e8f0';
+      }
     }
     
     // Check login credentials against database
     async function checkCredentials() {
       // Hash the entered password
-      hashedPassword = hash(passwordElement.value).toString()
+      let hashedPassword = hash(passwordElement.value).toString()
       
       // Query database for username
       const { data, error } = await supabaseClient
@@ -79,7 +337,7 @@
         console.log(hashedPassword)
         // Password matches
         if (data[0].password_hash === hashedPassword) {
-          updateStatus('Login Succesful')
+          updateStatus('Login Successful')
           // Store user in session storage
           sessionStorage.setItem('currentUser',data[0].username);
           console.log(data[0].user_type);

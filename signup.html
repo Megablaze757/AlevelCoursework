@@ -600,7 +600,7 @@
           const {data, error} = await supabaseClient
             .from('classes')
             .insert([{
-              class_code: classCode,
+              class_code: toInt(combinedString),
               class_name: className,
               school: schoolSelect.value
             }]);

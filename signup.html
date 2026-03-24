@@ -4,6 +4,7 @@
     <title>Sign Up - Revision App</title>
     <script src='https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2'></script>
     <style>
+      /* Remove browser defaults */
       * {
           margin: 0;
           padding: 0;
@@ -11,6 +12,7 @@
           font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
       }
 
+      /* White background with subtle gradient */
       body {
           background: linear-gradient(135deg, #f5f7fa 0%, #ffffff 100%);
           min-height: 100vh;
@@ -20,12 +22,14 @@
           padding: 20px;
       }
 
+      /* Main container - centered card */
       .container {
           width: 100%;
           max-width: 550px;
           margin: 0 auto;
       }
 
+      /* Signup form card */
       .signupForm {
           background: white;
           border-radius: 30px;
@@ -40,6 +44,7 @@
           box-shadow: 0 30px 80px rgba(102, 126, 234, 0.12);
       }
 
+      /* Form title */
       .signupForm h2 {
           color: #2d3748;
           font-size: 2.2rem;
@@ -55,6 +60,7 @@
           border: 1px solid #e2e8f0;
       }
 
+      /* Labels */
       .signupForm label {
           display: block;
           margin-bottom: 8px;
@@ -66,6 +72,7 @@
           margin-left: 5px;
       }
 
+      /* Input fields */
       .signupForm input[type="text"],
       .signupForm input[type="password"],
       .signupForm select {
@@ -92,12 +99,14 @@
           box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
       }
 
+      /* Disabled select styling */
       .signupForm select:disabled {
           background: #f7fafc;
           cursor: not-allowed;
           opacity: 0.7;
       }
 
+      /* Checkbox container */
       .checkbox-container {
           display: flex;
           align-items: center;
@@ -123,6 +132,7 @@
           accent-color: #667eea;
       }
 
+      /* School and Class sections */
       .schoolSection,
       .classSection {
           margin: 25px 0;
@@ -132,6 +142,7 @@
           border: 1px solid #e2e8f0;
       }
 
+      /* New school/class containers */
       #newSchoolContainer,
       #newClassContainer {
           margin-top: 20px;
@@ -153,6 +164,7 @@
           }
       }
 
+      /* Small buttons for add school/class */
       .small-btn {
           padding: 12px 25px;
           border: none;
@@ -180,6 +192,7 @@
           transform: scale(0.98);
       }
 
+      /* Submit button */
       .submit-btn {
           width: 100%;
           padding: 18px 30px;
@@ -207,6 +220,7 @@
           transform: scale(0.98);
       }
 
+      /* Status message */
       .statusMessage {
           padding: 15px 25px;
           border-radius: 50px;
@@ -223,6 +237,7 @@
           justify-content: center;
       }
 
+      /* Success message styling */
       .statusMessage:not(:empty) {
           background: #f0fff4;
           color: #276749;
@@ -230,13 +245,7 @@
           border: 1px solid #c6f6d5;
       }
 
-      .statusMessage.error {
-          background: #fff5f5;
-          color: #c53030;
-          border-left: 4px solid #f56565;
-          border: 1px solid #fed7d7;
-      }
-
+      /* Login link */
       .login-link {
           text-align: center;
           margin-top: 20px;
@@ -258,12 +267,14 @@
           text-decoration: underline;
       }
 
+      /* Placeholder styling */
       .signupForm input::placeholder,
       .signupForm select::placeholder {
           color: #a0aec0;
           opacity: 0.7;
       }
 
+      /* Animation */
       @keyframes slideIn {
           from {
               opacity: 0;
@@ -275,6 +286,7 @@
           }
       }
 
+      /* Responsive design */
       @media (max-width: 600px) {
           .signupForm {
               padding: 30px 20px;
@@ -295,6 +307,7 @@
           }
       }
 
+      /* Background pattern */
       body::before {
           content: '';
           position: fixed;
@@ -307,6 +320,7 @@
           pointer-events: none;
       }
 
+      /* Focus visible for accessibility */
       .submit-btn:focus-visible,
       .small-btn:focus-visible,
       .signupForm input:focus-visible,
@@ -315,6 +329,7 @@
           outline-offset: 2px;
       }
 
+      /* Custom scrollbar for select dropdowns */
       select {
           appearance: none;
           background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%234a5568' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
@@ -323,6 +338,7 @@
           background-size: 15px;
       }
 
+      /* Hide default select arrow in IE */
       select::-ms-expand {
           display: none;
       }
@@ -330,29 +346,40 @@
   </head>
   
   <body>
+    <!-- Main container for the signup form -->
     <div class="container">
+      <!-- Signup form -->
       <div class='signupForm'>
         <h2>Create an Account</h2>
         
-        <label for='Username'>Username</label>
-        <input type='text' id='Username' username=username placeholder="Enter username">
+        <!-- Username input field -->
+        <label for='Username'>Username</label><br>
+        <input type='text' id='Username' username=username placeholder="Enter username"><br>
         
-        <label for='Password'>Password</label>
-        <input type='password' id='Password' password=password placeholder="Enter password (min. 8 characters)">
+        <!-- Password input field -->
+        <label for='Password'>Password</label><br>
+        <input type='password' id='Password' password=password placeholder="Enter password (min. 8 characters)"><br>
         
-        <label for='Name'>Full Name</label>
-        <input type='text' id='Name' name=name placeholder="Enter your full name">
+        <!-- Full name input field -->
+        <label for='Name'>Full Name</label><br>
+        <input type='text' id='Name' name=name placeholder="Enter your full name"><br>
         
+        <!-- Teacher checkbox -->
         <div class="checkbox-container">
-          <input type="checkbox" class='isTeacher' id='isTeacher'>
           <label for='isTeacher'>Are you a Teacher?</label> 
+          <input type="checkbox" class='isTeacher' id='isTeacher'>
         </div>
         
+        <!-- School Selection Section -->
         <div class='schoolSection'>
-          <label for='schoolSelect'>Select School</label>
+          <label for='schoolSelect'>Select School</label><br>
+          
+          <!-- Dropdown for schools -->
           <select id="schoolSelect">
             <option value="">Loading schools...</option>
           </select>
+
+          <!-- Container for adding a new school (hidden by default) -->
           <div id='newSchoolContainer' style='display:none;'>
             <label for='newSchool'>Add a new school</label>
             <input type="text" id="newSchool" placeholder="Enter school name">
@@ -360,22 +387,30 @@
           </div>
         </div>
         
+        <!-- Class Selection Section -->
         <div class='classSection' id='classSection' style='display: block;'>
-          <label for='classSelect'>Select Class</label>
+          <label for='classSelect'>Select Class</label><br>
+
+          <!-- Class dropdown (disabled until school is selected) -->
           <select id='classSelect' disabled>
             <option value=''>Select school first</option>
           </select>
+
+          <!-- Container for adding a new class (hidden by default) -->
           <div id='newClassContainer' style='display: none;'>
-            <label for='newClass'>Add a new Class</label>
+            <label for='newClass'>Add a new Class</label><br>
             <input type='text' id='newClass' placeholder='Enter class name'>
             <button type='button' id='addClassBtn' class="small-btn">Add Class</button>
           </div>
         </div>
         
+        <!-- Submit button -->
         <button type="button" id='btnSubmit' class="submit-btn">Sign Up</button>
         
+        <!-- Status message display area -->
         <div class='statusMessage' id='statusMessage'></div>
         
+        <!-- Login link -->
         <div class="login-link">
           Already have an account? <a href="index.html">Login here</a>
         </div>
@@ -383,14 +418,17 @@
     </div>
     
   <script>
+    // Supabase configuration
     const supabase_url = 'https://pxjndwrkafegopsolnde.supabase.co'
     const supabase_key = 'sb_publishable_eOUJ3K3GNczOncszRwYhyA_A1QAw72F'
     
+    // Initialize Supabase client
     const supabaseClient = supabase.createClient(
       'https://pxjndwrkafegopsolnde.supabase.co',
       'sb_publishable_eOUJ3K3GNczOncszRwYhyA_A1QAw72F'
     );
 
+    // Get DOM elements
     let teacherCheckbox =  document.getElementById('isTeacher')
     let usernameElement = document.getElementById('Username');
     let passwordElement = document.getElementById('Password');
@@ -408,36 +446,35 @@
 
     let selectedSchoolId = null;
     let userType = ''
+    let selectedClassCode = null;
     
+    // Load schools from database
     async function loadSchools() {
         const {data, error} = await supabaseClient
           .from('schools')
           .select('school')
           .order('school');
 
-        if(error) {
-          console.error('Error loading schools:', error);
-          schoolSelect.innerHTML = '<option value="">Error loading schools</option>';
-          return;
-        }
-        
-        schoolSelect.innerHTML = '<option value="">Select a School</option>';
+        console.log(data)
+      schoolSelect.innerHTML = '<option value="">Select a School</option>';
 
-        data.forEach(school => {
-          let option = document.createElement('option')
-          option.value = school.school;
-          option.textContent = school.school;
-          schoolSelect.appendChild(option);
-        });
+      data.forEach(school => {
+        let option = document.createElement('option')
+        option.value = school.school;
+        option.textContent = school.school;
+        schoolSelect.appendChild(option);
+      });
 
-        let otherOption = document.createElement('option');
-        otherOption.value = 'other';
-        otherOption.textContent = 'Add another School';
-        schoolSelect.appendChild(otherOption);
+    let otherOption = document.createElement('option');
+    otherOption.value = 'other';
+    otherOption.textContent = 'Add another School';
+    schoolSelect.appendChild(otherOption);
     }
 
+    // Toggle add school input visibility
     function toggleAddSchool() {
       let selectedValue = schoolSelect.value;
+
       if (selectedValue === 'other') {
         newSchoolContainer.style.display = 'block';
       } else {
@@ -445,70 +482,60 @@
       }
     }
 
+    // Add new school to database
     async function addNewSchool() {
       let newSchoolName = newSchoolInput.value.trim()
-      
-      if(!newSchoolName) {
-        updateStatus('Please enter a school name');
-        return;
-      }
-      
-      const {data: existing, error: checkError} = await supabaseClient
+
+      const {data,error} = await supabaseClient
         .from('schools')
         .select('school')
         .eq('school', newSchoolName)
       
-      if(existing && existing.length > 0) {
-        updateStatus('School already exists');
-        return;
+      if(data && data.length === 0) {
+        const {data: insertData,error: insertError} = await supabaseClient
+          .from('schools')
+          .insert([{school: newSchoolName}])
+
+        await loadSchools();
+        schoolSelect.value = newSchoolName;
+        selectedSchool = newSchoolName;
+        newSchoolContainer.style.display = 'none';
+        updateStatus('School added successfully');
+      } else {
+        updateStatus('School Exists');
       }
-      
-      const {data, error} = await supabaseClient
-        .from('schools')
-        .insert([{school: newSchoolName}])
-        .select();
-      
-      if(error) {
-        updateStatus('Error adding school: ' + error.message);
-        return;
-      }
-      
-      await loadSchools();
-      if(data && data.length > 0) {
-        schoolSelect.value = data[0].school;
-      }
-      newSchoolContainer.style.display = 'none';
-      newSchoolInput.value = '';
-      await loadClasses(schoolSelect.value);
-      updateStatus('School added successfully');
     }
 
+    // Generate class code from school name and class name
+    function generateClassCode(schoolName, className) {
+      let combinedString = schoolName + className;
+      let classCode = 0;
+      for (let i = 0; i < combinedString.length; i++) {
+        classCode += combinedString.charCodeAt(i);
+      }
+      return classCode;
+    }
+
+    // Load classes based on selected school
     async function loadClasses(school) {
       if(!school || school === '' || school === 'other') {
         classSection.style.display = 'none';
         classSelect.disabled = true;
-        classSelect.innerHTML = '<option value="">Select school first</option>';
       } else {
         classSection.style.display = 'block';
         classSelect.disabled = false;
 
         const{data: classes, error} = await supabaseClient
           .from('classes')
-          .select('class_name')
+          .select('class_name, class_code')
           .eq('school',school)
           .order('class_name');
-
-        if(error) {
-          console.error('Error loading classes:', error);
-          classSelect.innerHTML = '<option value="">Error loading classes</option>';
-          return;
-        }
 
         classSelect.innerHTML = '<option value="">Select a class</option>';
         
         classes.forEach(cls => {
           let option = document.createElement('option');
-          option.value = cls.class_name;
+          option.value = cls.class_code;
           option.textContent = cls.class_name;
           classSelect.appendChild(option);
         });
@@ -520,24 +547,27 @@
       }
     }
 
+    // Toggle add class input visibility
     function toggleNewClassInput() {
       let selectedValue = classSelect.value;
+      
       if (selectedValue === 'other') {
         newClassContainer.style.display = 'block';
       } else {
         newClassContainer.style.display = 'none';
+        // Store the selected class code
+        if (selectedValue && selectedValue !== '') {
+          selectedClassCode = parseInt(selectedValue);
+        }
       }
     }
 
+    // Update status message
     function updateStatus(message) {
       statusElement.textContent = message;
-      if (message.includes('already') || message.includes('Invalid') || message.includes('failed') || message.includes('not') || message.includes('must') || message.includes('Please') || message.includes('Error')) {
-        statusElement.classList.add('error');
-      } else {
-        statusElement.classList.remove('error');
-      }
     }
-    
+
+    // Hash function for password
     function hash(password) {
       let product = 1;
       for(let i = 0; i < password.length; i++) {
@@ -545,66 +575,55 @@
       }
       return product
     }
-    
-    function computeAsciiSum(str) {
-      let sum = 0;
-      for(let i = 0; i < str.length; i++) {
-        sum += str.charCodeAt(i);
-      }
-      return sum;
-    }
-    
+
+    // Add new class to database
     async function addNewClass() {
       let className = newClassInput.value.trim();
-      let selectedSchoolName = schoolSelect.value;
-      
+      let selectedSchool = schoolSelect.value;
+
       if (!className) {
-        updateStatus('Please enter a class name');
+        updateStatus('Enter Class Name');
         return;
+      } else {
+        const {data, error} = await supabaseClient
+          .from('classes')
+          .select('class_name')
+          .eq('class_name', className)
+          .eq('school', selectedSchool)
+        
+        if (data && data.length === 0) {
+          // Generate class code using school name and class name
+          let classCode = generateClassCode(selectedSchool, className);
+          
+          const {data: insertData, error: insertError} = await supabaseClient
+            .from('classes')
+            .insert([{
+              class_code: classCode,
+              class_name: className,
+              school: selectedSchool
+            }]);
+          
+          if (!insertError) {
+            updateStatus('Class added successfully');
+            // Set the selected class code to the newly created one
+            selectedClassCode = classCode;
+            await loadClasses(selectedSchool);
+            // Select the newly added class
+            classSelect.value = classCode;
+            newClassContainer.style.display = 'none';
+          } else {
+            updateStatus('Error adding class');
+          }
+        } else {
+          updateStatus('Class already exists');
+        }
       }
-      
-      if(!selectedSchoolName || selectedSchoolName === '' || selectedSchoolName === 'other') {
-        updateStatus('Please select a valid school first');
-        return;
-      }
-      
-      const {data: existing, error: checkError} = await supabaseClient
-        .from('classes')
-        .select('class_name')
-        .eq('class_name', className)
-        .eq('school', selectedSchoolName);
-      
-      if(existing && existing.length > 0) {
-        updateStatus('Class already exists in this school');
-        return;
-      }
-      
-      const asciiSumClass = computeAsciiSum(className);
-      const asciiSumSchool = computeAsciiSum(selectedSchoolName);
-      const combinedClassCode = asciiSumClass + asciiSumSchool;
-      
-      const {data, error} = await supabaseClient
-        .from('classes')
-        .insert([{
-          class_code: combinedClassCode,
-          class_name: className,
-          school: selectedSchoolName
-        }]);
-      
-      if(error) {
-        updateStatus('Error adding class: ' + error.message);
-        return;
-      }
-      
-      updateStatus('Class added successfully');
-      newClassInput.value = '';
-      newClassContainer.style.display = 'none';
-      await loadClasses(selectedSchoolName);
-      classSelect.value = className;
     }
 
+    // Get user type from checkbox
     function getUserType(){
       var isChecked = teacherCheckbox.checked;
+      console.log(isChecked)
       if (isChecked) {
         userType = 'Teacher'
       } else {
@@ -612,127 +631,78 @@
       }
     }
 
+    // Validate all form inputs
     async function checkValidation() {
-      let selectedClass = classSelect.value;
+      let selectedClassCode = classSelect.value;
       let selectedSchool = schoolSelect.value;
-      let username = usernameElement.value.trim();
-      let password = passwordElement.value;
-      let fullName = nameElement.value.trim();
-      
-      if(!username) {
-        updateStatus('Username is required');
-        return false;
-      }
-      
+
       const { data, error } = await supabaseClient
         .from('userinfo')
         .select('username')
-        .eq('username', username);
-        
-      if(error) {
-        updateStatus('Error checking username');
+        .eq('username', usernameElement.value);
+
+      if ((error || !data || data.length === 0) && (usernameElement.value.length > 0)) {
+        if (passwordElement.value.length >= 8 && !passwordElement.value.includes(' ')) {
+          if (nameElement.value.length > 2 && nameElement.value.length < 50 && /^[a-zA-Z\s]+$/.test(nameElement.value)) {
+            if (selectedSchool && selectedSchool !== '' && !(selectedSchool === 'other' )) {
+              if (selectedClassCode && selectedClassCode !== '' && selectedClassCode !== 'none' && !(selectedClassCode === 'other' )) {
+                return true;
+              } else {
+                updateStatus('Please select a valid class');
+                return false;
+              }
+            } else {
+              updateStatus('Please select a valid school');
+              return false;
+            }
+          } else {
+            updateStatus('Name must be 3-50 letters only');
+            return false;
+          }
+        } else {
+          updateStatus('Password must be at least 8 characters and no spaces');
+          return false;
+        }
+      } else {
+        updateStatus('Username already taken or invalid');
         return false;
       }
-      
-      if(data && data.length > 0) {
-        updateStatus('Username already taken');
-        return false;
-      }
-      
-      if(username.length < 3) {
-        updateStatus('Username must be at least 3 characters');
-        return false;
-      }
-      
-      if (password.length < 8) {
-        updateStatus('Password must be at least 8 characters');
-        return false;
-      }
-      
-      if (password.includes(' ')) {
-        updateStatus('Password cannot contain spaces');
-        return false;
-      }
-      
-      if (fullName.length < 2 || fullName.length > 50) {
-        updateStatus('Name must be 2-50 characters');
-        return false;
-      }
-      
-      const nameRegex = /^[a-zA-Z\s]+$/;
-      if (!nameRegex.test(fullName)) {
-        updateStatus('Name must contain only letters and spaces');
-        return false;
-      }
-      
-      if (!selectedSchool || selectedSchool === '' || selectedSchool === 'other') {
-        updateStatus('Please select a valid school');
-        return false;
-      }
-      
-      if (!selectedClass || selectedClass === '' || selectedClass === 'none' || selectedClass === 'other') {
-        updateStatus('Please select a valid class');
-        return false;
-      }
-      
-      return true;
     }
 
+    // Upload user credentials to database
     async function uploadCredentials() {
       getUserType()
       
-      const isValid = await checkValidation();
-      if (!isValid) {
-        return;
-      }
-      
-      const selectedClass = classSelect.value;
-      const selectedSchool = schoolSelect.value;
-      const username = usernameElement.value.trim();
-      const fullName = nameElement.value.trim();
-      const passwordHash = hash(passwordElement.value);
-      
-      const { data, error } = await supabaseClient
-        .from('userinfo')
-        .insert([
-          { 
-            username: username, 
-            name: fullName, 
-            password_hash: passwordHash, 
-            user_type: userType, 
-            class: selectedClass, 
-            school: selectedSchool 
-          }
-        ]);
-      
-      if (error) {
-        console.error('Upload error:', error);
-        updateStatus('Registration failed: ' + error.message);
-      } else {
-        console.log('Upload successful:', data);
-        updateStatus('Registration successful! Redirecting...');
-        setTimeout(() => {
-          window.location.href = 'index.html'
-        },1500)
+      if (await checkValidation() === true) {
+        // Get the class code from the select value
+        let classCodeToInsert = parseInt(classSelect.value);
+        
+        const { data, error } = await supabaseClient
+          .from('userinfo')
+          .insert([
+            { username: usernameElement.value, name: nameElement.value, password_hash: hash(passwordElement.value), user_type: userType, class: classCodeToInsert, school: schoolSelect.value }
+          ]);
+        
+        if (error) {
+          console.error('Upload error:', error);
+          updateStatus('Registration failed: ' + error.message);
+        } else {
+          console.log('Upload successful:', data);
+          updateStatus('Registration successful! Redirecting...');
+          setTimeout(() => {
+            window.location.href = 'index.html'
+          },1500)
+        }
       }
     }
     
+    // Event listeners when DOM is loaded
     document.addEventListener('DOMContentLoaded', function () {
       loadSchools()
 
       schoolSelect.addEventListener('change', function() {
         toggleAddSchool();
-        const selectedSchool = schoolSelect.value;
-        if(selectedSchool && selectedSchool !== '' && selectedSchool !== 'other') {
-          loadClasses(selectedSchool);
-        } else if(selectedSchool === 'other') {
-          classSelect.disabled = true;
-          classSelect.innerHTML = '<option value="">Select school first</option>';
-          classSection.style.display = 'block';
-        } else {
-          classSelect.disabled = true;
-          classSelect.innerHTML = '<option value="">Select school first</option>';
-        }
+        loadClasses(schoolSelect.value);
       });
       
       classSelect.addEventListener('change', function() {
@@ -745,18 +715,6 @@
       let button = document.getElementById('btnSubmit');
       button.addEventListener('click', function () {
         uploadCredentials()
-      });
-      
-      usernameElement.addEventListener('keypress', function(e) {
-        if(e.key === 'Enter') {
-          uploadCredentials();
-        }
-      });
-      
-      passwordElement.addEventListener('keypress', function(e) {
-        if(e.key === 'Enter') {
-          uploadCredentials();
-        }
       });
     });
   </script>

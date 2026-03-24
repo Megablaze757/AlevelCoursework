@@ -531,9 +531,15 @@ const supabaseClient = supabase.createClient(
                     accuracy_percent: 0
                 }));
                 
-                await supabaseClient
+                const { error: insertError } = await supabaseClient
                     .from('topic_performance')
                     .insert(defaultPerformances);
+                
+                if (insertError) {
+                    console.error('Error initializing user:', insertError);
+                } else {
+                    console.log('New user initialized successfully');
+                }
             }
         }
     }
@@ -562,32 +568,6 @@ const supabaseClient = supabase.createClient(
       console.log('Initial accuracies:', initialTopicAccuracies);
     }
 
-    async function getNextStrengthId() {
-      const { data: strengths } = await supabaseClient
-        .from('strengths')
-        .select('strength_id')
-        .order('strength_id', { ascending: false })
-        .limit(1);
-      
-      if (strengths && strengths.length > 0) {
-        return strengths[0].strength_id + 1;
-      }
-      return 1;
-    }
-
-    async function getNextWeaknessId() {
-      const { data: weaknesses } = await supabaseClient
-        .from('weaknesses')
-        .select('weakness_id')
-        .order('weakness_id', { ascending: false })
-        .limit(1);
-      
-      if (weaknesses && weaknesses.length > 0) {
-        return weaknesses[0].weakness_id + 1;
-      }
-      return 1;
-    }
-
     async function loadInitialStrengthsWeaknesses() {
       const { data: performances } = await supabaseClient
         .from('topic_performance')
@@ -611,23 +591,29 @@ const supabaseClient = supabase.createClient(
         const topicId = p.topic_id;
         
         if (accuracy > 80) {
-          const nextId = await getNextStrengthId();
-          await supabaseClient
-            .from('strengths')
-            .insert({ 
-              strength_id: nextId,
-              student_id: student_id, 
-              topic_id: topicId 
-            });
+          try {
+            await supabaseClient
+              .from('strengths')
+              .insert({ 
+                student_id: student_id, 
+                topic_id: topicId 
+              });
+            console.log(`Added strength for topic ${topicId}`);
+          } catch (err) {
+            console.error('Error adding strength:', err);
+          }
         } else if (accuracy < 50) {
-          const nextId = await getNextWeaknessId();
-          await supabaseClient
-            .from('weaknesses')
-            .insert({ 
-              weakness_id: nextId,
-              student_id: student_id, 
-              topic_id: topicId 
-            });
+          try {
+            await supabaseClient
+              .from('weaknesses')
+              .insert({ 
+                student_id: student_id, 
+                topic_id: topicId 
+              });
+            console.log(`Added weakness for topic ${topicId}`);
+          } catch (err) {
+            console.error('Error adding weakness:', err);
+          }
         }
       }
     }

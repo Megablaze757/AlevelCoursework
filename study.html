@@ -4,14 +4,12 @@
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   
   <style>
-    /* Remove browser Defaults */
     * {
       margin: 0;
       padding: 0;
       box-sizing: border-box;
     }
 
-    /* Create a nice backgroud*/
     body{
       background: linear-gradient(145deg, #f6f9fc 0%, #edf2f9 100%);
       min-height: 100vh;
@@ -20,7 +18,7 @@
       align-items: center;
       padding: 1.5rem;
     }
-    /* 2 column layout */
+
     .layout {
       display: flex;
       align-items: flex-start;
@@ -29,7 +27,6 @@
       width: 100%;
     }
 
-    /* Left Column */
     .scorePanel {
     min-width: 170px;
     }
@@ -45,7 +42,7 @@
       width: fit-content;
       margin-bottom: 15px;
     }
-    /* Number correct box */
+
     .numCorrect {
       background: #e8f5e9;
       color: #2e7d32;
@@ -56,7 +53,6 @@
       border-left: 4px solid #4caf50;
   }
 
-/* Number incorrect box */
     .numIncorrect {
         background: #ffebee;
         color: #c62828;
@@ -67,7 +63,6 @@
         border-left: 4px solid #ef5350;
     }
     
-    /* Card Area  right Column*/
     .cardArea {
       display: flex;
       flex-direction: column;
@@ -76,7 +71,6 @@
       flex: 1;
     }
     
-    /* End Session button */
     .endSession {
       background: transparent;
       border: 2px dashed #90a4ae;
@@ -100,7 +94,7 @@
       box-shadow: 0 5px 20px rgba(0,0,0,0.1);
       max-width: 600px;
 }
-    /* Question box */
+
     .question {
         background: #f5f9ff;
         border: 2px solid #bbdefb;
@@ -112,7 +106,6 @@
         color: #0d47a1;
   }
 
-    /*Answer input area */
   .answerBox {
       background: white;
       border: 2px solid #b0bec5;
@@ -129,7 +122,6 @@
       box-shadow: 0 0 0 3px rgba(33,150,243,0.2);
 }
 
-    /* Check answer button */
 .checkAnswer {
 background: #1976d2;
 color: white;
@@ -151,7 +143,7 @@ background: #1565c0;
 .checkAnswer:active {
 transform: scale(0.98);
 }
-    /* Feedback message Styling */
+
 .feedback {
 margin-top: 20px;
 padding: 15px 20px;
@@ -162,21 +154,21 @@ text-align: center;
 transition: all 0.3s ease;
 display: none; 
 }
-/* Correct message styling*/
+
 .feedback.correct {
 background: #e8f5e9;
 color: #2e7d32;
 border: 2px solid #4caf50;
 display: block;
 }
-/* Incorrect message styling */
+
 .feedback.incorrect {
 background: #ffebee;
 color: #c62828;
 border: 2px solid #ef5350;
 display: block;
 }
-    /* Modal styles */
+
 .modal {
   display: none;
   position: fixed;
@@ -337,8 +329,8 @@ display: block;
   flex: 2;
   text-align: left;
 }
-/* Next Question button */
-    .nextQuestionBtn {
+
+.nextQuestionBtn {
       background: #4caf50;
       color: white;
       padding: 15px 30px;
@@ -365,15 +357,12 @@ display: block;
     .nextQuestionBtn.hidden {
       display: none;
     }
-
-    
   </style>
   
 </head>
 <body>
 <div class="layout">
 
-<!-- Left Column: To have the number correct and incorrect -->
 <div class="scorePanel">
   <div class='numCorrectContainer'>
     <div class='numCorrect' id='numCorrect'></div>           
@@ -381,10 +370,8 @@ display: block;
   </div>
 </div>
 
-<!-- Right Column: Question card + End button -->
 <div class="cardArea">
   
-  <!-- Question container -->
   <div class='questionContainer'>
     <div class='question' id='questionHolder'></div>
     <input type='text' class='answerBox' id='answerBox'>        
@@ -394,22 +381,19 @@ display: block;
     
   </div>
   
-  <!-- End Session button Below the card on the bottom right -->
   <div class='endSession' id='endSession'>End session</div>
 
-</div>  <!-- end of card-area -->
+</div>
 
 </div>
-<!-- End Session Modal -->
+
 <div class="modal" id="endSessionModal">
   <div class="modalContent">
-    <!-- Strengths shown at the end of the session -->
     <div id='strengthsDiv' style="margin: 10px 0; padding: 10px; background: #e8f5e9; border-radius: 10px;">
       <strong style="color: #2e7d32;">Current Strengths:</strong>
       <div id='strengthsList'></div>
     </div>
 
-    <!-- Weaknesses shown at the end of the session -->
     <div id='weaknessesDiv' style="margin: 10px 0; padding: 10px; background: #ffebee; border-radius: 10px;">
       <strong style="color: #c62828;">Current Weaknesses:</strong>
       <div id='weaknessesList'></div>
@@ -457,7 +441,6 @@ display: block;
     const closeModalBtn = document.getElementById('closeModalBtn');
     const homeBtn = document.getElementById('homeBtn');
     
-
     const username = sessionStorage.getItem('username');
     if (!username) {
         window.location.href = 'index.html';
@@ -499,7 +482,6 @@ display: block;
     
 let questions = [];
 
-//Variables to store number of attemps
 let currentQuestionAttempts = 0;
 
     
@@ -550,7 +532,33 @@ const supabaseClient = supabase.createClient(
       return 1;
     }
 
+    async function ensureStudentExists() {
+      const { data: existingStudent } = await supabaseClient
+        .from('students')
+        .select('student_id')
+        .eq('student_id', student_id)
+        .single();
+    
+      if (!existingStudent) {
+        const { error: insertError } = await supabaseClient
+          .from('students')
+          .insert([{
+            student_id: student_id,
+            target_grade: null,
+            class_code: null
+          }]);
+        
+        if (insertError) {
+          console.error('Error creating student record:', insertError);
+        } else {
+          console.log('Student record created successfully');
+        }
+      }
+    }
+
     async function initializeNewUser() {
+        await ensureStudentExists();
+        
         const { data: existingPerformance } = await supabaseClient
             .from('topic_performance')
             .select('topic_id')
@@ -609,57 +617,79 @@ const supabaseClient = supabase.createClient(
       console.log('Initial accuracies:', initialTopicAccuracies);
     }
 
-    async function loadInitialStrengthsWeaknesses() {
-      const { data: performances } = await supabaseClient
-        .from('topic_performance')
-        .select('topic_id, accuracy_percent')
-        .eq('student_id', student_id);
-      
-      if (!performances || performances.length === 0) return;
-      
-      await supabaseClient
+    async function updateStrengthsWeaknessesForTopic(topicId, newAccuracy) {
+      const { data: currentStrength } = await supabaseClient
         .from('strengths')
-        .delete()
-        .eq('student_id', student_id);
+        .select('*')
+        .eq('student_id', student_id)
+        .eq('topic_id', topicId)
+        .single();
       
-      await supabaseClient
+      const { data: currentWeakness } = await supabaseClient
         .from('weaknesses')
-        .delete()
-        .eq('student_id', student_id);
+        .select('*')
+        .eq('student_id', student_id)
+        .eq('topic_id', topicId)
+        .single();
       
-      let nextStrengthId = await getNextStrengthId();
-      let nextWeaknessId = await getNextWeaknessId();
-      
-      for (let p of performances) {
-        const accuracy = p.accuracy_percent;
-        const topicId = p.topic_id;
-        
-        if (accuracy > 80) {
-          try {
-            await supabaseClient
-              .from('strengths')
-              .insert({ 
-                strength_id: nextStrengthId++,
-                student_id: student_id, 
-                topic_id: topicId 
-              });
-            console.log(`Added strength for topic ${topicId}`);
-          } catch (err) {
-            console.error('Error adding strength:', err);
-          }
-        } else if (accuracy < 50) {
-          try {
-            await supabaseClient
-              .from('weaknesses')
-              .insert({ 
-                weakness_id: nextWeaknessId++,
-                student_id: student_id, 
-                topic_id: topicId 
-              });
-            console.log(`Added weakness for topic ${topicId}`);
-          } catch (err) {
-            console.error('Error adding weakness:', err);
-          }
+      if (newAccuracy > 80) {
+        if (!currentStrength) {
+          const nextId = await getNextStrengthId();
+          await supabaseClient
+            .from('strengths')
+            .insert({ 
+              strength_id: nextId,
+              student_id: student_id, 
+              topic_id: topicId 
+            });
+          console.log(`Added topic ${topicId} as strength`);
+        }
+        if (currentWeakness) {
+          await supabaseClient
+            .from('weaknesses')
+            .delete()
+            .eq('student_id', student_id)
+            .eq('topic_id', topicId);
+          console.log(`Removed topic ${topicId} from weaknesses`);
+        }
+      } 
+      else if (newAccuracy < 50) {
+        if (!currentWeakness) {
+          const nextId = await getNextWeaknessId();
+          await supabaseClient
+            .from('weaknesses')
+            .insert({ 
+              weakness_id: nextId,
+              student_id: student_id, 
+              topic_id: topicId 
+            });
+          console.log(`Added topic ${topicId} as weakness`);
+        }
+        if (currentStrength) {
+          await supabaseClient
+            .from('strengths')
+            .delete()
+            .eq('student_id', student_id)
+            .eq('topic_id', topicId);
+          console.log(`Removed topic ${topicId} from strengths`);
+        }
+      }
+      else {
+        if (currentStrength) {
+          await supabaseClient
+            .from('strengths')
+            .delete()
+            .eq('student_id', student_id)
+            .eq('topic_id', topicId);
+          console.log(`Removed topic ${topicId} from strengths`);
+        }
+        if (currentWeakness) {
+          await supabaseClient
+            .from('weaknesses')
+            .delete()
+            .eq('student_id', student_id)
+            .eq('topic_id', topicId);
+          console.log(`Removed topic ${topicId} from weaknesses`);
         }
       }
     }
@@ -702,6 +732,7 @@ const supabaseClient = supabase.createClient(
             console.error('Error updating performance:', updateError);
           } else {
             console.log('Performance updated successfully');
+            await updateStrengthsWeaknessesForTopic(topicId, Math.round(newAccuracy));
           }
         } else {
           console.log('No existing performance record, creating new one');
@@ -725,6 +756,7 @@ const supabaseClient = supabase.createClient(
             console.error('Error inserting performance:', insertError);
           } else {
             console.log('New performance record created successfully');
+            await updateStrengthsWeaknessesForTopic(topicId, newAccuracy);
           }
         }
       } catch (error) {
@@ -806,7 +838,6 @@ const supabaseClient = supabase.createClient(
       const { data: strengths, error } = await supabaseClient
         .from('strengths')
         .select('*')
-
         .eq('student_id', student_id)
       return strengths;
     }
@@ -815,7 +846,6 @@ const supabaseClient = supabase.createClient(
       const { data: weaknesses, error } = await supabaseClient
         .from('weaknesses')
         .select('topic_id')
-
         .eq('student_id', student_id)
       return weaknesses;
     }
@@ -858,7 +888,6 @@ const supabaseClient = supabase.createClient(
       const { data: learningStyle , error } = await supabaseClient
         .from('adaptive_settings')
         .select('preferred_style')
-
         .eq('student_id', student_id)
       return learningStyle;
     }
@@ -936,24 +965,49 @@ const supabaseClient = supabase.createClient(
       return [];
     }
 
-    async function loadNewSession() {
-      orderedTopicsList = await orderTopics();
-      if (!orderedTopicsList || orderedTopicsList.length === 0) return;
-
-      for (let i = 0; i < orderedTopicsList.length; i++) {
-        currentTopicIndex = i;
-        currentTopicId = orderedTopicsList[i].topic_id;
-
-        sessionQuestions = await getQuestion(currentTopicId);
-
-        if (sessionQuestions.length > 0) {
-          currentQuestionIndex = 0;
-          displayQuestion();
-          return;
+    async function refreshStrengthsWeaknesses() {
+      const { data: performances } = await supabaseClient
+        .from('topic_performance')
+        .select('topic_id, accuracy_percent')
+        .eq('student_id', student_id);
+      
+      if (!performances || performances.length === 0) return;
+      
+      await supabaseClient
+        .from('strengths')
+        .delete()
+        .eq('student_id', student_id);
+      
+      await supabaseClient
+        .from('weaknesses')
+        .delete()
+        .eq('student_id', student_id);
+      
+      let nextStrengthId = await getNextStrengthId();
+      let nextWeaknessId = await getNextWeaknessId();
+      
+      for (let p of performances) {
+        const accuracy = p.accuracy_percent;
+        const topicId = p.topic_id;
+        
+        if (accuracy > 80) {
+          await supabaseClient
+            .from('strengths')
+            .insert({ 
+              strength_id: nextStrengthId++,
+              student_id: student_id, 
+              topic_id: topicId 
+            });
+        } else if (accuracy < 50) {
+          await supabaseClient
+            .from('weaknesses')
+            .insert({ 
+              weakness_id: nextWeaknessId++,
+              student_id: student_id, 
+              topic_id: topicId 
+            });
         }
       }
-
-      questionHolder.innerHTML = 'No questions available for any topic';
     }
 
     function displayQuestion() {
@@ -975,7 +1029,7 @@ const supabaseClient = supabase.createClient(
       await initializeNewUser();
       await getInitialAccuracies();
       await fetchQuestion();
-      await loadInitialStrengthsWeaknesses();
+      await refreshStrengthsWeaknesses();
 
       if (selectedTopicName) {
         const { data: topic } = await supabaseClient
@@ -1061,6 +1115,8 @@ const supabaseClient = supabase.createClient(
     }
 });
       endSession.addEventListener('click', async function() {
+        await refreshStrengthsWeaknesses();
+        
         const { data: topics } = await supabaseClient
           .from('topics')
           .select('topic_id, topic_name');

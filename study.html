@@ -511,7 +511,7 @@ const supabaseClient = supabase.createClient(
         .from('students')
         .select('student_id')
         .eq('student_id', student_id)
-        .single();
+        .maybeSingle();
     
       if (!existingStudent) {
         const { error: insertError } = await supabaseClient
@@ -596,18 +596,19 @@ const supabaseClient = supabase.createClient(
         .from('strengths')
         .select('*')
         .eq('student_id', student_id)
-        .eq('topic_id', topicId)
-        .single();
+        .eq('topic_id', topicId);
       
       const { data: currentWeakness } = await supabaseClient
         .from('weaknesses')
         .select('*')
         .eq('student_id', student_id)
-        .eq('topic_id', topicId)
-        .single();
+        .eq('topic_id', topicId);
+      
+      const hasStrength = currentStrength && currentStrength.length > 0;
+      const hasWeakness = currentWeakness && currentWeakness.length > 0;
       
       if (newAccuracy > 80) {
-        if (!currentStrength) {
+        if (!hasStrength) {
           await supabaseClient
             .from('strengths')
             .insert({ 
@@ -616,7 +617,7 @@ const supabaseClient = supabase.createClient(
             });
           console.log(`Added topic ${topicId} as strength`);
         }
-        if (currentWeakness) {
+        if (hasWeakness) {
           await supabaseClient
             .from('weaknesses')
             .delete()
@@ -626,7 +627,7 @@ const supabaseClient = supabase.createClient(
         }
       } 
       else if (newAccuracy < 50) {
-        if (!currentWeakness) {
+        if (!hasWeakness) {
           await supabaseClient
             .from('weaknesses')
             .insert({ 
@@ -635,7 +636,7 @@ const supabaseClient = supabase.createClient(
             });
           console.log(`Added topic ${topicId} as weakness`);
         }
-        if (currentStrength) {
+        if (hasStrength) {
           await supabaseClient
             .from('strengths')
             .delete()
@@ -645,7 +646,7 @@ const supabaseClient = supabase.createClient(
         }
       }
       else {
-        if (currentStrength) {
+        if (hasStrength) {
           await supabaseClient
             .from('strengths')
             .delete()
@@ -653,7 +654,7 @@ const supabaseClient = supabase.createClient(
             .eq('topic_id', topicId);
           console.log(`Removed topic ${topicId} from strengths`);
         }
-        if (currentWeakness) {
+        if (hasWeakness) {
           await supabaseClient
             .from('weaknesses')
             .delete()

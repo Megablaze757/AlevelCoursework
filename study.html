@@ -633,128 +633,68 @@ const supabaseClient = supabase.createClient(
     }
 
     async function updateTopicPerformance(topicId, studentId, wasCorrect) {
-      const { data: currentPerformance } = await supabaseClient
-        .from('topic_performance')
-        .select('*')
-        .eq('student_id', studentId)
-        .eq('topic_id', topicId);
-
-      if (currentPerformance && currentPerformance.length > 0) {
-        const updatedPerformance = currentPerformance[0];
+      try {
+        console.log(`Updating performance - Topic: ${topicId}, Student: ${studentId}, Correct: ${wasCorrect}`);
         
-        let newAttempted = updatedPerformance.questions_attempted + 1;
-        let newCorrect = updatedPerformance.questions_correct + (wasCorrect ? 1 : 0);
-        let newAccuracy = (newCorrect / newAttempted) * 100;
-        
-        console.log(`Topic ${topicId} - Before: Attempted=${updatedPerformance.questions_attempted}, Correct=${updatedPerformance.questions_correct}, Accuracy=${updatedPerformance.accuracy_percent}%`);
-        console.log(`After update: Attempted=${newAttempted}, Correct=${newCorrect}, New Accuracy=${Math.round(newAccuracy)}%`);
-        
-        await supabaseClient 
+        const { data: currentPerformance, error: fetchError } = await supabaseClient
           .from('topic_performance')
-          .update({
-            questions_attempted: newAttempted,
-            questions_correct: newCorrect,
-            accuracy_percent: Math.round(newAccuracy)
-          })
-          .eq('perfomance_id', updatedPerformance.perfomance_id);
-       
-        if (newAccuracy > 80) {
-          const { data: existingStrength } = await supabaseClient
-            .from('strengths')
-            .select('*')
-            .eq('student_id', studentId)
-            .eq('topic_id', topicId);
-            
-          if (!existingStrength || existingStrength.length === 0) {
-            const nextId = await getNextStrengthId();
-            await supabaseClient
-              .from('strengths')
-              .insert({ 
-                strength_id: nextId,
-                student_id: studentId, 
-                topic_id: topicId 
-              });
-          }
-          
-          await supabaseClient
-            .from('weaknesses')
-            .delete()
-            .eq('student_id', studentId)
-            .eq('topic_id', topicId);
-        } 
-        else if (newAccuracy < 50) {
-          const { data: existingWeakness } = await supabaseClient
-            .from('weaknesses')
-            .select('*')
-            .eq('student_id', studentId)
-            .eq('topic_id', topicId);
-          
-          if (!existingWeakness || existingWeakness.length === 0) {
-            const nextId = await getNextWeaknessId();
-            await supabaseClient
-              .from('weaknesses')
-              .insert({ 
-                weakness_id: nextId,
-                student_id: studentId, 
-                topic_id: topicId 
-              });
-          }
-          
-          await supabaseClient
-            .from('strengths')
-            .delete()
-            .eq('student_id', studentId)
-            .eq('topic_id', topicId);
-        }
-        else {
-          await supabaseClient
-            .from('strengths')
-            .delete()
-            .eq('student_id', studentId)
-            .eq('topic_id', topicId);
-          
-          await supabaseClient
-            .from('weaknesses')
-            .delete()
-            .eq('student_id', studentId)
-            .eq('topic_id', topicId);
-        }
-      }
-      else {
-        let newAttempted = 1;
-        let newCorrect = wasCorrect ? 1 : 0;
-        let newAccuracy = wasCorrect ? 100 : 0;
+          .select('*')
+          .eq('student_id', studentId)
+          .eq('topic_id', topicId);
         
-        await supabaseClient
-          .from('topic_performance')
-          .insert([{
-            student_id: studentId,
-            topic_id: topicId,
-            questions_attempted: newAttempted,
-            questions_correct: newCorrect,
-            accuracy_percent: newAccuracy
-          }]);
-        
-        if (newAccuracy > 80) {
-          const nextId = await getNextStrengthId();
-          await supabaseClient
-            .from('strengths')
-            .insert({ 
-              strength_id: nextId,
-              student_id: studentId, 
-              topic_id: topicId 
-            });
-        } 
-        else if (newAccuracy < 50) {
-          const nextId = await getNextWeaknessId();
-          await supabaseClient
-            .from('weaknesses')
-            .insert({ 
-              weakness_id: nextId,
-              student_id: studentId, 
-              topic_id: topicId 
-            });
+        if (fetchError) {
+          console.error('Error fetching performance:', fetchError);
+          return;
         }
+        
+        if (currentPerformance && currentPerformance.length > 0) {
+          const updatedPerformance = currentPerformance[0];
+          
+          let newAttempted = (updatedPerformance.questions_attempted || 0) + 1;
+          let newCorrect = (updatedPerformance.questions_correct || 0) + (wasCorrect ? 1 : 0);
+          let newAccuracy = (newCorrect / newAttempted) * 100;
+          
+          console.log(`Before: Attempted=${updatedPerformance.questions_attempted}, Correct=${updatedPerformance.questions_correct}, Accuracy=${updatedPerformance.accuracy_percent}%`);
+          console.log(`After: Attempted=${newAttempted}, Correct=${newCorrect}, Accuracy=${Math.round(newAccuracy)}%`);
+          
+          const { error: updateError } = await supabaseClient 
+            .from('topic_performance')
+            .update({
+              questions_attempted: newAttempted,
+              questions_correct: newCorrect,
+              accuracy_percent: Math.round(newAccuracy)
+            })
+            .eq('perfomance_id', updatedPerformance.perfomance_id);
+          
+          if (updateError) {
+            console.error('Error updating performance:', updateError);
+          } else {
+            console.log('Performance updated successfully');
+          }
+        } else {
+          console.log('No existing performance record, creating new one');
+          let newAttempted = 1;
+          let newCorrect = wasCorrect ? 1 : 0;
+          let newAccuracy = wasCorrect ? 100 : 0;
+          
+          const { error: insertError } = await supabaseClient
+            .from('topic_performance')
+            .insert([{
+              student_id: studentId,
+              topic_id: topicId,
+              questions_attempted: newAttempted,
+              questions_correct: newCorrect,
+              accuracy_percent: newAccuracy
+            }]);
+          
+          if (insertError) {
+            console.error('Error inserting performance:', insertError);
+          } else {
+            console.log('New performance record created successfully');
+          }
+        }
+      } catch (error) {
+        console.error('Error in updateTopicPerformance:', error);
       }
     }
 
@@ -786,7 +726,9 @@ const supabaseClient = supabase.createClient(
         
         nextQuestion.classList.remove('hidden');
         
+        console.log('Updating performance for correct answer');
         await updateTopicPerformance(topicId, student_id, true);
+        console.log('Performance update completed');
         currentQuestionAttempts = 0;
       } else {
         currentQuestionAttempts++;
@@ -799,7 +741,9 @@ const supabaseClient = supabase.createClient(
           
           nextQuestion.classList.remove('hidden');
           
+          console.log('Updating performance for incorrect answer after 3 attempts');
           await updateTopicPerformance(topicId, student_id, false);
+          console.log('Performance update completed');
           currentQuestionAttempts = 0;
         } else {  
           feedback.textContent = `Incorrect. Try again (Attempt ${currentQuestionAttempts}/3)`;
@@ -807,7 +751,9 @@ const supabaseClient = supabase.createClient(
           
           nextQuestion.classList.add('hidden');
           
+          console.log('Updating performance for incorrect answer');
           await updateTopicPerformance(topicId, student_id, false);
+          console.log('Performance update completed');
         }
       }
       

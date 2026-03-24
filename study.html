@@ -641,10 +641,13 @@ const supabaseClient = supabase.createClient(
 
       if (currentPerformance && currentPerformance.length > 0) {
         const updatedPerformance = currentPerformance[0];
-
-        const newAttempted = updatedPerformance.questions_attempted + 1;
-        const newCorrect = updatedPerformance.questions_correct + (wasCorrect ? 1 : 0);
-        const newAccuracy = (newCorrect / newAttempted) * 100
+        
+        let newAttempted = updatedPerformance.questions_attempted + 1;
+        let newCorrect = updatedPerformance.questions_correct + (wasCorrect ? 1 : 0);
+        let newAccuracy = (newCorrect / newAttempted) * 100;
+        
+        console.log(`Topic ${topicId} - Before: Attempted=${updatedPerformance.questions_attempted}, Correct=${updatedPerformance.questions_correct}, Accuracy=${updatedPerformance.accuracy_percent}%`);
+        console.log(`After update: Attempted=${newAttempted}, Correct=${newCorrect}, New Accuracy=${Math.round(newAccuracy)}%`);
         
         await supabaseClient 
           .from('topic_performance')
@@ -718,111 +721,99 @@ const supabaseClient = supabase.createClient(
         }
       }
       else {
-        const newAccuracy = wasCorrect ? 100 : 0;
+        let newAttempted = 1;
+        let newCorrect = wasCorrect ? 1 : 0;
+        let newAccuracy = wasCorrect ? 100 : 0;
+        
         await supabaseClient
           .from('topic_performance')
           .insert([{
             student_id: studentId,
             topic_id: topicId,
-            questions_attempted: 1,
-            questions_correct: wasCorrect ? 1 : 0,
+            questions_attempted: newAttempted,
+            questions_correct: newCorrect,
             accuracy_percent: newAccuracy
           }]);
         
         if (newAccuracy > 80) {
-          const { data: existingStrength } = await supabaseClient
+          const nextId = await getNextStrengthId();
+          await supabaseClient
             .from('strengths')
-            .select('*')
-            .eq('student_id', studentId)
-            .eq('topic_id', topicId);
-            
-          if (!existingStrength || existingStrength.length === 0) {
-            const nextId = await getNextStrengthId();
-            await supabaseClient
-              .from('strengths')
-              .insert({ 
-                strength_id: nextId,
-                student_id: studentId, 
-                topic_id: topicId 
-              });
-          }
+            .insert({ 
+              strength_id: nextId,
+              student_id: studentId, 
+              topic_id: topicId 
+            });
         } 
         else if (newAccuracy < 50) {
-          const { data: existingWeakness } = await supabaseClient
+          const nextId = await getNextWeaknessId();
+          await supabaseClient
             .from('weaknesses')
-            .select('*')
-            .eq('student_id', studentId)
-            .eq('topic_id', topicId);
-          
-          if (!existingWeakness || existingWeakness.length === 0) {
-            const nextId = await getNextWeaknessId();
-            await supabaseClient
-              .from('weaknesses')
-              .insert({ 
-                weakness_id: nextId,
-                student_id: studentId, 
-                topic_id: topicId 
-              });
-          }
+            .insert({ 
+              weakness_id: nextId,
+              student_id: studentId, 
+              topic_id: topicId 
+            });
         }
       }
     }
 
     checkAnswer.addEventListener('click', async function() {
-  if (sessionQuestions.length === 0) {
-    feedback.textContent = 'Please click Next Question first';
-    feedback.className = 'feedback incorrect';
-    feedback.style.display = 'block';
-    return;
-  }
-  
-  const userAnswer = answerBox.value.trim().toLowerCase();
-  if (!userAnswer) {
-    feedback.textContent = 'Please enter an answer';
-    feedback.className = 'feedback incorrect';
-    feedback.style.display = 'block';
-    return;
-  }
-  
-  const currentQuestion = sessionQuestions[currentQuestionIndex];
-  const correctAnswer = currentQuestion.correct_answer.toLowerCase();
-  const topicId = currentQuestion.topic_id;
-  
-  if (userAnswer === correctAnswer) {
-    feedback.textContent = 'Correct!';
-    feedback.className = 'feedback correct';
-    correctCount++;
-    numCorrect.textContent = correctCount;
-    
-    nextQuestion.classList.remove('hidden');
-    
-    await updateTopicPerformance(topicId, student_id, true);
-  } else {
-    currentQuestionAttempts++;
-    incorrectCount++;
-    numIncorrect.textContent = incorrectCount;
-    
-    if (currentQuestionAttempts >= 2) {
-      feedback.textContent = `Incorrect. The correct answer is ${currentQuestion.correct_answer}`;
-      feedback.className = 'feedback incorrect';
+      if (sessionQuestions.length === 0) {
+        feedback.textContent = 'Please click Next Question first';
+        feedback.className = 'feedback incorrect';
+        feedback.style.display = 'block';
+        return;
+      }
       
-      nextQuestion.classList.remove('hidden');
+      const userAnswer = answerBox.value.trim().toLowerCase();
+      if (!userAnswer) {
+        feedback.textContent = 'Please enter an answer';
+        feedback.className = 'feedback incorrect';
+        feedback.style.display = 'block';
+        return;
+      }
       
-      await updateTopicPerformance(topicId, student_id, false);
-    } else {  
-      feedback.textContent = `Incorrect. Try again (Attempt ${currentQuestionAttempts}/2)`;
-      feedback.className = 'feedback incorrect';
+      const currentQuestion = sessionQuestions[currentQuestionIndex];
+      const correctAnswer = currentQuestion.correct_answer.toLowerCase();
+      const topicId = currentQuestion.topic_id;
       
+      if (userAnswer === correctAnswer) {
+        feedback.textContent = 'Correct!';
+        feedback.className = 'feedback correct';
+        correctCount++;
+        numCorrect.textContent = correctCount;
+        
+        nextQuestion.classList.remove('hidden');
+        
+        await updateTopicPerformance(topicId, student_id, true);
+        currentQuestionAttempts = 0;
+      } else {
+        currentQuestionAttempts++;
+        incorrectCount++;
+        numIncorrect.textContent = incorrectCount;
+        
+        if (currentQuestionAttempts >= 3) {
+          feedback.textContent = `Incorrect. The correct answer is ${currentQuestion.correct_answer}`;
+          feedback.className = 'feedback incorrect';
+          
+          nextQuestion.classList.remove('hidden');
+          
+          await updateTopicPerformance(topicId, student_id, false);
+          currentQuestionAttempts = 0;
+        } else {  
+          feedback.textContent = `Incorrect. Try again (Attempt ${currentQuestionAttempts}/3)`;
+          feedback.className = 'feedback incorrect';
+          
+          nextQuestion.classList.add('hidden');
+          
+          await updateTopicPerformance(topicId, student_id, false);
+        }
+      }
       
-      nextQuestion.classList.add('hidden');
-      
-      await updateTopicPerformance(topicId, student_id, false);
-    }
-  }
-  
-  feedback.style.display = 'block';
-  askedQuestionIds.push(currentQuestion.question_id);
-});
+      feedback.style.display = 'block';
+      askedQuestionIds.push(currentQuestion.question_id);
+    });
 
     async function fetchQuestion() {
       const { data, error } = await supabaseClient
@@ -1158,7 +1149,7 @@ const supabaseClient = supabase.createClient(
               <div class="topicName">${topic.topic_name}</div>
               <div class="topicBefore">${initial}%</div>
               <div class="topicAfter">${current}%</div>
-              <div class="topicChange ${changeClass}">${changeSymbol}${change}%</div>
+              <div class="topicChange ${changeClass}">${changeSymbol}${Math.round(change)}%</div>
             </div>
           `;
         }

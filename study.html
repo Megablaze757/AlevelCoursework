@@ -506,6 +506,32 @@ const supabaseClient = supabase.createClient(
       return 1;
     }
 
+    async function getNextStrengthId() {
+      const { data: strengths } = await supabaseClient
+        .from('strengths')
+        .select('strength_id')
+        .order('strength_id', { ascending: false })
+        .limit(1);
+      
+      if (strengths && strengths.length > 0) {
+        return strengths[0].strength_id + 1;
+      }
+      return 1;
+    }
+
+    async function getNextWeaknessId() {
+      const { data: weaknesses } = await supabaseClient
+        .from('weaknesses')
+        .select('weakness_id')
+        .order('weakness_id', { ascending: false })
+        .limit(1);
+      
+      if (weaknesses && weaknesses.length > 0) {
+        return weaknesses[0].weakness_id + 1;
+      }
+      return 1;
+    }
+
     async function ensureStudentExists() {
       const { data: existingStudent } = await supabaseClient
         .from('students')
@@ -609,9 +635,11 @@ const supabaseClient = supabase.createClient(
       
       if (newAccuracy > 80) {
         if (!hasStrength) {
+          const nextId = await getNextStrengthId();
           await supabaseClient
             .from('strengths')
             .insert({ 
+              strength_id: nextId,
               student_id: student_id, 
               topic_id: topicId 
             });
@@ -628,9 +656,11 @@ const supabaseClient = supabase.createClient(
       } 
       else if (newAccuracy < 50) {
         if (!hasWeakness) {
+          const nextId = await getNextWeaknessId();
           await supabaseClient
             .from('weaknesses')
             .insert({ 
+              weakness_id: nextId,
               student_id: student_id, 
               topic_id: topicId 
             });
@@ -954,6 +984,9 @@ const supabaseClient = supabase.createClient(
         .delete()
         .eq('student_id', student_id);
       
+      let nextStrengthId = await getNextStrengthId();
+      let nextWeaknessId = await getNextWeaknessId();
+      
       for (let p of performances) {
         const accuracy = p.accuracy_percent;
         const topicId = p.topic_id;
@@ -962,6 +995,7 @@ const supabaseClient = supabase.createClient(
           await supabaseClient
             .from('strengths')
             .insert({ 
+              strength_id: nextStrengthId++,
               student_id: student_id, 
               topic_id: topicId 
             });
@@ -969,6 +1003,7 @@ const supabaseClient = supabase.createClient(
           await supabaseClient
             .from('weaknesses')
             .insert({ 
+              weakness_id: nextWeaknessId++,
               student_id: student_id, 
               topic_id: topicId 
             });

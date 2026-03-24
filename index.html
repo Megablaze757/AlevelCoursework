@@ -339,7 +339,7 @@
         if (data[0].password_hash === hashedPassword) {
           updateStatus('Login Successful')
           // Store user in session storage
-          sessionStorage.setItem('currentUser',data[0].username);
+          sessionStorage.setItem('username',data[0].username);
           console.log(data[0].user_type);
           
           // Redirect based on user type

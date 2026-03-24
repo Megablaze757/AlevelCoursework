@@ -899,15 +899,15 @@ async function loadClassRankings() {
         });
     }
     
-    // Sort by accuracy (descending for top, ascending for bottom)
+    // Sort by accuracy descending for top ascending for bottom
     const sortedByAccuracy = [...studentPerformance].sort((a, b) => b.accuracy - a.accuracy);
     
-    // Get top 5 (filter out those with no data)
+    // Get top 5 filter out those with no data
     const top5 = sortedByAccuracy
         .filter(s => s.totalQuestions > 0)
         .slice(0, 5);
     
-    // Get bottom 5 (filter out those with no data)
+    // Get bottom 5 filter out those with no data
     const bottom5 = sortedByAccuracy
         .filter(s => s.totalQuestions > 0)
         .reverse()
@@ -1046,7 +1046,7 @@ async function loadClassTopicAlerts(classCode) {
         }
     }
     
-    // Sort by accuracy (lowest first) and take top 10
+    // Sort by accuracy
     alerts.sort((a, b) => a.accuracy - b.accuracy);
     const topAlerts = alerts.slice(0, 10);
     
@@ -1108,14 +1108,12 @@ async function loadStudents() {
 document.getElementById('loadClassBtn').addEventListener('click', loadStudents);
 document.getElementById('loadStudentsBtn').addEventListener('click', loadAnalytics);
 
-// Also load rankings when class is selected from dropdown
 document.getElementById('classSelect').addEventListener('change', function() {
     if (this.value) {
-        loadStudents(); // This will load students AND rankings
+        loadStudents();
     }
 });
 
-// Initialize
 loadClassesData();
 loadTopic();
     document.getElementById('loadStudentsBtn').addEventListener('click', loadAnalytics)

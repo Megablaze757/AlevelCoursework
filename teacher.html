@@ -647,7 +647,8 @@
             'https://pxjndwrkafegopsolnde.supabase.co',
             'sb_publishable_eOUJ3K3GNczOncszRwYhyA_A1QAw72F'
         );
-      let teacherId = 'TeacherTest'
+      let teacherId = sessionStorage.getItem('username')
+        
 
       async function loadClassesData(){
         const { data: teacherInfo, error: teacherError } = await supabaseClient
@@ -1120,6 +1121,14 @@ loadTopic();
 
     loadClassesData();
     loadTopic();
+  document.addEventListener('DOMContentLoaded', function() {
+    if (!sessionStorage.getItem('username')) {
+      setTimeout(() => {
+        window.location.href = 'https://megablaze757.github.io/AlevelCoursework/index.html';
+      }, 2000);
+      return;
+    }
+  });
     </script>
 </body>
 </html>

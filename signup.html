@@ -354,15 +354,15 @@
         
         <!-- Username input field -->
         <label for='Username'>Username</label><br>
-        <input type='text' id='Username' username=username placeholder="Enter username"><br>
+        <input type='text' id='Username' placeholder="Enter username"><br>
         
         <!-- Password input field -->
         <label for='Password'>Password</label><br>
-        <input type='password' id='Password' password=password placeholder="Enter password (min. 8 characters)"><br>
+        <input type='password' id='Password' placeholder="Enter password (min. 8 characters)"><br>
         
         <!-- Full name input field -->
         <label for='Name'>Full Name</label><br>
-        <input type='text' id='Name' name=name placeholder="Enter your full name"><br>
+        <input type='text' id='Name' placeholder="Enter your full name"><br>
         
         <!-- Teacher checkbox -->
         <div class="checkbox-container">
@@ -669,6 +669,66 @@
       }
     }
 
+    // Insert student record into students table
+    async function insertStudentRecord(username) {
+      // Only insert if user is a student
+      if (userType === 'Student') {
+        const { data: existingStudent } = await supabaseClient
+          .from('students')
+          .select('student_id')
+          .eq('student_id', username)
+          .single();
+        
+        if (!existingStudent) {
+          const { error: insertError } = await supabaseClient
+            .from('students')
+            .insert([{
+              student_id: username,
+              target_grade: null,
+              class_code: classSelect.value
+            }]);
+          
+          if (insertError) {
+            console.error('Error inserting student record:', insertError);
+            return false;
+          } else {
+            console.log('Student record created successfully');
+            return true;
+          }
+        }
+      }
+      return true;
+    }
+
+    // Insert teacher record into teachers table
+    async function insertTeacherRecord(username) {
+      // Only insert if user is a teacher
+      if (userType === 'Teacher') {
+        const { data: existingTeacher } = await supabaseClient
+          .from('teachers')
+          .select('teacher_id')
+          .eq('teacher_id', username)
+          .single();
+        
+        if (!existingTeacher) {
+          const { error: insertError } = await supabaseClient
+            .from('teachers')
+            .insert([{
+              teacher_id: username
+            }]);
+          
+          if (insertError) {
+            console.error('Error inserting teacher record:', insertError);
+            return false;
+          } else {
+            console.log('Teacher record created successfully');
+            return true;
+          }
+        }
+      }
+      return true;
+    }
+
     // Upload user credentials to database
     async function uploadCredentials() {
       getUserType()
@@ -687,11 +747,20 @@
           console.error('Upload error:', error);
           updateStatus('Registration failed: ' + error.message);
         } else {
-          console.log('Upload successful:', data);
-          updateStatus('Registration successful! Redirecting...');
-          setTimeout(() => {
-            window.location.href = 'index.html'
-          },1500)
+          console.log('Userinfo inserted successfully:', data);
+          
+          // Insert into students or teachers table based on user type
+          let studentSuccess = await insertStudentRecord(usernameElement.value);
+          let teacherSuccess = await insertTeacherRecord(usernameElement.value);
+          
+          if ((userType === 'Student' && studentSuccess) || (userType === 'Teacher' && teacherSuccess)) {
+            updateStatus('Registration successful! Redirecting...');
+            setTimeout(() => {
+              window.location.href = 'index.html'
+            }, 1500)
+          } else {
+            updateStatus('Registration completed but profile creation failed. Please contact support.');
+          }
         }
       }
     }
